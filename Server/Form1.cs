@@ -114,11 +114,19 @@ namespace Server
                 SendResponse(clientStream, "EMAIL_EXIST"); // Gửi phản hồi rằng email đã tồn tại
                 return;
             }
+
             // Thêm tài khoản vào cơ sở dữ liệu
-            Database.ThemTaiKhoan(taiKhoan, matKhau, email);
+            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email);
 
             // Gửi phản hồi cho client
-            SendResponse(clientStream, "DANGKI_SUCCESS");
+            if (themThanhCong)
+            {
+                SendResponse(clientStream, "DANGKI_SUCCESS");
+            }
+            else
+            {
+                SendResponse(clientStream, "DANGKI_FAILED_DB"); // Gửi lỗi do database
+            }
         }
         // Phương thức xử lý đăng nhập
         private void HandleLogin(string[] requestParts, NetworkStream clientStream)
