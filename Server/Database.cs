@@ -46,40 +46,35 @@ namespace Server
         }
         public static bool KiemTraDangNhap(string taiKhoan, string matKhau)
         {
-            bool ketQua = false;
+              bool ketQua = false;
 
-            using (SqlConnection connection = Connection.getSQLConnection())
-            {
-                try
-                {
-                    string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE TaiKhoan = @TaiKhoan AND MatKhau = @MatKhau";
-                    using (SqlCommand command = new SqlCommand(query, connection))
+             using (SqlConnection connection = Connection.getSQLConnection())
+             {
+                    try
                     {
-                        command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
-                        command.Parameters.AddWithValue("@MatKhau", matKhau);
-                        connection.Open();
-
-                        object result = command.ExecuteScalar();
-
-                        if (result != null && result != DBNull.Value)
+                        string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE TaiKhoan = @TaiKhoan AND MatKhau = @MatKhau";
+                        using (SqlCommand command = new SqlCommand(query, connection))
                         {
-                            int count = Convert.ToInt32(result);
-                            ketQua = (count > 0);
+                            command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
+                            command.Parameters.AddWithValue("@MatKhau", matKhau);
+                            connection.Open();
+
+                            object result = command.ExecuteScalar();
+
+                            if (result != null && result != DBNull.Value)
+                            {
+                                int count = Convert.ToInt32(result);
+                                ketQua = (count > 0);
+                            }
                         }
                     }
-                }
-                catch (Exception ex)
-                {
-                    // Xử lý ngoại lệ nếu cần
-                    MessageBox.Show("Lỗi kết nối cơ sở dữ liệu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                if (!ketQua)
-                {
-                    MessageBox.Show("Tài khoản hoặc mật khẩu không đúng!", "Lỗi đăng nhập", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-
-                return ketQua;
-            }
+                    catch (Exception ex)
+                    { 
+                    // Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message); 
+                        ketQua = false; // Nếu lỗi thì xem như đăng nhập thất bại
+                    }
+                    return ketQua;
+             }
         }
             
 
@@ -137,7 +132,7 @@ namespace Server
             return tonTai;
         }
 
-        internal static void ThemTaiKhoan(string taiKhoan, string matKhau, string email)
+        internal static bool  ThemTaiKhoan(string taiKhoan, string matKhau, string email)
         {
             using (SqlConnection connection = Connection.getSQLConnection())
             {
@@ -154,13 +149,13 @@ namespace Server
                         connection.Open();
                         command.ExecuteNonQuery();
 
-                        MessageBox.Show("Thêm tài khoản thành công!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return true; // Trả về true nếu thành công
                     }
                 }
                 catch (Exception ex)
                 {
-                    // Xử lý ngoại lệ và hiển thị thông báo cụ thể về lỗi
-                    MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    // Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
+                    return false; // Trả về false nếu có lỗi
                 }
             }
         }
