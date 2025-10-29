@@ -31,15 +31,15 @@
             panel1 = new Panel();
             pictureBox1 = new PictureBox();
             panel3 = new Panel();
+            button2 = new Button();
+            label3 = new Label();
             panel2 = new Panel();
+            linkLabel1 = new LinkLabel();
+            button1 = new Button();
+            textBox2 = new TextBox();
             label2 = new Label();
             textBox1 = new TextBox();
             label1 = new Label();
-            textBox2 = new TextBox();
-            button1 = new Button();
-            label3 = new Label();
-            button2 = new Button();
-            linkLabel1 = new LinkLabel();
             panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             panel3.SuspendLayout();
@@ -84,6 +84,30 @@
             panel3.TabIndex = 1;
             panel3.Paint += panel3_Paint;
             // 
+            // button2
+            // 
+            button2.BackColor = Color.LimeGreen;
+            button2.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic);
+            button2.ForeColor = SystemColors.ButtonHighlight;
+            button2.Location = new Point(99, 96);
+            button2.Name = "button2";
+            button2.Size = new Size(166, 52);
+            button2.TabIndex = 3;
+            button2.Text = "REGISTER ";
+            button2.UseVisualStyleBackColor = false;
+            button2.Click += button2_Click;
+            // 
+            // label3
+            // 
+            label3.AutoSize = true;
+            label3.Font = new Font("Times New Roman", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            label3.ForeColor = SystemColors.ButtonHighlight;
+            label3.Location = new Point(71, 56);
+            label3.Name = "label3";
+            label3.Size = new Size(229, 25);
+            label3.TabIndex = 2;
+            label3.Text = "NEED AN ACCOUNT?";
+            // 
             // panel2
             // 
             panel2.BackColor = Color.FromArgb(64, 64, 64);
@@ -97,6 +121,39 @@
             panel2.Name = "panel2";
             panel2.Size = new Size(371, 392);
             panel2.TabIndex = 0;
+            // 
+            // linkLabel1
+            // 
+            linkLabel1.AutoSize = true;
+            linkLabel1.Font = new Font("Times New Roman", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            linkLabel1.LinkColor = Color.DeepSkyBlue;
+            linkLabel1.Location = new Point(36, 349);
+            linkLabel1.Name = "linkLabel1";
+            linkLabel1.Size = new Size(189, 22);
+            linkLabel1.TabIndex = 4;
+            linkLabel1.TabStop = true;
+            linkLabel1.Text = "Forgot your password ";
+            // 
+            // button1
+            // 
+            button1.BackColor = Color.DeepSkyBlue;
+            button1.BackgroundImageLayout = ImageLayout.Stretch;
+            button1.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
+            button1.ForeColor = Color.White;
+            button1.Location = new Point(117, 271);
+            button1.Name = "button1";
+            button1.Size = new Size(135, 53);
+            button1.TabIndex = 3;
+            button1.Text = "LOGIN";
+            button1.UseVisualStyleBackColor = false;
+            button1.Click += button1_Click;
+            // 
+            // textBox2
+            // 
+            textBox2.Location = new Point(23, 210);
+            textBox2.Name = "textBox2";
+            textBox2.Size = new Size(320, 31);
+            textBox2.TabIndex = 2;
             // 
             // label2
             // 
@@ -127,61 +184,6 @@
             label1.Size = new Size(121, 23);
             label1.TabIndex = 0;
             label1.Text = "USERNAME";
-            // 
-            // textBox2
-            // 
-            textBox2.Location = new Point(23, 210);
-            textBox2.Name = "textBox2";
-            textBox2.Size = new Size(320, 31);
-            textBox2.TabIndex = 2;
-            // 
-            // button1
-            // 
-            button1.BackColor = Color.DeepSkyBlue;
-            button1.BackgroundImageLayout = ImageLayout.Stretch;
-            button1.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            button1.ForeColor = Color.White;
-            button1.Location = new Point(117, 271);
-            button1.Name = "button1";
-            button1.Size = new Size(135, 53);
-            button1.TabIndex = 3;
-            button1.Text = "LOGIN";
-            button1.UseVisualStyleBackColor = false;
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Times New Roman", 11F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            label3.ForeColor = SystemColors.ButtonHighlight;
-            label3.Location = new Point(71, 56);
-            label3.Name = "label3";
-            label3.Size = new Size(229, 25);
-            label3.TabIndex = 2;
-            label3.Text = "NEED AN ACCOUNT?";
-            // 
-            // button2
-            // 
-            button2.BackColor = Color.LimeGreen;
-            button2.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic);
-            button2.ForeColor = SystemColors.ButtonHighlight;
-            button2.Location = new Point(99, 96);
-            button2.Name = "button2";
-            button2.Size = new Size(166, 52);
-            button2.TabIndex = 3;
-            button2.Text = "REGISTER ";
-            button2.UseVisualStyleBackColor = false;
-            // 
-            // linkLabel1
-            // 
-            linkLabel1.AutoSize = true;
-            linkLabel1.Font = new Font("Times New Roman", 10F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            linkLabel1.LinkColor = Color.DeepSkyBlue;
-            linkLabel1.Location = new Point(36, 349);
-            linkLabel1.Name = "linkLabel1";
-            linkLabel1.Size = new Size(189, 22);
-            linkLabel1.TabIndex = 4;
-            linkLabel1.TabStop = true;
-            linkLabel1.Text = "Forgot your password ";
             // 
             // DangNhap
             // 

@@ -162,7 +162,7 @@ namespace Server
 
         internal static string LayMatKhauQuenMatKhau(string email)
         {
-            string matKhau = null;
+            string matKhau = string.Empty;
 
             using (SqlConnection connection = Connection.getSQLConnection())
             {
@@ -194,7 +194,6 @@ namespace Server
                     MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
-
             return matKhau;
         }
 
