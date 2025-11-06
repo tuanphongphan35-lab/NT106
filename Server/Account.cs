@@ -11,10 +11,6 @@ namespace Server
         private string username;
         private string password;
 
-        public Account()
-        {
-            // Default constructor
-        }
         public  Account(string username, string password)
         {
             this.username = username;

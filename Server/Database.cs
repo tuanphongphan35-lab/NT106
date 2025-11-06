@@ -70,7 +70,7 @@ namespace Server
                     }
                     catch (Exception ex)
                     { 
-                    // Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message); 
+                       Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message); 
                         ketQua = false; // Nếu lỗi thì xem như đăng nhập thất bại
                     }
                     return ketQua;
@@ -154,13 +154,13 @@ namespace Server
                 }
                 catch (Exception ex)
                 {
-                    // Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
+                    Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
                     return false; // Trả về false nếu có lỗi
                 }
             }
         }
 
-        internal static string LayMatKhauQuenMatKhau(string email)
+        /*internal static string LayMatKhauQuenMatKhau(string email)
         {
             string matKhau = string.Empty;
 
@@ -196,6 +196,7 @@ namespace Server
             }
             return matKhau;
         }
+        */
 
         internal static bool KiemTraTonTaiMatKhau(string matKhau)
         {

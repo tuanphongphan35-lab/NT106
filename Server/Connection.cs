@@ -11,11 +11,12 @@ namespace Server
     {
         // Ở đây bạn có thể thêm các phương thức và thuộc tính liên quan đến kết nối cơ sở dữ liệu lay tu D:\Database
         private static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ChatApp;Integrated Security=True;TrustServerCertificate=True";
-        private static SqlConnection? connection;
+        //private static SqlConnection? connection;
 
         internal static SqlConnection getSQLConnection()
         {
-            throw new NotImplementedException();
+            SqlConnection connection = new SqlConnection(connectionString);
+            return connection;
         }
     }
 }

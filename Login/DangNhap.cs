@@ -94,5 +94,11 @@ namespace Login
             DangKy dangKyForm = new DangKy();
             dangKyForm.Show();
         }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            QuenMK quenMKForm = new QuenMK();
+            quenMKForm.Show();
+        }
     }
 }
