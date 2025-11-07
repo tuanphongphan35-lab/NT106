@@ -8,7 +8,6 @@ namespace Server
     {
         private TcpListener tcpListener;
         private Thread listenThread;
-       
         public Form1()
         {
             InitializeComponent();
@@ -34,9 +33,9 @@ namespace Server
             // Hiển thị thông báo khi server bắt đầu chạy
             label1.Text = "Server đang chạy. Kết nối...";
         }
-        private void HandleClientComm(object client)
+        private void HandleClientComm(object? client)
         {
-            TcpClient tcpClient = (TcpClient)client;
+            TcpClient tcpClient = (TcpClient)client!;
             NetworkStream clientStream = tcpClient.GetStream();
 
             byte[] message = new byte[4096];
@@ -97,6 +96,10 @@ namespace Server
             string taiKhoan = requestParts[1];
             string matKhau = requestParts[2];
             string email = requestParts[3];
+
+            // Convert base64 image string to local byte[] (non-null)
+            byte[] fileAnh = Convert.FromBase64String(requestParts[4]);
+
             if (Database.KiemTraTonTaiTaiKhoan(taiKhoan))
             {
                 SendResponse(clientStream, "TAIKHOAN_EXIST"); // Gửi phản hồi rằng tài khoản đã tồn tại
@@ -104,7 +107,7 @@ namespace Server
             }
             if (Database.KiemTraTonTaiMatKhau(matKhau))
             {
-                SendResponse(clientStream, "MATKHAU_EXIST"); // Gửi phản hồi rằng tài khoản đã tồn tại
+                SendResponse(clientStream, "MATKHAU_EXIST"); // Gửi phản hồi rằng mật khẩu đã tồn tại
                 return;
             }
 
@@ -116,8 +119,9 @@ namespace Server
             }
 
             // Thêm tài khoản vào cơ sở dữ liệu
-            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email);
-
+            // Database.ThemTaiKhoan returns Task<bool>, vì vậy sử dụng GetAwaiter().GetResult() để đồng bộ hóa
+            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email, fileAnh).GetAwaiter().GetResult();
+                
             // Gửi phản hồi cho client
             if (themThanhCong)
             {

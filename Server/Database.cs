@@ -1,27 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data.SqlTypes;
-using System.Windows.Forms;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Data.SqlClient;
-using Server;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+﻿using Microsoft.Data.SqlClient;
+using System;
+using System.Drawing;
+using BCrypt.Net;
+using System.Runtime.CompilerServices;
 
 namespace Server
 {
-    internal class Database
+    public class Database
     {
-        public List<Account> ReadListAccount()
+        private OpenFileDialog openFileDialog = new OpenFileDialog();
+        public static  List<Account> ReadListAccount()
         {
             // Giả sử chúng ta đọc từ một nguồn dữ liệu và trả về danh sách tài khoản
             List<Account> accounts = new List<Account>();
             {
                 using (SqlConnection connection = Connection.getSQLConnection())
                 {
-                    string query = "SELECT TaiKhoan, MatKhau FROM TaiKhoan_Server"; // Thay đổi TableName cho phù hợp
+                    string query = "SELECT Username, Password FROM Users";
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
@@ -50,45 +45,47 @@ namespace Server
 
              using (SqlConnection connection = Connection.getSQLConnection())
              {
-                    try
+                try
+                {
+                        string query = "SELECT COUNT(*) FROM Users WHERE Username = @TaiKhoan AND Password = @MatKhau";
+                    using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE TaiKhoan = @TaiKhoan AND MatKhau = @MatKhau";
-                        using (SqlCommand command = new SqlCommand(query, connection))
+                        command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
+                        command.Parameters.AddWithValue("@MatKhau", matKhau);
+                        connection.Open();
+
+                        object result = command.ExecuteScalar();
+                        if (result != null && result != DBNull.Value)
                         {
-                            command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
-                            command.Parameters.AddWithValue("@MatKhau", matKhau);
-                            connection.Open();
-
-                            object result = command.ExecuteScalar();
-
-                            if (result != null && result != DBNull.Value)
-                            {
-                                int count = Convert.ToInt32(result);
-                                ketQua = (count > 0);
-                            }
+                            int count = Convert.ToInt32(result);
+                            ketQua = (count > 0);
+                            ketQua = true; // Tài khoản và mật khẩu đúng
+                        }
+                        else
+                        {
+                            ketQua = false; // Không tìm thấy tài khoản hoặc mật khẩu không đúng
                         }
                     }
-                    catch (Exception ex)
-                    { 
-                       Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message); 
-                        ketQua = false; // Nếu lỗi thì xem như đăng nhập thất bại
-                    }
-                    return ketQua;
+                }
+                catch (Exception ex)
+                { 
+                    Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message); 
+                    ketQua = false; // Nếu lỗi thì xem như đăng nhập thất bại
+                }
+                return ketQua;
              }
         }
-            
-
-        internal static bool KiemTraTonTaiTaiKhoan(string taiKhoan)
+        public static bool KiemTraTonTaiTaiKhoan(string taiKhoan)
         {
             bool tonTai = false;
 
             using (SqlConnection connection = Connection.getSQLConnection())
             {
-                string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE TaiKhoan = @TaiKhoan";
+                string query = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
+                    command.Parameters.AddWithValue("@Username", taiKhoan);
 
                     connection.Open();
 
@@ -104,14 +101,13 @@ namespace Server
 
             return tonTai;
         }
-
-        internal static bool KiemTraTonTaiEmail(string email)
+        public static bool KiemTraTonTaiEmail(string email)
         {
             bool tonTai = false;
 
             using (SqlConnection connection = Connection.getSQLConnection())
             {
-                string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE Email = @Email";
+                string query = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
@@ -132,35 +128,45 @@ namespace Server
             return tonTai;
         }
 
-        internal static bool  ThemTaiKhoan(string taiKhoan, string matKhau, string email)
+        public static async Task<bool>  ThemTaiKhoan(string taiKhoan, string matKhau, string email, byte[] fileAnh)
         {
+            string matKhauDaBam = BCrypt.Net.BCrypt.HashPassword(matKhau);
             using (SqlConnection connection = Connection.getSQLConnection())
             {
                 try
                 {
-                    string query = "INSERT INTO TaiKhoan_Server (TaiKhoan, MatKhau, Email) VALUES (@TaiKhoan, @MatKhau, @Email)";
+                    string query = "INSERT INTO Users (Username, Email, Password, Avatar) VALUES(@user, @email, @pass, @avatar)";
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
-                        command.Parameters.AddWithValue("@TaiKhoan", taiKhoan);
-                        command.Parameters.AddWithValue("@MatKhau", matKhau);
-                        command.Parameters.AddWithValue("@Email", email);
+                        command.Parameters.AddWithValue("@user", taiKhoan);
+                        command.Parameters.AddWithValue("@pass", matKhauDaBam);
+                        command.Parameters.AddWithValue("@email", email);
 
-                        connection.Open();
-                        command.ExecuteNonQuery();
+                        // Thêm avatar vào
+                        if (fileAnh != null)
+                        {
+                            command.Parameters.AddWithValue("@avatar", fileAnh);
+                        }
+                        else
+                        {
+                            command.Parameters.AddWithValue("@avatar", DBNull.Value);
 
-                        return true; // Trả về true nếu thành công
+                        }
+                        await connection.OpenAsync();
+                        await command.ExecuteNonQueryAsync();
+                        return true;
                     }
                 }
                 catch (Exception ex)
                 {
                     Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
-                    return false; // Trả về false nếu có lỗi
+                    return false;
                 }
             }
         }
 
-        /*internal static string LayMatKhauQuenMatKhau(string email)
+        public static string LayMatKhauQuenMatKhau(string email)
         {
             string matKhau = string.Empty;
 
@@ -168,7 +174,7 @@ namespace Server
             {
                 try
                 {
-                    string query = "SELECT MatKhau FROM TaiKhoan_Server WHERE Email = @Email";
+                    string query = "SELECT MatKhau FROM Users  WHERE Email = @Email";
 
                     using (SqlCommand command = new SqlCommand(query, connection))
                     {
@@ -196,15 +202,15 @@ namespace Server
             }
             return matKhau;
         }
-        */
+        
 
-        internal static bool KiemTraTonTaiMatKhau(string matKhau)
+        public static bool KiemTraTonTaiMatKhau(string matKhau)
         {
             bool tonTai = false;
 
             using (SqlConnection connection = Connection.getSQLConnection())
             {
-                string query = "SELECT COUNT(*) FROM TaiKhoan_Server WHERE MatKhau = @MatKhau";
+                string query = "SELECT COUNT(*) FROM Users WHERE MatKhau = @MatKhau";
 
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {

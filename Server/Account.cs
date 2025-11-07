@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Server
 {
-    internal class Account
+    public class Account
     {
         private string username;
         private string password;

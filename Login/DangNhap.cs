@@ -19,7 +19,6 @@ namespace Login
 {
     public partial class DangNhap : Form
     {
-        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=ChatApp;Integrated Security=True;";
         public DangNhap()
         {
             InitializeComponent();
@@ -45,41 +44,19 @@ namespace Login
 
             try
             {
-                using (SqlConnection conn = new SqlConnection(connectionString))
+                // Kiểm tra đăng nhập trong cơ sở dữ liệu
+                bool ketQuaDangNhap = Server.Database.KiemTraDangNhap(tenDangNhap, matKhau);
+                if (ketQuaDangNhap)
                 {
-                    conn.Open();
-
-                    // 1. Lấy chuỗi băm (Password) từ database 
-                    string query = "SELECT Password FROM Users WHERE Username = @user";
-
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
-                    {
-                        cmd.Parameters.AddWithValue("@user", tenDangNhap);
-
-                        object result = cmd.ExecuteScalar();
-
-                        if (result != null) // Nếu tìm thấy user
-                        {
-                            string matKhauDaLuu = result.ToString();
-
-                            // 2. Dùng BCrypt.Verify để so sánh
-                            bool isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, matKhauDaLuu);
-                            if (isPasswordValid)
-                            {
-                                MessageBox.Show("Đăng nhập thành công!");
-                                // Mở form chính...
-                            }
-                            else
-                            {
-                                MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
-                            }
-                        }
-                        else
-                        {
-                            // Không tìm thấy user
-                            MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
-                        }
-                    }
+                    MessageBox.Show("Đăng nhập thành công!", "Thông báo");
+                    // Mở form chính sau khi đăng nhập thành công
+                    //Form1 mainForm = new Form1(tenDangNhap);
+                    //mainForm.Show();
+                    this.Hide(); // Ẩn form đăng nhập
+                }
+                else
+                {
+                    MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi");
                 }
             }
             catch (Exception ex)
