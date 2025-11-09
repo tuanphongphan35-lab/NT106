@@ -13,10 +13,9 @@ namespace Server
         private static string connectionString = @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=ChatApp;Integrated Security=True;TrustServerCertificate=True";
         //private static SqlConnection? connection;
 
-        internal static SqlConnection getSQLConnection()
+        public static SqlConnection getSQLConnection()
         {
-            SqlConnection connection = new SqlConnection(connectionString);
-            return connection;
+            return new SqlConnection(connectionString);
         }
     }
 }

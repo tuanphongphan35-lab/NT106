@@ -30,7 +30,7 @@ namespace Login
         {
 
         }
-        private void buttonOTP_Click(object sender, EventArgs e) // Gửi OTP xác thực
+        private async void buttonOTP_Click(object sender, EventArgs e) // Gửi OTP xác thực
         {
             string email = textBox2.Text;
             if (string.IsNullOrWhiteSpace(email))
@@ -42,7 +42,7 @@ namespace Login
             try
             {
                 // Sử dụng phương thức từ lớp Database để kiểm tra tồn tại email
-                bool emailExists = Server.Database.KiemTraTonTaiEmail(email);
+                bool emailExists = await Server.Database.KiemTraTonTaiEmail(email);
                 if (!emailExists)
                 {
                     MessageBox.Show("Email không tồn tại trong hệ thống!", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);

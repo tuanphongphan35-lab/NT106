@@ -46,12 +46,17 @@ namespace Login
             // 2. Kiểm tra dữ liệu đầu vào (Validation)
             if (string.IsNullOrWhiteSpace(email) ||
                 string.IsNullOrWhiteSpace(maOTP) ||
-                 maOTP != this.verificationCode ||
                 string.IsNullOrWhiteSpace(tenDangNhap) ||
                 string.IsNullOrWhiteSpace(matKhau) ||
-                string.IsNullOrWhiteSpace(xacNhanMatKhau))
+                string.IsNullOrWhiteSpace(xacNhanMatKhau)) 
+
             {
                 MessageBox.Show("Vui lòng điền đầy đủ thông tin.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            if (maOTP != this.verificationCode)
+            {
+                MessageBox.Show("Mã OTP xác nhận không đúng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -61,13 +66,13 @@ namespace Login
                 return;
             }
             // Kiểm tra có bị trùng tên đăng nhập hoặc email không
-            bool emailExist = Server.Database.KiemTraTonTaiEmail(email);
+            bool emailExist = await Server.Database.KiemTraTonTaiEmail(email);
             if (emailExist)
             {
                 MessageBox.Show("Email này đã được sử dụng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
-            bool taiKhoanExist = Server.Database.KiemTraTonTaiTaiKhoan(tenDangNhap);
+            bool taiKhoanExist = await Server.Database.KiemTraTonTaiTaiKhoan(tenDangNhap);
             if (taiKhoanExist)
             {
                 MessageBox.Show("Tên đăng nhập này đã được sử dụng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -75,8 +80,9 @@ namespace Login
             }
             try
             {
-               bool themThanhCong = await Server.Database.ThemTaiKhoan(tenDangNhap, matKhau, email, this.fileAnh);
-                if (themThanhCong) {
+                bool themThanhCong = await Server.Database.ThemTaiKhoan(tenDangNhap, matKhau, email, this.fileAnh);
+                if (themThanhCong)
+                {
                     MessageBox.Show("Đăng ký thành công!", "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     this.Close();
                     return;
@@ -126,7 +132,7 @@ namespace Login
             }
         }
 
-        private void button3_Click(object sender, EventArgs e)
+        private async void button3_Click(object sender, EventArgs e)
         {
             string email = textBox2.Text.Trim();
             if (string.IsNullOrWhiteSpace(email))
@@ -137,16 +143,16 @@ namespace Login
             try
             {
                 // Sử dụng phương thức từ lớp Database để kiểm tra tồn tại email
-                bool emailExists = Server.Database.KiemTraTonTaiEmail(email);
+                bool emailExists =await Server.Database.KiemTraTonTaiEmail(email);
                 if (emailExists)
-                    {
-                        MessageBox.Show("Email này đã được sử dụng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                        return;
-                    }
-                    // Nếu OK thì gửi mã xác thực
-                    this.verificationCode = GeneraiVerificationCode();
-                    GuiEmailXacThuc(email, this.verificationCode);
-                    MessageBox.Show("Mã xác nhận đã được gửi đến email của bạn.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                {
+                    MessageBox.Show("Email này đã được sử dụng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+                // Nếu OK thì gửi mã xác thực
+                this.verificationCode = GeneraiVerificationCode();
+                GuiEmailXacThuc(email, this.verificationCode);
+                MessageBox.Show("Mã xác nhận đã được gửi đến email của bạn.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -192,6 +198,11 @@ namespace Login
             {
                 MessageBox.Show("Lỗi khi gửi email: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
