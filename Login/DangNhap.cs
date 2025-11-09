@@ -20,11 +20,11 @@ namespace Login
     public partial class DangNhap : Form
     {
         private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=ChatApp;Integrated Security=True;";
+
         public DangNhap()
         {
             InitializeComponent();
             // Kết nối với cơ sở dữ liệu SQL 
-
         }
 
         private void panel3_Paint(object sender, PaintEventArgs e)
@@ -66,8 +66,13 @@ namespace Login
                             bool isPasswordValid = BCrypt.Net.BCrypt.Verify(matKhau, matKhauDaLuu);
                             if (isPasswordValid)
                             {
+                                PhienDangNhap.TaiKhoanHienTai = tenDangNhap;
+                                PhienDangNhap.IDNguoiDungHienTai = Server.Database.LayIDNguoiDung(tenDangNhap);
                                 MessageBox.Show("Đăng nhập thành công!");
                                 // Mở form chính...
+                                ThongTinNguoiDung mainForm = new ThongTinNguoiDung();
+                                mainForm.Show();
+                                this.Hide();
                             }
                             else
                             {
@@ -93,6 +98,12 @@ namespace Login
             // Mở form đăng ký
             DangKy dangKyForm = new DangKy();
             dangKyForm.Show();
+        }
+
+        private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        {
+            QuenMK quenMKForm = new QuenMK();
+            quenMKForm.Show();
         }
     }
 }

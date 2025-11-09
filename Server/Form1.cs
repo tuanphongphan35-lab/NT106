@@ -8,7 +8,6 @@ namespace Server
     {
         private TcpListener tcpListener;
         private Thread listenThread;
-       
         public Form1()
         {
             InitializeComponent();
@@ -34,9 +33,9 @@ namespace Server
             // Hiển thị thông báo khi server bắt đầu chạy
             label1.Text = "Server đang chạy. Kết nối...";
         }
-        private void HandleClientComm(object client)
+        private void HandleClientComm(object? client)
         {
-            TcpClient tcpClient = (TcpClient)client;
+            TcpClient tcpClient = (TcpClient)client!;
             NetworkStream clientStream = tcpClient.GetStream();
 
             byte[] message = new byte[4096];
@@ -92,32 +91,37 @@ namespace Server
             tcpClient.Close();
         }
         // Phương thức xử lý đăng kí
-        private void HandleRegistration(string[] requestParts, NetworkStream clientStream)
+        private async void HandleRegistration(string[] requestParts, NetworkStream clientStream)
         {
             string taiKhoan = requestParts[1];
             string matKhau = requestParts[2];
             string email = requestParts[3];
-            if (Database.KiemTraTonTaiTaiKhoan(taiKhoan))
+
+            // Convert base64 image string to local byte[] (non-null)
+            byte[] fileAnh = Convert.FromBase64String(requestParts[4]);
+
+            if (await Database.KiemTraTonTaiTaiKhoan(taiKhoan))
             {
                 SendResponse(clientStream, "TAIKHOAN_EXIST"); // Gửi phản hồi rằng tài khoản đã tồn tại
                 return;
             }
-            if (Database.KiemTraTonTaiMatKhau(matKhau))
+            if (await Database.KiemTraTonTaiMatKhau(matKhau))
             {
-                SendResponse(clientStream, "MATKHAU_EXIST"); // Gửi phản hồi rằng tài khoản đã tồn tại
+                SendResponse(clientStream, "MATKHAU_EXIST"); // Gửi phản hồi rằng mật khẩu đã tồn tại
                 return;
             }
 
             // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu chưa
-            if (Database.KiemTraTonTaiEmail(email))
+            if (await Database.KiemTraTonTaiEmail(email))
             {
                 SendResponse(clientStream, "EMAIL_EXIST"); // Gửi phản hồi rằng email đã tồn tại
                 return;
             }
 
             // Thêm tài khoản vào cơ sở dữ liệu
-            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email);
-
+            // Database.ThemTaiKhoan returns Task<bool>, vì vậy sử dụng GetAwaiter().GetResult() để đồng bộ hóa
+            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email, fileAnh).GetAwaiter().GetResult();
+                
             // Gửi phản hồi cho client
             if (themThanhCong)
             {
@@ -148,6 +152,31 @@ namespace Server
                 Invoke((MethodInvoker)(() => label1.Text = $"Tài khoản: {taiKhoan} - Đăng nhập thành công"));
             }
         }
+        // Cách gọi nó từ luồng nền (ví dụ trong HandleClientComm):
+        private void HandleClient(object client)
+        {
+            TcpClient tcpClient = (TcpClient)client;
+
+            // ...
+            // GỌI HÀM NÀY (AN TOÀN)
+            UpdateUILabel("Client vừa kết nối!");
+            // ...
+        }
+        private void UpdateUILabel(string message)
+        {
+            // Kiểm tra xem có cần Invoke không
+            if (label1.InvokeRequired)
+            {
+                // Nếu đang ở luồng khác, gọi lại chính nó trên luồng UI
+                label1.Invoke(new Action(() => label1.Text = message));
+            }
+            else
+            {
+                // Nếu đang ở luồng UI, cập nhật trực tiếp
+                label1.Text = message;
+            }
+        }
+
         // Phương thức xử lý quên mật khẩu
         private void HandleQMK(string[] requestParts, NetworkStream clientStream)
         {
