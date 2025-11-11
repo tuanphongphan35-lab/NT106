@@ -358,13 +358,5 @@ namespace Server
             public string? GioiTinh { get; set; }
             public byte[]? Avatar { get; set; }
         }
-        public class UserInfo
-        {
-            public string? TenNguoiDung { get; set; }
-            public string? Email { get; set; }
-            public DateTime NgaySinh { get; set; }
-            public string? GioiTinh { get; set; }
-            public byte[]? Avatar { get; set; }
-        }
     }
 }
