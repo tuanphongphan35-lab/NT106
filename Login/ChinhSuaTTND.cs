@@ -24,12 +24,6 @@ namespace Login
             // Bạn phải đảm bảo PhienDangNhap.IDNguoiDungHienTai đã được đổi kiểu sang string.
             string id = PhienDangNhap.IDNguoiDungHienTai;
 
-        }
-
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            // Lưu thông tin người dùng sau khi chỉnh sửa
-            int  id = PhienDangNhap.IDNguoiDungHienTai; // Change type to int
             string tenNguoiDung = textBox1.Text.Trim();
             DateTime ngaySinh = dateTimePicker1.Value;
             string gioiTinh = comboBox1.SelectedItem?.ToString() ?? "";
@@ -81,7 +75,7 @@ namespace Login
             }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e){ }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
 
         private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
 

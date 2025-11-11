@@ -15,7 +15,6 @@ namespace Login
 {
     public partial class DangNhap : Form
     {
-        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=ChatApp;Integrated Security=True;";
 
         public DangNhap()
         {
@@ -30,6 +29,7 @@ namespace Login
         // Chuyển đổi hàm xử lý sự kiện sang async
         private async void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
             string tenDangNhap = textBox1.Text.Trim(); // Textbox tên đăng nhập
             string matKhau = textBox2.Text.Trim();      // Textbox mật khẩu
 
@@ -66,9 +66,10 @@ namespace Login
                     MessageBox.Show("Đăng nhập thành công!");
 
                     // 3. Mở form chính
+                    // Chỉ cần mở 1 lần form ThongTinNguoiDung
                     ThongTinNguoiDung mainForm = new ThongTinNguoiDung();
                     mainForm.Show();
-                    this.Hide();
+                    this.Hide(); // Ẩn form đăng nhập
                 }
                 else
                 {
@@ -85,6 +86,7 @@ namespace Login
 
         private void button2_Click(object sender, EventArgs e)
         {
+            button2.Enabled = false;
             // Mở form đăng ký
             DangKy dangKyForm = new DangKy();
             dangKyForm.Show();
@@ -92,6 +94,7 @@ namespace Login
 
         private void linkLabel1_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
+            linkLabel1.Enabled = false;
             QuenMK quenMKForm = new QuenMK();
             quenMKForm.Show();
         }

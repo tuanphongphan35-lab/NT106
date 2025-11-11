@@ -1,11 +1,4 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic.ApplicationServices;
-using Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
 using System.Net.Http; // Cần thiết để tải ảnh từ URL
 using System.Threading.Tasks;
@@ -36,8 +29,6 @@ namespace Login
             path.AddArc(this.Width - (radius * 2), this.Height - (radius * 2), radius * 2, radius * 2, 0, 90);
             path.AddArc(0, this.Height - (radius * 2), radius * 2, radius * 2, 90, 90);
             path.CloseFigure();
-
-            // Áp dụng vùng bo tròn cho Form
             this.Region = new System.Drawing.Region(path);
 
             // --- BẮT ĐẦU LOGIC TẢI DỮ LIỆU FIRESTORE ---
@@ -58,7 +49,6 @@ namespace Login
                     {
                         // Hàm tải ảnh từ URL và chuyển thành Image
                         await LoadImageFromUrlAsync(avatarUrl);
-                        }
                     }
                     else
                     {
@@ -66,49 +56,39 @@ namespace Login
                         circularPictureBox1.Image = Properties.Resources.user_default;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi tải avatar: " + ex.Message);
-            }
-            // Lấy từ database TaiKhoan_Server và hiển thị các thông tin người dùng khác tương tự
 
                 // 3. Tải Thông tin Người dùng
                 // THAY ĐỔI: Gọi lớp FirestoreDatabase và dùng STRING ID
                 UserInfo info = await Server.Database.LayThongTinNguoiDung(userId);
 
                 // 4. Hiển thị thông tin lên Form
-            if (info != null)
-            {
+                if (info != null)
+                {
                     // LƯU Ý: UserInfo.Avatar giờ là null (nếu bạn giữ lại byte[] cũ)
 
-                textBox1.Text = info.TenNguoiDung;
-                textBox4.Text = info.Email;
+                    textBox1.Text = info.TenNguoiDung;
+                    textBox4.Text = info.Email;
 
                     if (info.NgaySinh.Year > 1900)
-                {
-                    // Định dạng ngày/tháng/năm
-                    textBox2.Text = info.NgaySinh.ToString("dd/MM/yyyy");
+                    {
+                        textBox2.Text = info.NgaySinh.ToString("dd/MM/yyyy");
+                    }
+                    else
+                    {
+                        textBox2.Text = "Chưa cập nhật";
+                    }
 
-                    // Bạn có thể dùng định dạng tiếng Việt: "dd tháng MM năm yyyy"
-                    // txtNgaySinh.Text = user.NgaySinh.ToString("dd \\t\\h\\á\\n\\g MM yyyy");
+                    if (!string.IsNullOrEmpty(info.GioiTinh))
+                    {
+                        textBox3.Text = info.GioiTinh;
+                    }
+                    else
+                    {
+                        textBox3.Text = "Chưa cập nhật";
+                    }
                 }
                 else
                 {
-                    textBox2.Text = "Chưa cập nhật";
-                }
-
-                if (!string.IsNullOrEmpty(info.GioiTinh))
-                {
-                    textBox3.Text = info.GioiTinh;
-                }
-                else
-                {
-                    textBox3.Text = "Chưa cập nhật";
-                }
-            }
-            else
-            {
                     MessageBox.Show("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
                 }
             }
@@ -164,21 +144,6 @@ namespace Login
         private void ThongTinNguoiDungForm_MouseUp(object sender, MouseEventArgs e)
         {
             dragging = false;
-        }
-
-        private void circularPictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void roundPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
         }
 
         private void button1_Click(object sender, EventArgs e)

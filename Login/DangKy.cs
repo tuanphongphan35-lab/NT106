@@ -32,6 +32,7 @@ namespace Login
 
         private async void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
             string email = textBox2.Text.Trim();
             string maOTP = textBoxOTP.Text.Trim();
             string tenDangNhap = textBox3.Text.Trim();
@@ -91,6 +92,7 @@ namespace Login
 
         private void button2_Click(object sender, EventArgs e)
         {
+            button2.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
 
@@ -116,6 +118,7 @@ namespace Login
 
         private async void button3_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false; // Vô hiệu hóa nút đăng ký trong khi gửi email
             string email = textBox2.Text.Trim();
             if (string.IsNullOrWhiteSpace(email))
             {
