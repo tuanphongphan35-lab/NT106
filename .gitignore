@@ -361,3 +361,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Server/nt106-7d101-firebase-adminsdk-fbsvc-aa1a28b8ca.json
