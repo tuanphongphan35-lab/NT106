@@ -1,40 +1,37 @@
 ﻿using BCrypt.Net;
-using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic.ApplicationServices;
 using System;
-using System.Collections.Generic;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Data.SqlTypes;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Security.Policy;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading.Tasks; // Cần cho async/await
 using System.Windows.Forms;
+using Server; // Cần để gọi lớp FirestoreDatabase
 
 namespace Login
 {
     public partial class DangNhap : Form
     {
+        private string connectionString = @"Server=(localdb)\MSSQLLocalDB;Database=ChatApp;Integrated Security=True;";
+
         public DangNhap()
         {
             InitializeComponent();
-            // Kết nối với cơ sở dữ liệu SQL 
-
+            // Kết nối Firebase được xử lý trong FirestoreHelper
         }
 
         private void panel3_Paint(object sender, PaintEventArgs e)
         {
-
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        // Chuyển đổi hàm xử lý sự kiện sang async
+        private async void button1_Click(object sender, EventArgs e)
         {
-            string tenDangNhap = textBox1.Text; // Textbox tên đăng nhập
-            string matKhau = textBox2.Text;     // Textbox mật khẩu
+            string tenDangNhap = textBox1.Text.Trim(); // Textbox tên đăng nhập
+            string matKhau = textBox2.Text.Trim();      // Textbox mật khẩu
 
             if (string.IsNullOrEmpty(tenDangNhap) || string.IsNullOrEmpty(matKhau))
             {
@@ -42,26 +39,47 @@ namespace Login
                 return;
             }
 
+            // --- THAY THẾ LOGIC SQL BẰNG LOGIC FIRESTORE ---
+
             try
             {
-                // Kiểm tra đăng nhập trong cơ sở dữ liệu
-                bool ketQuaDangNhap = Server.Database.KiemTraDangNhap(tenDangNhap, matKhau);
-                if (ketQuaDangNhap)
+                // Gọi hàm KiemTraDangNhap (Hàm này đã được sửa trong FirestoreDatabase để dùng WhereEqualTo và BCrypt.Verify)
+                bool isPasswordValid = await Server.Database.KiemTraDangNhap(tenDangNhap, matKhau);
+
+                if (isPasswordValid)
                 {
-                    MessageBox.Show("Đăng nhập thành công!", "Thông báo");
-                    // Mở form chính sau khi đăng nhập thành công
-                    //Form1 mainForm = new Form1(tenDangNhap);
-                    //mainForm.Show();
-                    this.Hide(); // Ẩn form đăng nhập
+                    // 1. Đăng nhập thành công, Lấy ID Document (string)
+                    // Hàm LayIDNguoiDung phải là async và trả về string
+                    string currentUserId = await Server.Database.LayIDNguoiDung(tenDangNhap);
+
+                    if (string.IsNullOrEmpty(currentUserId))
+                    {
+                        MessageBox.Show("Lỗi nội bộ: Không thể lấy ID người dùng.", "Lỗi");
+                        return;
+                    }
+
+                    // 2. Lưu thông tin phiên đăng nhập
+                    PhienDangNhap.TaiKhoanHienTai = tenDangNhap;
+                    // LƯU Ý: PhienDangNhap.IDNguoiDungHienTai giờ là STRING
+                    PhienDangNhap.IDNguoiDungHienTai = currentUserId;
+
+                    MessageBox.Show("Đăng nhập thành công!");
+
+                    // 3. Mở form chính
+                    ThongTinNguoiDung mainForm = new ThongTinNguoiDung();
+                    mainForm.Show();
+                    this.Hide();
                 }
                 else
                 {
-                    MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.", "Lỗi");
+                    // Tên đăng nhập được tìm thấy nhưng mật khẩu sai HOẶC Tên đăng nhập không tồn tại
+                    MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi: " + ex.Message);
+                // Bắt lỗi kết nối Firebase, lỗi cấu hình, v.v.
+                MessageBox.Show("Lỗi kết nối hoặc xử lý Firebase: " + ex.Message, "Lỗi");
             }
         }
 

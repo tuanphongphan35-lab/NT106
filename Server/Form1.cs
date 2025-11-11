@@ -1,39 +1,56 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading; // Cần Thread
+using System.Windows.Forms; // Cần Form
+using Server; // Cần gọi lớp FirestoreDatabase
+using System;
+using System.Threading.Tasks; // Cần Task và async/await
 
 namespace Server
 {
+    // Đảm bảo Form1 thừa kế từ Form
     public partial class Form1 : Form
     {
         private TcpListener tcpListener;
         private Thread listenThread;
+
+        // --- CÁC HÀM KHỞI TẠO TCP GIỮ NGUYÊN ---
         public Form1()
         {
             InitializeComponent();
-            StartServer();
         }
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            StartServer();
+            Invoke((MethodInvoker)(() => label1.Text = "Server đang chạy. Kết nối..."));
+        }
+
+        private void StartServer()
+        {
+            // Vẫn dùng IPAddress.Any, 8080 để lắng nghe kết nối TCP
+            tcpListener = new TcpListener(IPAddress.Any, 8080);
+            listenThread = new Thread(new ThreadStart(ListenForClients));
+            listenThread.Start();
+
+        }
+
         private void ListenForClients()
         {
             tcpListener.Start();
 
             while (true)
             {
+                // AcceptTcpClient là hàm chặn (blocking), chấp nhận được gọi đồng bộ
                 TcpClient client = tcpListener.AcceptTcpClient();
+                // Tạo luồng mới để xử lý mỗi client
                 Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
                 clientThread.Start(client);
             }
         }
-        private void StartServer()
-        {
-            tcpListener = new TcpListener(IPAddress.Any, 8080);
-            listenThread = new Thread(new ThreadStart(ListenForClients));
-            listenThread.Start();
 
-            // Hiển thị thông báo khi server bắt đầu chạy
-            label1.Text = "Server đang chạy. Kết nối...";
-        }
-        private void HandleClientComm(object? client)
+        // --- HÀM XỬ LÝ KẾT NỐI CLIENT (HandleClientComm) ---
+        private async void HandleClientComm(object? client) // CHUYỂN THÀNH ASYNC VOID
         {
             TcpClient tcpClient = (TcpClient)client!;
             NetworkStream clientStream = tcpClient.GetStream();
@@ -47,6 +64,7 @@ namespace Server
 
                 try
                 {
+                    // Đọc dữ liệu
                     bytesRead = clientStream.Read(message, 0, 4096);
                 }
                 catch
@@ -60,129 +78,162 @@ namespace Server
                 }
 
                 string dataReceived = Encoding.ASCII.GetString(message, 0, bytesRead);
-
-                // Tách dữ liệu nhận được từ client thành các tham số
                 string[] requestParts = dataReceived.Split('|');
-
-                // Xác định loại yêu cầu từ client (đăng kí hoặc đăng nhập)
                 string command = requestParts[0];
 
                 switch (command)
                 {
                     case "DANGKI":
-                        // Xử lý yêu cầu đăng kí
-                        HandleRegistration(requestParts, clientStream);
+                        // Xử lý yêu cầu đăng kí (Dùng await)
+                        await HandleRegistration(requestParts, clientStream);
                         break;
                     case "DANGNHAP":
-                        // Xử lý yêu cầu đăng nhập
-                        HandleLogin(requestParts, clientStream);
+                        // Xử lý yêu cầu đăng nhập (Dùng await)
+                        await HandleLogin(requestParts, clientStream);
                         break;
                     case "QUENMK":
-                        // Xử lý yêu cầu đăng nhập
-                        HandleQMK(requestParts, clientStream);
+                        // Xử lý yêu cầu quên mật khẩu (Dùng await)
+                        await HandleQMK(requestParts, clientStream);
                         break;
                     default:
-                        // Yêu cầu không hợp lệ
                         SendResponse(clientStream, "INVALID_REQUEST");
                         break;
                 }
             }
-
             tcpClient.Close();
         }
-        // Phương thức xử lý đăng kí
-        private void HandleRegistration(string[] requestParts, NetworkStream clientStream)
+
+        // --- HÀM XỬ LÝ ĐĂNG KÍ (HandleRegistration) ---
+        // Bắt buộc là async Task
+        private async Task HandleRegistration(string[] requestParts, NetworkStream clientStream)
         {
             string taiKhoan = requestParts[1];
             string matKhau = requestParts[2];
             string email = requestParts[3];
 
-            // Convert base64 image string to local byte[] (non-null)
+            // Convert base64 image string to byte[]
             byte[] fileAnh = Convert.FromBase64String(requestParts[4]);
 
-            if (Database.KiemTraTonTaiTaiKhoan(taiKhoan))
+            // Dùng FirestoreDatabase mới
+            if (await Database.KiemTraTonTaiTaiKhoan(taiKhoan))
             {
-                SendResponse(clientStream, "TAIKHOAN_EXIST"); // Gửi phản hồi rằng tài khoản đã tồn tại
-                return;
-            }
-            if (Database.KiemTraTonTaiMatKhau(matKhau))
-            {
-                SendResponse(clientStream, "MATKHAU_EXIST"); // Gửi phản hồi rằng mật khẩu đã tồn tại
+                SendResponse(clientStream, "TAIKHOAN_EXIST");
                 return;
             }
 
-            // Kiểm tra xem email đã tồn tại trong cơ sở dữ liệu chưa
-            if (Database.KiemTraTonTaiEmail(email))
+            if (await Database.KiemTraTonTaiEmail(email))
             {
-                SendResponse(clientStream, "EMAIL_EXIST"); // Gửi phản hồi rằng email đã tồn tại
+                SendResponse(clientStream, "EMAIL_EXIST");
                 return;
             }
 
-            // Thêm tài khoản vào cơ sở dữ liệu
-            // Database.ThemTaiKhoan returns Task<bool>, vì vậy sử dụng GetAwaiter().GetResult() để đồng bộ hóa
-            bool themThanhCong = Database.ThemTaiKhoan(taiKhoan, matKhau, email, fileAnh).GetAwaiter().GetResult();
-                
-            // Gửi phản hồi cho client
+            // Gọi hàm ThemTaiKhoan đã là async Task<bool> và sử dụng await
+            bool themThanhCong = await Database.ThemTaiKhoan(taiKhoan, matKhau, email, fileAnh);
+
             if (themThanhCong)
             {
                 SendResponse(clientStream, "DANGKI_SUCCESS");
             }
             else
             {
-                SendResponse(clientStream, "DANGKI_FAILED_DB"); // Gửi lỗi do database
+                SendResponse(clientStream, "DANGKI_FAILED_DB");
             }
         }
-        // Phương thức xử lý đăng nhập
-        private void HandleLogin(string[] requestParts, NetworkStream clientStream)
+
+        // --- HÀM XỬ LÝ ĐĂNG NHẬP (HandleLogin) ---
+        // Chuyển đổi sang async Task
+        private async Task HandleLogin(string[] requestParts, NetworkStream clientStream)
         {
             string taiKhoan = requestParts[1];
             string matKhau = requestParts[2];
 
-            // Kiểm tra đăng nhập trong cơ sở dữ liệu
-            bool ketQuaDangNhap = Database.KiemTraDangNhap(taiKhoan, matKhau);
+            // Gọi hàm KiemTraDangNhap đã là async Task<bool>
+            bool ketQuaDangNhap = await Database.KiemTraDangNhap(taiKhoan, matKhau);
 
-            // Gửi kết quả đăng nhập cho client
-            byte[] responseData = Encoding.ASCII.GetBytes(ketQuaDangNhap.ToString());
-            clientStream.Write(responseData, 0, responseData.Length);
-
-            // Hiển thị thông tin đăng nhập nếu đăng nhập thành công
             if (ketQuaDangNhap)
             {
-                // Hiển thị thông tin đăng nhập trên label
-                Invoke((MethodInvoker)(() => label1.Text = $"Tài khoản: {taiKhoan} - Đăng nhập thành công"));
-            }
-        }
-        // Phương thức xử lý quên mật khẩu
-        private void HandleQMK(string[] requestParts, NetworkStream clientStream)
-        {
+                // Lấy ID Document (string) và gửi về client (rất quan trọng cho các request sau)
+                string userID = await Database.LayIDNguoiDung(taiKhoan);
 
-            string email = requestParts[1];
+                // Phản hồi: SUCCESS|ID_DOCUMENT
+                SendResponse(clientStream, "DANGNHAP_SUCCESS|" + userID);
 
-            // Lấy mật khẩu từ cơ sở dữ liệu
-            string matKhau = Database.LayMatKhauQuenMatKhau(email);
-
-            if (matKhau != null)
-            {
-                // Gửi mật khẩu cho client
-                SendResponse(clientStream, "MATKHAU|" + matKhau);
+                // Hiển thị thông tin đăng nhập trên label (dùng Invoke)
+                UpdateUILabel($"Tài khoản: {taiKhoan} - Đăng nhập thành công. ID: {userID}");
             }
             else
             {
-                // Gửi thông báo không tìm thấy mật khẩu cho client
-                SendResponse(clientStream, "MATKHAU_NOT_FOUND");
+                SendResponse(clientStream, "DANGNHAP_FAILED");
+                UpdateUILabel($"Tài khoản: {taiKhoan} - Đăng nhập thất bại.");
             }
         }
-        // Phương thức gửi phản hồi cho client
+
+        // --- HÀM XỬ LÝ QUÊN MẬT KHẨU (HandleQMK) ---
+        // Chuyển đổi sang async Task
+        private async Task HandleQMK(string[] requestParts, NetworkStream clientStream)
+        {
+            string email = requestParts[1];
+
+            // Lưu ý: LayMatKhauQuenMatKhau giờ là async Task<string>
+            // Hàm này (trong server TCP) KHÔNG NÊN gửi mật khẩu về, mà chỉ kiểm tra email và phản hồi.
+            // Nếu bạn muốn gửi OTP, bạn cần triển khai logic gửi email ở đây.
+
+            // Giả sử client đã gửi OTP trước đó và yêu cầu đặt lại mật khẩu ở đây:
+
+            // Bước 1: Kiểm tra email có tồn tại
+            if (!await Database.KiemTraTonTaiEmail(email))
+            {
+                SendResponse(clientStream, "EMAIL_NOT_FOUND");
+                return;
+            }
+
+            // Bước 2: Lấy mật khẩu đã băm (cho mục đích xác nhận nội bộ, nhưng không gửi về client)
+            string matKhauDaLuu = await Database.LayMatKhauQuenMatKhau(email);
+
+            if (!string.IsNullOrEmpty(matKhauDaLuu))
+            {
+                // ***************************************************************
+                // ** CẢNH BÁO: KHÔNG GỬI MẬT KHẨU ĐÃ BĂM (HOẶC MẬT KHẨU GỐC) QUA TCP/IP **
+                // ***************************************************************
+
+                // Tốt nhất là phản hồi thành công và để client tự xử lý bước tiếp theo
+                SendResponse(clientStream, "QUENMK_SUCCESS");
+            }
+            else
+            {
+                SendResponse(clientStream, "QUENMK_FAILED");
+            }
+        }
+
+        // --- HÀM CẬP NHẬT UI AN TOÀN ---
+        private void UpdateUILabel(string message)
+        {
+            // Kiểm tra xem có cần Invoke không
+            if (label1.InvokeRequired)
+            {
+                // Nếu đang ở luồng khác, gọi lại chính nó trên luồng UI
+                label1.Invoke(new Action(() => label1.Text = message));
+            }
+            else
+            {
+                // Nếu đang ở luồng UI, cập nhật trực tiếp
+                label1.Text = message;
+            }
+        }
+
+        // --- HÀM GỬI PHẢN HỒI ---
         private void SendResponse(NetworkStream clientStream, string response)
         {
             byte[] responseData = Encoding.ASCII.GetBytes(response);
-            clientStream.Write(responseData, 0, responseData.Length);
+            try
+            {
+                clientStream.Write(responseData, 0, responseData.Length);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi gửi phản hồi: " + ex.Message);
+            }
         }
-      
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
