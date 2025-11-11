@@ -65,9 +65,6 @@ artifacts/
 
 # ASP.NET Scaffolding
 ScaffoldingReadMe.txt
-s
-# Firebase Admin SDK Credentials
-Server/NT106-Server/Firebase-adminSDK/fsvc-asaa2bca.json
 
 # StyleCop
 StyleCopReport.xml
@@ -129,6 +126,9 @@ $tf/
 
 # Guidance Automation Toolkit
 *.gpState
+
+# Firebase Admin SDK Credentials
+Server/NT106-Server/Firebase-adminSDK/fsvc-asaa2bca.json
 
 # ReSharper is a .NET coding add-in
 _ReSharper*/
