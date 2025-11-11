@@ -25,9 +25,9 @@ namespace Login
         {
         }
 
-        // Chuyển đổi hàm xử lý sự kiện sang async
         private async void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
             string tenDangNhap = textBox1.Text.Trim(); // Textbox tên đăng nhập
             string matKhau = textBox2.Text.Trim();      // Textbox mật khẩu
 
@@ -37,17 +37,13 @@ namespace Login
                 return;
             }
 
-            // --- THAY THẾ LOGIC SQL BẰNG LOGIC FIRESTORE ---
 
             try
             {
-                // Gọi hàm KiemTraDangNhap (Hàm này đã được sửa trong FirestoreDatabase để dùng WhereEqualTo và BCrypt.Verify)
                 bool isPasswordValid = await Server.Database.KiemTraDangNhap(tenDangNhap, matKhau);
 
                 if (isPasswordValid)
                 {
-                    // 1. Đăng nhập thành công, Lấy ID Document (string)
-                    // Hàm LayIDNguoiDung phải là async và trả về string
                     string currentUserId = await Server.Database.LayIDNguoiDung(tenDangNhap);
 
                     if (string.IsNullOrEmpty(currentUserId))
@@ -58,7 +54,6 @@ namespace Login
 
                     // 2. Lưu thông tin phiên đăng nhập
                     PhienDangNhap.TaiKhoanHienTai = tenDangNhap;
-                    // LƯU Ý: PhienDangNhap.IDNguoiDungHienTai giờ là STRING
                     PhienDangNhap.IDNguoiDungHienTai = currentUserId;
 
                     MessageBox.Show("Đăng nhập thành công!");

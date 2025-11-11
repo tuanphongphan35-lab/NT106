@@ -14,7 +14,6 @@ namespace Login
 {
     public partial class QuenMK : Form
     {
-        // Loại bỏ: private string connectionString = ...; (Không dùng LocalDB nữa)
         private string? verificationCode;
 
         public QuenMK()
@@ -26,7 +25,6 @@ namespace Login
         {
         }
 
-        // --- HÀM 1: GỬI OTP XÁC THỰC (buttonOTP_Click) ---
         private async void buttonOTP_Click(object sender, EventArgs e)
         {
             string email = textBox2.Text.Trim();
@@ -38,7 +36,6 @@ namespace Login
 
             try
             {
-                // THAY ĐỔI: Gọi lớp FirestoreDatabase mới
                 bool emailExists = await Server.Database.KiemTraTonTaiEmail(email);
 
                 if (!emailExists)
@@ -47,7 +44,6 @@ namespace Login
                     return;
                 }
 
-                // Giữ nguyên logic gửi email (Giả sử các hàm GeneraiVerificationCode/GuiEmailXacThuc nằm trong DangKy.cs và là public static)
                 this.verificationCode = DangKy.GeneraiVerificationCode();
                 DangKy.GuiEmailXacThuc(email, this.verificationCode);
                 MessageBox.Show("Mã xác nhận đã được gửi đến email của bạn.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -58,10 +54,9 @@ namespace Login
             }
         }
 
-        // --- HÀM 2: ĐẶT LẠI MẬT KHẨU (button1_Click) ---
-        // Cần chuyển đổi sang async để thực hiện các thao tác Firebase
         private async void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
             string email = textBox2.Text.Trim();
             string maOTP = textBoxOTP.Text.Trim();
             string matKhau = textBox3.Text.Trim();
@@ -94,10 +89,6 @@ namespace Login
 
             try
             {
-                // THAY ĐỔI LOGIC CẬP NHẬT FIRESTORE:
-
-                // Bước A: Tìm Username (hoặc ID Document) từ Email
-                // Chúng ta sẽ cần một hàm mới trong Database để làm việc này:
                 string? username = await Server.Database.LayUsernameTuEmail(email);
 
                 if (string.IsNullOrEmpty(username))
@@ -115,10 +106,6 @@ namespace Login
                     return;
                 }
 
-                // Bước C: Cập nhật mật khẩu bằng SetOptions.Merge
-                // Chúng ta dùng lại hàm LuuThongTinNguoiDung hoặc tạo hàm UpdatePassword riêng:
-
-                // Giả định bạn đã tạo hàm UpdatePasswordAsync trong FirestoreDatabase:
                 bool updateSuccess = await Server.Database.UpdatePasswordAsync(userID, matKhauDaBam);
 
                 if (updateSuccess)

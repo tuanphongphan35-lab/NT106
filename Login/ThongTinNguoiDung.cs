@@ -5,8 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Server;
 using static Server.Database; // Lớp chứa FirestoreDatabase
-// Loại bỏ: using Microsoft.Data.SqlClient;
-// Loại bỏ: using Microsoft.VisualBasic.ApplicationServices;
+
 
 namespace Login
 {
@@ -21,7 +20,6 @@ namespace Login
 
         private async void ThongTinNguoiDung_Load(object sender, EventArgs e)
         {
-            // --- GIỮ NGUYÊN LOGIC BO GÓC FORM ---
             System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
             int radius = 20; // Độ bo góc
             path.AddArc(0, 0, radius * 2, radius * 2, 180, 90);
@@ -36,13 +34,11 @@ namespace Login
             {
                 // 1. Lấy username và ID (là STRING trong Firestore)
                 string username = PhienDangNhap.TaiKhoanHienTai;
-                // IDNguoiDungHienTai giờ là string ID Document của Firestore
                 string userId = PhienDangNhap.IDNguoiDungHienTai;
 
                 // 2. Tải Avatar qua URL
                 if (!string.IsNullOrEmpty(username))
                 {
-                    // THAY ĐỔI: Gọi lớp FirestoreDatabase và hàm LayAvatarUrl (trả về string URL)
                     string avatarUrl = await Server.Database.LayAvatarUrl(username);
 
                     if (!string.IsNullOrEmpty(avatarUrl))
@@ -56,15 +52,11 @@ namespace Login
                         circularPictureBox1.Image = Properties.Resources.user_default;
                     }
                 }
-
-                // 3. Tải Thông tin Người dùng
-                // THAY ĐỔI: Gọi lớp FirestoreDatabase và dùng STRING ID
                 UserInfo info = await Server.Database.LayThongTinNguoiDung(userId);
 
                 // 4. Hiển thị thông tin lên Form
                 if (info != null)
                 {
-                    // LƯU Ý: UserInfo.Avatar giờ là null (nếu bạn giữ lại byte[] cũ)
 
                     textBox1.Text = info.TenNguoiDung;
                     textBox4.Text = info.Email;
@@ -117,13 +109,9 @@ namespace Login
                 circularPictureBox1.Image = Properties.Resources.user_default;
             }
         }
-
-        // --- GIỮ NGUYÊN CÁC HÀM XỬ LÝ SỰ KIỆN KHÁC ---
         private bool dragging = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
-
-        // ... (Các hàm MouseDown, MouseMove, MouseUp, Click) ...
 
         private void ThongTinNguoiDungForm_MouseDown(object sender, MouseEventArgs e)
         {

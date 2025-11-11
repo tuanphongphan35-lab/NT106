@@ -15,13 +15,10 @@ namespace Login
             InitializeComponent();
         }
 
-        // ... (Các hàm không liên quan đến database) ...
-
         private async void button1_Click(object sender, EventArgs e)
         {
-            // --- THAY ĐỔI QUAN TRỌNG: ID người dùng là STRING ---
-            // 1. Lấy ID Document (string) từ PhienDangNhap
-            // Bạn phải đảm bảo PhienDangNhap.IDNguoiDungHienTai đã được đổi kiểu sang string.
+            button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
+
             string id = PhienDangNhap.IDNguoiDungHienTai;
 
             string tenNguoiDung = textBox1.Text.Trim();
@@ -34,8 +31,6 @@ namespace Login
                 return;
             }
 
-            // 2. Gọi hàm Lưu thông tin đã được chuyển đổi (sẽ Upload ảnh lên Storage nếu có)
-            // LƯU Ý: Đổi tên lớp gọi từ Server.Database sang Server.FirestoreDatabase
             bool luuThanhCong = await Server.Database.LuuThongTinNguoiDung(id, tenNguoiDung, ngaySinh, gioiTinh, this.fileAnh);
 
             if (luuThanhCong)
