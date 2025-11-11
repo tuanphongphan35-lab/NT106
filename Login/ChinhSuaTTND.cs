@@ -75,7 +75,7 @@ namespace Login
             }
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e){ }
 
         private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
 

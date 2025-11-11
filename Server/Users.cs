@@ -40,6 +40,6 @@ namespace Server
 
         // Avatar (Lưu URL từ Firebase Storage)
         [FirestoreProperty("avatar")]
-        public string AvatarUrl { get; set; }
+        public string? AvatarUrl { get; set; }
     }
 }

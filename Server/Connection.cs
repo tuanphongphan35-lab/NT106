@@ -5,7 +5,7 @@ using System.IO;
 
 namespace Server
 {
-    public static class FirestoreHelper 
+    public static class FirestoreHelper // Hoặc giữ tên Connection nếu muốn
     {
         private static FirestoreDb db;
 

@@ -1,18 +1,26 @@
 ﻿using BCrypt.Net;
 using Google.Cloud.Firestore; // Dùng cho Firestore
 using Firebase.Storage;       // Dùng cho Firebase Storage
-using Server;          
+using Server;          // Giả sử các Model (Users, Account) ở đây
 using System.IO;              // Dùng cho MemoryStream
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Linq;            // Dùng cho FirstOrDefault()
+
+// Loại bỏ các using cũ: Microsoft.Data.SqlClient, System.Drawing, v.v.
+// Nếu muốn giữ MessageBox, bạn cần giữ using System.Windows.Forms; (cần reference tới System.Windows.Forms)
 using System.Windows.Forms;
 
 
 namespace Server
 {
+    // Đổi tên lớp để tránh nhầm lẫn với Database SQL cũ
     public class Database
     {
+        // Loại bỏ: private OpenFileDialog openFileDialog = new OpenFileDialog();
+
+        // --- HELPER 1: UPLOAD AVATAR TO FIREBASE STORAGE ---
+        // Hàm này thay thế cho việc lưu byte[] vào SQL Server
         private static async Task<string> UploadAvatar(byte[] fileData, string userName)
         {
             // CẦN THAY THẾ bằng URL của bạn!
@@ -31,6 +39,7 @@ namespace Server
             return downloadUrl;
         }
 
+        // --- HÀM CŨ: ReadListAccount() (SELECT ALL) ---
         public static async Task<List<Account>> ReadListAccount()
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -60,6 +69,8 @@ namespace Server
             return accounts;
         }
 
+        // --- HÀM CŨ: LuuThongTinNguoiDung() (UPDATE) ---
+        // Thay đổi int userID thành string userID (ID Document Firestore)
         public static async Task<bool> LuuThongTinNguoiDung(string userID, string tenNguoiDung, DateTime ngaySinh, string gioiTinh, byte[]? fileAnh)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -105,6 +116,8 @@ namespace Server
                 return false;
             }
         }
+
+        // --- HÀM CŨ: KiemTraDangNhap() (SELECT PASSWORD) ---
         public static async Task<bool> KiemTraDangNhap(string taiKhoan, string matKhau)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -132,6 +145,7 @@ namespace Server
             return false;
         }
 
+        // --- HÀM CŨ: KiemTraTonTaiTaiKhoan() (SELECT COUNT) ---
         public static async Task<bool> KiemTraTonTaiTaiKhoan(string taiKhoan)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -146,6 +160,7 @@ namespace Server
             return snapshot.Documents.Count > 0;
         }
 
+        // --- HÀM CŨ: KiemTraTonTaiEmail() (SELECT COUNT) ---
         public static async Task<bool> KiemTraTonTaiEmail(string email)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -159,6 +174,7 @@ namespace Server
             return snapshot.Documents.Count > 0;
         }
 
+        // --- HÀM CŨ: ThemTaiKhoan() (INSERT) ---
         public static async Task<bool> ThemTaiKhoan(string taiKhoan, string matKhau, string email, byte[] fileAnh)
         {
             string matKhauDaBam = await Task.Run(() => BCrypt.Net.BCrypt.HashPassword(matKhau));
@@ -197,6 +213,8 @@ namespace Server
             }
         }
 
+        // --- HÀM CŨ: LayAvatar() (SELECT BYTE[]) ---
+        // CHUYỂN ĐỔI: Hàm mới trả về URL (string)
         public static async Task<string> LayAvatarUrl(string taiKhoan)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -219,6 +237,8 @@ namespace Server
             return null;
         }
 
+        // --- HÀM CŨ: LayThongTinNguoiDung() (SELECT USER INFO) ---
+        // CHUYỂN ĐỔI: int userID thành string userID
         public static async Task<UserInfo> LayThongTinNguoiDung(string userID)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -250,6 +270,8 @@ namespace Server
             }
             return null;
         }
+
+        // --- HÀM CŨ: LayMatKhauQuenMatKhau() (SELECT PASSWORD BY EMAIL) ---
         public static async Task<string> LayMatKhauQuenMatKhau(string email)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -276,6 +298,8 @@ namespace Server
             return string.Empty;
         }
 
+        // --- HÀM CŨ: LayIDNguoiDung() (SELECT USER ID) ---
+        // CHUYỂN ĐỔI: Trả về string (ID Document) thay vì int
         public static async Task<string> LayIDNguoiDung(string username)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();
@@ -356,7 +380,7 @@ namespace Server
             public string? Email { get; set; }
             public DateTime NgaySinh { get; set; }
             public string? GioiTinh { get; set; }
-            public byte[]? Avatar { get; set; }
+            public byte[]? Avatar { get; set; } // Giữ lại cho UI cũ, nhưng giá trị sẽ luôn là NULL
         }
     }
 }
