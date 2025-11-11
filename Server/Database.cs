@@ -332,7 +332,7 @@ namespace Server
             // 1. Chuẩn bị dữ liệu cập nhật
             Dictionary<string, object> updates = new Dictionary<string, object>
             {
-                { "password", matKhauDaBam }
+                { "Password", matKhauDaBam }
             };
             try
             {
