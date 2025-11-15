@@ -9,6 +9,6 @@ namespace Login
     internal class PhienDangNhap
     {
         public static string TaiKhoanHienTai { get; set; }
-        public static int  IDNguoiDungHienTai { get; set; }
+        public static string IDNguoiDungHienTai { get; set; }
     }
 }

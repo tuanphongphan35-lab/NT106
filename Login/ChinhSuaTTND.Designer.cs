@@ -1,4 +1,5 @@
-﻿namespace Login
+﻿
+namespace Login
 {
     partial class ChinhSuaTTND
     {

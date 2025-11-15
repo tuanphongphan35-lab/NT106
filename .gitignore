@@ -127,6 +127,9 @@ $tf/
 # Guidance Automation Toolkit
 *.gpState
 
+# Firebase Admin SDK Credentials
+Server/NT106-Server/Firebase-adminSDK/fsvc-asaa2bca.json
+
 # ReSharper is a .NET coding add-in
 _ReSharper*/
 *.[Rr]e[Ss]harper
@@ -361,3 +364,4 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Server/nt106-7d101-firebase-adminsdk-fbsvc-aa1a28b8ca.json

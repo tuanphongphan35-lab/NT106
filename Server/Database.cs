@@ -1,379 +1,363 @@
 ﻿using BCrypt.Net;
-using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic.ApplicationServices;
-using System;
-using System.Diagnostics.Eventing.Reader;
-using System.Drawing;
-using System.Runtime.CompilerServices;
+using Google.Cloud.Firestore; // Dùng cho Firestore
+using Firebase.Storage;       // Dùng cho Firebase Storage
+using Server;          // Giả sử các Model (Users, Account) ở đây
+using System.IO;              // Dùng cho MemoryStream
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using System.Linq;            // Dùng cho FirstOrDefault()
+using System.Windows.Forms;
+
 
 namespace Server
 {
     public class Database
     {
-        private OpenFileDialog openFileDialog = new OpenFileDialog();
-        public static  List<Account> ReadListAccount()
+
+        private static async Task<string> UploadAvatar(byte[] fileData, string userName)
         {
-            // Giả sử chúng ta đọc từ một nguồn dữ liệu và trả về danh sách tài khoản
+            // CẦN THAY THẾ bằng URL của bạn!
+            var storageBucketUrl = "YOUR_FIREBASE_STORAGE_BUCKET_URL";
+
+            // Tên file trên Storage: avatars/username_timestamp.jpg
+            var fileName = $"avatars/{userName}_{DateTime.Now.Ticks}.jpg";
+
+            var storage = new FirebaseStorage(storageBucketUrl);
+
+            // Bắt đầu Upload và trả về URL
+            string downloadUrl = await storage
+                .Child(fileName)
+                .PutAsync(new MemoryStream(fileData));
+
+            return downloadUrl;
+        }
+
+        public static async Task<List<Account>> ReadListAccount()
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
             List<Account> accounts = new List<Account>();
-            {
-                using (SqlConnection connection = Connection.getSQLConnection())
-                {
-                    string query = "SELECT Username, Password FROM Users";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        connection.Open();
-
-                        using (SqlDataReader reader = command.ExecuteReader())
-                        {
-                            while (reader.Read())
-                            {
-                                string taiKhoan = reader.GetString(0);
-                                string matKhau = reader.GetString(1);
-
-                                Account tk = new Account(taiKhoan, matKhau);
-                                accounts.Add(tk);
-                            }
-                        }
-                    }
-                }
-
-                return accounts;
-            }
-        }
-        public static async Task<bool> LuuThongTinNguoiDung(int  userID, string tenNguoiDung, DateTime ngaySinh, string gioiTinh, byte[]? fileAnh)
-        {
-            using (SqlConnection connection = Connection.getSQLConnection())
-            {
-                try
-                {
-                    // Xây dựng câu query để UPDATE tất cả trong 1 lệnh
-                    string query = @"UPDATE Users 
-                             SET 
-                                 Email = @Email, 
-                                 TenNguoiDung = @Ten, 
-                                 NgaySinh = @NgaySinh, 
-                                 GioiTinh = @GioiTinh";
-
-                    // Chỉ cập nhật Avatar NẾU có ảnh mới (tránh bị NULL)
-                    if (fileAnh != null)
-                    {
-                        query += ", Avatar = @Avatar";
-                    }
-
-                    query += " WHERE UserID = @UserID"; // Lọc theo UserID
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@UserID", userID);
-                        command.Parameters.AddWithValue("@Ten", tenNguoiDung);
-                        command.Parameters.AddWithValue("@NgaySinh", ngaySinh);
-                        command.Parameters.AddWithValue("@GioiTinh", gioiTinh);
-
-                        if (fileAnh != null)
-                        {
-                            command.Parameters.AddWithValue("@Avatar", fileAnh);
-                        }
-
-                        await connection.OpenAsync();
-                        int rowsAffected = await command.ExecuteNonQueryAsync();
-                        return rowsAffected > 0;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Lỗi LuuThongTinNguoiDung: " + ex.Message);
-                    return false;
-                }
-            }
-        }
-        public static bool   KiemTraDangNhap(string taiKhoan, string matKhau)
-        {
-            string matKhauDaLuu = null; // Biến để lưu mật khẩu đã băm từ DB
 
             try
             {
-                string query = "SELECT Password FROM Users WHERE Username = @user";
+                // Lấy tất cả Documents trong Collection "Users"
+                QuerySnapshot snapshot = await db.Collection("Users").GetSnapshotAsync();
 
-                using (SqlConnection conn = Connection.getSQLConnection())
+                foreach (DocumentSnapshot document in snapshot.Documents)
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    if (document.Exists)
                     {
-                        cmd.Parameters.AddWithValue("@user", taiKhoan);
-                        object result = cmd.ExecuteScalar();
+                        // Ánh xạ Document sang Model Users (cần có [FirestoreData])
+                        var user = document.ConvertTo<Users>();
 
-                        if (result != null && result != DBNull.Value) 
-                        {
-                            matKhauDaLuu = result.ToString();
-                        }
+                        // Chuyển đổi sang Account Model cũ (nếu cần)
+                        accounts.Add(new Account(user.Username, user.Password));
                     }
-                } 
-
-                if (matKhauDaLuu == null)
-                {
-                    return false;
                 }
-                return BCrypt.Net.BCrypt.Verify(matKhau, matKhauDaLuu);
             }
             catch (Exception ex)
             {
+                Console.WriteLine("Lỗi ReadListAccount: " + ex.Message);
+            }
+            return accounts;
+        }
 
-                Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message);
+        public static async Task<bool> LuuThongTinNguoiDung(string userID, string tenNguoiDung, DateTime ngaySinh, string gioiTinh, byte[]? fileAnh)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            string newAvatarUrl = null;
+
+            if (fileAnh != null && fileAnh.Length > 0)
+            {
+                try
+                {
+                    // 1. Upload ảnh mới lên Firebase Storage
+                    newAvatarUrl = await UploadAvatar(fileAnh, userID);
+                }
+                catch (Exception uploadEx)
+                {
+                    Console.WriteLine("Lỗi Upload Avatar: " + uploadEx.Message);
+                }
+            }
+
+            // 2. Chuẩn bị Dictionary cập nhật
+            Dictionary<string, object> updates = new Dictionary<string, object>
+            {
+                {"tenNguoiDung", tenNguoiDung}, 
+                // Chuyển DateTime sang Firestore Timestamp (quan trọng!)
+                {"ngaysinh", Timestamp.FromDateTime(ngaySinh.ToUniversalTime())},
+                {"gioitinh", gioiTinh}
+            };
+
+            if (!string.IsNullOrEmpty(newAvatarUrl))
+            {
+                updates.Add("avatar", newAvatarUrl); // Cập nhật URL mới vào Firestore
+            }
+
+            try
+            {
+                // 3. Sử dụng SetAsync(MergeAll) để ghi đè các trường đã tồn tại
+                DocumentReference userDocRef = db.Collection("Users").Document(userID);
+                await userDocRef.SetAsync(updates, SetOptions.MergeAll);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi LuuThongTinNguoiDung Firestore: " + ex.Message);
                 return false;
             }
         }
-        public static async Task<bool> KiemTraTonTaiTaiKhoan(string taiKhoan)
+
+        public static async Task<bool> KiemTraDangNhap(string taiKhoan, string matKhau)
         {
-            bool tonTai = false;
+            FirestoreDb db = FirestoreHelper.GetDatabase();
 
-            using (SqlConnection connection = Connection.getSQLConnection())
+            try
             {
-                string query = "SELECT COUNT(*) FROM Users WHERE Username = @Username";
+                // 1. Tìm Document theo Username
+                Query query = db.Collection("Users").WhereEqualTo("username", taiKhoan).Limit(1);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                if (snapshot.Documents.Count > 0)
                 {
-                    command.Parameters.AddWithValue("@Username", taiKhoan);
+                    // 2. Lấy mật khẩu đã băm từ Document
+                    var user = snapshot.Documents.First().ConvertTo<Users>();
+                    string matKhauDaLuu = user.Password;
 
-                    await connection.OpenAsync();
-
-                    object? result = await command.ExecuteScalarAsync();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        int count = Convert.ToInt32(result);
-                        tonTai = (count > 0);
-                    }
+                    // 3. So sánh BCrypt
+                    return BCrypt.Net.BCrypt.Verify(matKhau, matKhauDaLuu);
                 }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi KiemTraDangNhap: " + ex.Message);
+            }
+            return false;
+        }
 
-            return tonTai;
+        public static async Task<bool> KiemTraTonTaiTaiKhoan(string taiKhoan)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+
+            Query query = db.Collection("Users")
+                            .WhereEqualTo("username", taiKhoan)
+                            .Limit(1);
+
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+            // Nếu có document nào trả về, tức là tài khoản tồn tại
+            return snapshot.Documents.Count > 0;
         }
         public static async Task<bool> KiemTraTonTaiEmail(string email)
         {
-            bool tonTai = false;
+            FirestoreDb db = FirestoreHelper.GetDatabase();
 
-            using (SqlConnection connection = Connection.getSQLConnection())
-            {
-                string query = "SELECT COUNT(*) FROM Users WHERE Email = @Email";
+            Query query = db.Collection("Users")
+                            .WhereEqualTo("email", email)
+                            .Limit(1);
 
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@Email", email);
+            QuerySnapshot snapshot = await query.GetSnapshotAsync();
 
-                    await connection.OpenAsync();
-
-                    object? result = await command.ExecuteScalarAsync();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        int count = Convert.ToInt32(result);
-                        tonTai = (count > 0);
-                    }
-                }
-            }
-
-            return tonTai;
+            return snapshot.Documents.Count > 0;
         }
-        public static async Task<bool>  ThemTaiKhoan(string taiKhoan, string matKhau, string email, byte[] fileAnh)
+
+        public static async Task<bool> ThemTaiKhoan(string taiKhoan, string matKhau, string email, byte[] fileAnh)
         {
             string matKhauDaBam = await Task.Run(() => BCrypt.Net.BCrypt.HashPassword(matKhau));
-            using (SqlConnection connection = Connection.getSQLConnection())
+            string avatarUrl = string.Empty;
+
+            if (fileAnh != null && fileAnh.Length > 0)
             {
-                try
-                {
-                    string query = "INSERT INTO Users (Username, Email, Password, Avatar, TenNguoiDung, NgaySinh, GioiTinh)" +
-                        "VALUES(@user, @email, @pass, @avatar, @ten, @ngay, @gt)";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@user", taiKhoan);
-                        command.Parameters.AddWithValue("@pass", matKhauDaBam);
-                        command.Parameters.AddWithValue("@email", email);
-                        command.Parameters.AddWithValue("@ten", "Null");
-                        command.Parameters.AddWithValue("@ngay", DateTime.Now); // Ngày sinh mặc định
-                        command.Parameters.AddWithValue("@gt", "Null"); // Giới tính mặc định
-
-                        // Thêm avatar vào
-                        if (fileAnh != null)
-                        {
-                            command.Parameters.AddWithValue("@avatar", fileAnh);
-                        }
-                        else
-                        {
-                            command.Parameters.AddWithValue("@avatar", DBNull.Value);
-
-                        }
-                        await connection.OpenAsync();
-                        await command.ExecuteNonQueryAsync();
-                        return true;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
-                    return false;
-                }
+                // Upload ảnh và lấy URL
+                avatarUrl = await UploadAvatar(fileAnh, taiKhoan);
             }
-        }
-        public static byte[]? LayAvatar(string taiKhoan)
-        {
-            byte[]? avatar = null;
-            using (SqlConnection connection = Connection.getSQLConnection())
+
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+
+            var newUser = new Users
             {
-                try
-                {
-                    string query = "SELECT Avatar FROM Users WHERE Username = @Username";
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Username", taiKhoan);
-                        connection.Open();
-                        object result = command.ExecuteScalar();
-                        if (result != null && result != DBNull.Value)
-                        {
-                            avatar = (byte[])result;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Lỗi Lấy Avatar: " + ex.Message);
-                }
-            }
-            return avatar;
-        }
-        public static async Task<UserInfo> LayThongTinNguoiDung(int userID)
-        {
-            UserInfo? user = null;
-            using (SqlConnection connection = Connection.getSQLConnection())
-            {
-                string query = @"
-            SELECT TenNguoiDung, Email, NgaySinh, GioiTinh, Avatar 
-            FROM Users 
-            WHERE UserID = @ID";
+                Username = taiKhoan,
+                Password = matKhauDaBam,
+                Email = email,
+                AvatarUrl = avatarUrl,
+                // Đảm bảo cung cấp các trường mặc định cho Firestore
+                DisplayName = "Null",
+                DateOfBirth = Timestamp.FromDateTime(DateTime.Now.ToUniversalTime()),
+                Gender = "Null",
+            };
 
-                using (SqlCommand command = new SqlCommand(query, connection))
-                {
-                    command.Parameters.AddWithValue("@ID", userID);
-                    await connection.OpenAsync();
-
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
-                    {
-                        if (reader.Read())
-                        {
-                            user = new UserInfo
-                            {
-                                // Kiểm tra DBNull trước khi đọc
-                                TenNguoiDung = reader["TenNguoiDung"] != DBNull.Value ? reader["TenNguoiDung"].ToString() : string.Empty,
-                                Email = reader["Email"] != DBNull.Value ? reader["Email"].ToString() : string.Empty,
-                                NgaySinh = reader["NgaySinh"] != DBNull.Value ? Convert.ToDateTime(reader["NgaySinh"]) : new DateTime(2000, 1, 1),
-                                GioiTinh = reader["GioiTinh"] != DBNull.Value ? reader["GioiTinh"].ToString() : string.Empty,
-                                Avatar = reader["Avatar"] != DBNull.Value ? (byte[])reader["Avatar"] : null
-                            };
-                        }
-                    }
-                }
-            }
-            return user;
-        }
-        public static string LayMatKhauQuenMatKhau(string email)
-        {
-            string matKhau = string.Empty;
-
-            using (SqlConnection connection = Connection.getSQLConnection())
-            {
-                try
-                {
-                    string query = "SELECT MatKhau FROM Users  WHERE Email = @Email";
-
-                    using (SqlCommand command = new SqlCommand(query, connection))
-                    {
-                        command.Parameters.AddWithValue("@Email", email);
-
-                        connection.Open();
-
-                        object result = command.ExecuteScalar();
-
-                        if (result != null && result != DBNull.Value)
-                        {
-                            matKhau = result.ToString();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Không tìm thấy email trong hệ thống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    // Xử lý ngoại lệ và hiển thị thông báo cụ thể về lỗi
-                    MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            return matKhau;
-        }
-        public static int LayIDNguoiDung(string username)
-        {
             try
             {
-                string query = "SELECT UserID FROM dbo.Users WHERE Username = @user";
-                using (SqlConnection conn = Connection.getSQLConnection())
+                // Thêm Document mới. Firestore tự động tạo ID.
+                await db.Collection("Users").AddAsync(newUser);
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi ThemTaiKhoan: " + ex.Message);
+                return false;
+            }
+        }
+
+        public static async Task<string> LayAvatarUrl(string taiKhoan)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+
+            try
+            {
+                Query query = db.Collection("Users").WhereEqualTo("username", taiKhoan).Limit(1);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
                 {
-                    conn.Open();
-                    using (SqlCommand cmd = new SqlCommand(query, conn))
+                    var user = snapshot.Documents.First().ConvertTo<Users>();
+                    return user.AvatarUrl;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi LayAvatarUrl: " + ex.Message);
+            }
+            return null;
+        }
+
+        public static async Task<UserInfo> LayThongTinNguoiDung(string userID)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+
+            try
+            {
+                DocumentReference docRef = db.Collection("Users").Document(userID);
+                DocumentSnapshot snapshot = await docRef.GetSnapshotAsync();
+
+                if (snapshot.Exists)
+                {
+                    var user = snapshot.ConvertTo<Users>();
+
+                    // Chuyển đổi từ Users Model (FireStore) sang UserInfo Model (WinForms cũ)
+                    return new UserInfo
                     {
-                        cmd.Parameters.AddWithValue("@user", username);
+                        TenNguoiDung = user.DisplayName,
+                        Email = user.Email,
+                        NgaySinh = user.DateOfBirth.ToDateTime(),
+                        GioiTinh = user.Gender,
+                        // Avatar giờ là URL (không phải byte[])
+                        Avatar = null
+                    };
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi LayThongTinNguoiDung: " + ex.Message);
+            }
+            return null;
+        }
 
-                        // Dùng ExecuteScalar vì chỉ lấy 1 giá trị
-                        object result = cmd.ExecuteScalar();
+        public static async Task<string> LayMatKhauQuenMatKhau(string email)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
 
-                        if (result != null && result != DBNull.Value)
-                        {
-                            return Convert.ToInt32(result); // Trả về UserID
-                        }
-                    }
+            try
+            {
+                Query query = db.Collection("Users").WhereEqualTo("email", email).Limit(1);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
+                {
+                    var user = snapshot.Documents.First().ConvertTo<Users>();
+                    return user.Password;
+                }
+                else
+                {
+                    MessageBox.Show("Không tìm thấy email trong hệ thống!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            return string.Empty;
+        }
+
+        public static async Task<string> LayIDNguoiDung(string username)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+
+            try
+            {
+                Query query = db.Collection("Users").WhereEqualTo("username", username).Limit(1);
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
+                {
+                    return snapshot.Documents.First().Id;
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine("Lỗi LayIDNguoiDung: " + ex.Message);
             }
-            return 0; // Trả về 0 nếu không tìm thấy hoặc có lỗi
+            return null;
         }
 
-        public static async Task<bool> KiemTraTonTaiMatKhau(string matKhau)
+        public static async Task<string?> LayUsernameTuEmail(string email)
         {
-            bool tonTai = false;
+            FirestoreDb db = FirestoreHelper.GetDatabase();
 
-            using (SqlConnection connection = Connection.getSQLConnection())
+            try
             {
-                string query = "SELECT COUNT(*) FROM Users WHERE MatKhau = @MatKhau";
+                // 1. Tạo Query: Lọc Documents có trường "email" bằng giá trị input
+                Query query = db.Collection("Users")
+                                .WhereEqualTo("email", email)
+                                .Limit(1);
 
-                using (SqlCommand command = new SqlCommand(query, connection))
+                QuerySnapshot snapshot = await query.GetSnapshotAsync();
+
+                if (snapshot.Documents.Count > 0)
                 {
-                    command.Parameters.AddWithValue("@MatKhau", matKhau);
-
-                    await connection.OpenAsync();
-
-                    object result = command.ExecuteScalar();
-
-                    if (result != null && result != DBNull.Value)
-                    {
-                        int count = Convert.ToInt32(result);
-                        tonTai = (count > 0);
-                    }
+                    // 2. Lấy Document đầu tiên và trả về trường Username
+                    // Lưu ý: Tên trường trong Firestore là "username"
+                    return snapshot.Documents.First().GetValue<string>("username");
                 }
             }
-
-            return tonTai;
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi LayUsernameTuEmail: " + ex.Message);
+            }
+            return null; // Trả về null nếu không tìm thấy hoặc có lỗi
         }
+
+        public static async Task<bool> UpdatePasswordAsync(string userID, string matKhauDaBam)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            // 1. Chuẩn bị dữ liệu cập nhật
+            Dictionary<string, object> updates = new Dictionary<string, object>
+            {
+                { "Password", matKhauDaBam }
+            };
+            try
+            {
+                // 2. Chỉ định Document cần cập nhật bằng userID (ID Document Firestore)
+                DocumentReference userDocRef = db.Collection("Users").Document(userID);
+
+                // 3. Thực hiện cập nhật bằng SetAsync với tùy chọn MergeAll
+                await userDocRef.SetAsync(updates, SetOptions.MergeAll);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi UpdatePasswordAsync: " + ex.Message);
+                return false;
+            }
+        }
+
         public class UserInfo
         {
             public string? TenNguoiDung { get; set; }
             public string? Email { get; set; }
             public DateTime NgaySinh { get; set; }
             public string? GioiTinh { get; set; }
-            public byte[]? Avatar { get; set; }
+            public byte[]? Avatar { get; set; } // Giữ lại cho UI cũ, nhưng giá trị sẽ luôn là NULL
         }
     }
 }

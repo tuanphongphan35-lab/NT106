@@ -1,23 +1,18 @@
-﻿using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic.ApplicationServices;
-using Server;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Net.Http; // Cần thiết để tải ảnh từ URL
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using static Server.Database;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.StartPanel;
+using Server;
+using static Server.Database; // Lớp chứa FirestoreDatabase
+
 
 namespace Login
 {
     public partial class ThongTinNguoiDung : Form
     {
+        private static readonly HttpClient client = new HttpClient();
+
         public ThongTinNguoiDung()
         {
             InitializeComponent();
@@ -25,92 +20,99 @@ namespace Login
 
         private async void ThongTinNguoiDung_Load(object sender, EventArgs e)
         {
-            // Đoạn code này sẽ tạo một "vùng" (Region) bo tròn và áp dụng nó cho Form
-            // Bạn có thể thay đổi số 20 để tăng/giảm độ bo góc
             System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
             int radius = 20; // Độ bo góc
-
-            // Vẽ hình chữ nhật bo góc
-            path.AddArc(0, 0, radius * 2, radius * 2, 180, 90); // Góc trên bên trái
-            path.AddArc(this.Width - (radius * 2), 0, radius * 2, radius * 2, 270, 90); // Góc trên bên phải
-            path.AddArc(this.Width - (radius * 2), this.Height - (radius * 2), radius * 2, radius * 2, 0, 90); // Góc dưới bên phải
-            path.AddArc(0, this.Height - (radius * 2), radius * 2, radius * 2, 90, 90); // Góc dưới bên trái
+            path.AddArc(0, 0, radius * 2, radius * 2, 180, 90);
+            path.AddArc(this.Width - (radius * 2), 0, radius * 2, radius * 2, 270, 90);
+            path.AddArc(this.Width - (radius * 2), this.Height - (radius * 2), radius * 2, radius * 2, 0, 90);
+            path.AddArc(0, this.Height - (radius * 2), radius * 2, radius * 2, 90, 90);
             path.CloseFigure();
-
-            // Áp dụng vùng bo tròn cho Form
             this.Region = new System.Drawing.Region(path);
+
+            // --- BẮT ĐẦU LOGIC TẢI DỮ LIỆU FIRESTORE ---
             try
             {
-                // load avatar từ database 
-                // xác định đường dẫn avatar từ database theo tài khoản đăng nhập hiện tại
+                // 1. Lấy username và ID (là STRING trong Firestore)
                 string username = PhienDangNhap.TaiKhoanHienTai;
+                string userId = PhienDangNhap.IDNguoiDungHienTai;
+
+                // 2. Tải Avatar qua URL
                 if (!string.IsNullOrEmpty(username))
                 {
-                    byte[]? avatarData = Server.Database.LayAvatar(username);
-                    if (avatarData != null && avatarData.Length > 0)
+                    string avatarUrl = await Server.Database.LayAvatarUrl(username);
+
+                    if (!string.IsNullOrEmpty(avatarUrl))
                     {
-                        using (MemoryStream ms = new MemoryStream(avatarData))
-                        {
-                            circularPictureBox1.Image = Image.FromStream(ms);
-                        }
+                        // Hàm tải ảnh từ URL và chuyển thành Image
+                        await LoadImageFromUrlAsync(avatarUrl);
                     }
                     else
                     {
-                        // Nếu không có avatar, bạn có thể đặt một hình mặc định
-                        // Giả sử bạn có một hình mặc định trong resources
-                        circularPictureBox1.Image = Properties.Resources.user_default; // Thay đổi theo tên hình mặc định của bạn
+                        // Hình mặc định
+                        circularPictureBox1.Image = Properties.Resources.user_default;
                     }
+                }
+                UserInfo info = await Server.Database.LayThongTinNguoiDung(userId);
+
+                // 4. Hiển thị thông tin lên Form
+                if (info != null)
+                {
+
+                    textBox1.Text = info.TenNguoiDung;
+                    textBox4.Text = info.Email;
+
+                    if (info.NgaySinh.Year > 1900)
+                    {
+                        textBox2.Text = info.NgaySinh.ToString("dd/MM/yyyy");
+                    }
+                    else
+                    {
+                        textBox2.Text = "Chưa cập nhật";
+                    }
+
+                    if (!string.IsNullOrEmpty(info.GioiTinh))
+                    {
+                        textBox3.Text = info.GioiTinh;
+                    }
+                    else
+                    {
+                        textBox3.Text = "Chưa cập nhật";
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.");
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi tải avatar: " + ex.Message);
+                MessageBox.Show("Lỗi khi tải dữ liệu người dùng: " + ex.Message, "Lỗi Firebase/Network");
             }
-            // Lấy từ database TaiKhoan_Server và hiển thị các thông tin người dùng khác tương tự
+        }
 
-            // 1. Lấy userid của người đang đăng nhập
-            int id = PhienDangNhap.IDNguoiDungHienTai;
-            // 2. Gọi hàm để lấy thông tin
-            UserInfo info = await Server.Database.LayThongTinNguoiDung(id);
-
-            // 3. Hiển thị thông tin lên Form
-            if (info != null)
+        // --- HÀM MỚI: TẢI ẢNH TỪ URL ---
+        private async Task LoadImageFromUrlAsync(string url)
+        {
+            try
             {
-                // Gán giá trị vào các controls
-                textBox1.Text = info.TenNguoiDung;
-                textBox4.Text = info.Email;
+                // Tải dữ liệu ảnh dưới dạng byte array từ URL
+                byte[] imageBytes = await client.GetByteArrayAsync(url);
 
-                // Kiểm tra NgaySinh hợp lệ trước khi gán
-                if (info.NgaySinh.Year > 1900) // Kiểm tra nếu không phải giá trị NULL mặc định
+                using (MemoryStream ms = new MemoryStream(imageBytes))
                 {
-                    // Định dạng ngày/tháng/năm
-                    textBox2.Text = info.NgaySinh.ToString("dd/MM/yyyy");
-
-                    // Bạn có thể dùng định dạng tiếng Việt: "dd tháng MM năm yyyy"
-                    // txtNgaySinh.Text = user.NgaySinh.ToString("dd \\t\\h\\á\\n\\g MM yyyy");
-                }
-                else
-                {
-                    textBox2.Text = "Chưa cập nhật";
-                }
-
-                if (!string.IsNullOrEmpty(info.GioiTinh))
-                {
-                    textBox3.Text = info.GioiTinh;
-                }
-                else
-                {
-                    textBox3.Text = "Chưa cập nhật";
+                    circularPictureBox1.Image = Image.FromStream(ms);
                 }
             }
-            else
+            catch (Exception ex)
             {
-                MessageBox.Show("Không tìm thấy thông tin người dùng.");
+                Console.WriteLine("Lỗi tải ảnh từ URL: " + ex.Message);
+                circularPictureBox1.Image = Properties.Resources.user_default;
             }
         }
         private bool dragging = false;
         private Point dragCursorPoint;
         private Point dragFormPoint;
+
         private void ThongTinNguoiDungForm_MouseDown(object sender, MouseEventArgs e)
         {
             dragging = true;
@@ -132,33 +134,19 @@ namespace Login
             dragging = false;
         }
 
-        private void circularPictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void roundPanel1_Paint(object sender, PaintEventArgs e)
-        {
-
-        }
-
-        private void textBox1_TextChanged(object sender, EventArgs e)
-        {
-
-        }
-
         private void button1_Click(object sender, EventArgs e)
         {
+            // Mở form chỉnh sửa thông tin (ChinhSuaTTND)
             ChinhSuaTTND chinhSuaTTND = new ChinhSuaTTND();
             chinhSuaTTND.Show();
             this.Hide();
         }
 
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
-        {
+        // ... (Các hàm không sử dụng) ...
 
-        }
-        // Lớp để chứa thông tin lấy từ cả 2 bảng
-
+        private void circularPictureBox1_Click(object sender, EventArgs e) { }
+        private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
+        private void textBox1_TextChanged(object sender, EventArgs e) { }
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
     }
 }

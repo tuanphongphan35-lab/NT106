@@ -1,6 +1,4 @@
 ﻿using BCrypt.Net;
-using Microsoft.Data.SqlClient;
-using Microsoft.VisualBasic.ApplicationServices;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -8,16 +6,13 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Net.Mail;
 using System.Configuration;
-using System.Security.Policy;
+using System.Threading.Tasks;
 using System.Text;
 using Server;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Login
 {
@@ -37,6 +32,7 @@ namespace Login
 
         private async void button1_Click(object sender, EventArgs e)
         {
+            button1.Enabled = false;
             string email = textBox2.Text.Trim();
             string maOTP = textBoxOTP.Text.Trim();
             string tenDangNhap = textBox3.Text.Trim();
@@ -88,19 +84,6 @@ namespace Login
                     return;
                 }
             }
-            catch (SqlException ex)
-            {
-                // Lỗi 2627 hoặc 2601 là lỗi trùng lặp (UNIQUE constraint)
-                if (ex.Number == 2627 || ex.Number == 2601)
-                {
-                    MessageBox.Show("Tên đăng nhập hoặc Email này đã tồn tại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else
-                {
-                    // Các lỗi SQL khác (mất kết nối, v.v.)
-                    MessageBox.Show("Lỗi SQL: " + ex.Message, "Lỗi SQL", MessageBoxButtons.OK, MessageBoxIcon.Stop);
-                }
-            }
             catch (Exception ex)
             {
                 MessageBox.Show("Đã xảy ra lỗi: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -109,6 +92,7 @@ namespace Login
 
         private void button2_Click(object sender, EventArgs e)
         {
+            button2.Enabled = false;
             OpenFileDialog openFileDialog = new OpenFileDialog();
             openFileDialog.Filter = "Image Files|*.jpg;*.jpeg;*.png;*.bmp;*.gif";
 
@@ -134,6 +118,7 @@ namespace Login
 
         private async void button3_Click(object sender, EventArgs e)
         {
+            button3.Enabled = false;
             string email = textBox2.Text.Trim();
             if (string.IsNullOrWhiteSpace(email))
             {
