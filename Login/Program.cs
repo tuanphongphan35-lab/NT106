@@ -12,6 +12,8 @@ namespace Login
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
             Application.Run(new DangNhap());
+            //Application.Run(new TimKiemNguoiDung());
+           //Application.Run(new DanhSachBanBe());
             //Application.Run(new ThongTinNguoiDung());
         }
     }
