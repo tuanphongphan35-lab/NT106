@@ -31,5 +31,10 @@ namespace Login
             // Hiển thị kết quả trong DataGridView
             dgvNguoiDung.DataSource = ketQua;
         }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

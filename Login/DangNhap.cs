@@ -59,8 +59,8 @@ namespace Login
                     MessageBox.Show("Đăng nhập thành công!");
 
                     // 3. Mở form chính
-                    ThongTinNguoiDung mainForm = new ThongTinNguoiDung();
-                    mainForm.Show();
+                    ChatForm chatForm = new ChatForm();
+                    chatForm.Show();
                     this.Hide();
                 }
                 else
