@@ -32,7 +32,7 @@ namespace Login
             dgvNguoiDung.DataSource = ketQua;
         }
 
-        private void btnXoa_Click(object sender, EventArgs e)
+        private void TimKiemNguoiDung_Load(object sender, EventArgs e)
         {
 
         }

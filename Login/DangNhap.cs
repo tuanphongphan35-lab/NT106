@@ -59,8 +59,8 @@ namespace Login
                     MessageBox.Show("Đăng nhập thành công!");
 
                     // 3. Mở form chính
-                    ChatForm chatForm = new ChatForm();
-                    chatForm.Show();
+                    ChatForm mainForm = new ChatForm(currentUserId);
+                    mainForm.Show();
                     this.Hide();
                 }
                 else
@@ -87,6 +87,16 @@ namespace Login
         {
             QuenMK quenMKForm = new QuenMK();
             quenMKForm.Show();
+        }
+
+        private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void DangNhap_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
