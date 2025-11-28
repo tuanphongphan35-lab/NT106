@@ -29,13 +29,13 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            panel2 = new Panel();
-            roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
-            roundFlowLayoutPanel2 = new RoundFlowLayoutPanel();
             roundTextBox1 = new RoundTextBox();
-            roundTextBox2 = new RoundTextBox();
-            roundTextBox3 = new RoundTextBox();
+            roundFlowLayoutPanel2 = new RoundFlowLayoutPanel();
+            panel2 = new Panel();
             roundButton1 = new RoundButton();
+            roundTextBox3 = new RoundTextBox();
+            roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
+            roundTextBox2 = new RoundTextBox();
             panel1.SuspendLayout();
             panel2.SuspendLayout();
             roundFlowLayoutPanel1.SuspendLayout();
@@ -52,29 +52,24 @@
             panel1.Size = new Size(280, 666);
             panel1.TabIndex = 0;
             // 
-            // panel2
+            // roundTextBox1
             // 
-            panel2.BackgroundImage = Properties.Resources.BackGroundChat1;
-            panel2.Controls.Add(roundButton1);
-            panel2.Controls.Add(roundTextBox3);
-            panel2.Controls.Add(roundFlowLayoutPanel1);
-            panel2.Dock = DockStyle.Fill;
-            panel2.Location = new Point(280, 0);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(725, 666);
-            panel2.TabIndex = 1;
-            // 
-            // roundFlowLayoutPanel1
-            // 
-            roundFlowLayoutPanel1.BackgroundImage = Properties.Resources.BackGroundChat2;
-            roundFlowLayoutPanel1.BorderColor = Color.Transparent;
-            roundFlowLayoutPanel1.BorderRadius = 20;
-            roundFlowLayoutPanel1.BorderThickness = 0F;
-            roundFlowLayoutPanel1.Controls.Add(roundTextBox2);
-            roundFlowLayoutPanel1.Location = new Point(24, 39);
-            roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
-            roundFlowLayoutPanel1.Size = new Size(672, 527);
-            roundFlowLayoutPanel1.TabIndex = 0;
+            roundTextBox1.BackColor = Color.FromArgb(64, 68, 75);
+            roundTextBox1.BorderColor = Color.Gray;
+            roundTextBox1.BorderFocusColor = Color.Gray;
+            roundTextBox1.BorderRadius = 15;
+            roundTextBox1.BorderSize = 0;
+            roundTextBox1.ForeColor = Color.Gray;
+            roundTextBox1.Location = new Point(12, 30);
+            roundTextBox1.Multiline = false;
+            roundTextBox1.Name = "roundTextBox1";
+            roundTextBox1.Padding = new Padding(10, 7, 10, 7);
+            roundTextBox1.PasswordChar = false;
+            roundTextBox1.Size = new Size(253, 35);
+            roundTextBox1.TabIndex = 1;
+            roundTextBox1.Texts = "Tìm bạn bè...";
+            roundTextBox1.UnderlinedStyle = false;
+            roundTextBox1._TextChanged += roundTextBox1__TextChanged;
             // 
             // roundFlowLayoutPanel2
             // 
@@ -87,41 +82,35 @@
             roundFlowLayoutPanel2.Size = new Size(253, 567);
             roundFlowLayoutPanel2.TabIndex = 0;
             // 
-            // roundTextBox1
+            // panel2
             // 
-            roundTextBox1.BackColor = Color.FromArgb(64, 68, 75);
-            roundTextBox1.BorderColor = Color.Gray;
-            roundTextBox1.BorderFocusColor = Color.Gray;
-            roundTextBox1.BorderRadius = 15;
-            roundTextBox1.BorderSize = 0;
-            roundTextBox1.ForeColor = Color.Gray;
-            roundTextBox1.Location = new Point(12, 39);
-            roundTextBox1.Multiline = false;
-            roundTextBox1.Name = "roundTextBox1";
-            roundTextBox1.Padding = new Padding(10, 7, 10, 7);
-            roundTextBox1.PasswordChar = false;
-            roundTextBox1.Size = new Size(253, 35);
-            roundTextBox1.TabIndex = 1;
-            roundTextBox1.Texts = "Tìm bạn bè...";
-            roundTextBox1.UnderlinedStyle = false;
+            panel2.BackgroundImage = Properties.Resources.BackGroundChat1;
+            panel2.Controls.Add(roundButton1);
+            panel2.Controls.Add(roundTextBox3);
+            panel2.Controls.Add(roundFlowLayoutPanel1);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Location = new Point(280, 0);
+            panel2.Name = "panel2";
+            panel2.Size = new Size(725, 666);
+            panel2.TabIndex = 1;
+            panel2.Paint += panel2_Paint;
             // 
-            // roundTextBox2
+            // roundButton1
             // 
-            roundTextBox2.BackColor = Color.FromArgb(64, 68, 75);
-            roundTextBox2.BorderColor = Color.MediumSlateBlue;
-            roundTextBox2.BorderFocusColor = Color.HotPink;
-            roundTextBox2.BorderRadius = 15;
-            roundTextBox2.BorderSize = 0;
-            roundTextBox2.ForeColor = Color.Gray;
-            roundTextBox2.Location = new Point(3, 3);
-            roundTextBox2.Multiline = false;
-            roundTextBox2.Name = "roundTextBox2";
-            roundTextBox2.Padding = new Padding(10, 7, 10, 7);
-            roundTextBox2.PasswordChar = false;
-            roundTextBox2.Size = new Size(163, 35);
-            roundTextBox2.TabIndex = 1;
-            roundTextBox2.Texts = "#";
-            roundTextBox2.UnderlinedStyle = false;
+            roundButton1.BackColor = Color.MediumSlateBlue;
+            roundButton1.BorderColor = Color.Transparent;
+            roundButton1.BorderRadius = 20;
+            roundButton1.BorderThickness = 0F;
+            roundButton1.FlatAppearance.BorderSize = 0;
+            roundButton1.FlatStyle = FlatStyle.Flat;
+            roundButton1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            roundButton1.ForeColor = Color.White;
+            roundButton1.Location = new Point(577, 583);
+            roundButton1.Name = "roundButton1";
+            roundButton1.Size = new Size(119, 35);
+            roundButton1.TabIndex = 2;
+            roundButton1.Text = "Gửi";
+            roundButton1.UseVisualStyleBackColor = false;
             // 
             // roundTextBox3
             // 
@@ -140,22 +129,35 @@
             roundTextBox3.Texts = "";
             roundTextBox3.UnderlinedStyle = false;
             // 
-            // roundButton1
+            // roundFlowLayoutPanel1
             // 
-            roundButton1.BackColor = Color.MediumSlateBlue;
-            roundButton1.BorderColor = Color.Transparent;
-            roundButton1.BorderRadius = 20;
-            roundButton1.BorderThickness = 0F;
-            roundButton1.FlatAppearance.BorderSize = 0;
-            roundButton1.FlatStyle = FlatStyle.Flat;
-            roundButton1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            roundButton1.ForeColor = Color.White;
-            roundButton1.Location = new Point(577, 583);
-            roundButton1.Name = "roundButton1";
-            roundButton1.Size = new Size(119, 35);
-            roundButton1.TabIndex = 2;
-            roundButton1.Text = "Gửi";
-            roundButton1.UseVisualStyleBackColor = false;
+            roundFlowLayoutPanel1.BackgroundImage = Properties.Resources.BackGroundChat2;
+            roundFlowLayoutPanel1.BorderColor = Color.Transparent;
+            roundFlowLayoutPanel1.BorderRadius = 20;
+            roundFlowLayoutPanel1.BorderThickness = 0F;
+            roundFlowLayoutPanel1.Controls.Add(roundTextBox2);
+            roundFlowLayoutPanel1.Location = new Point(24, 39);
+            roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
+            roundFlowLayoutPanel1.Size = new Size(672, 527);
+            roundFlowLayoutPanel1.TabIndex = 0;
+            // 
+            // roundTextBox2
+            // 
+            roundTextBox2.BackColor = Color.FromArgb(64, 68, 75);
+            roundTextBox2.BorderColor = Color.MediumSlateBlue;
+            roundTextBox2.BorderFocusColor = Color.HotPink;
+            roundTextBox2.BorderRadius = 15;
+            roundTextBox2.BorderSize = 0;
+            roundTextBox2.ForeColor = Color.Gray;
+            roundTextBox2.Location = new Point(3, 3);
+            roundTextBox2.Multiline = false;
+            roundTextBox2.Name = "roundTextBox2";
+            roundTextBox2.Padding = new Padding(10, 7, 10, 7);
+            roundTextBox2.PasswordChar = false;
+            roundTextBox2.Size = new Size(163, 35);
+            roundTextBox2.TabIndex = 1;
+            roundTextBox2.Texts = "#";
+            roundTextBox2.UnderlinedStyle = false;
             // 
             // ChatForm
             // 

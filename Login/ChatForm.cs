@@ -16,5 +16,15 @@ namespace Login
         {
             InitializeComponent();
         }
+
+        private void roundTextBox1__TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void panel2_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
     }
-}
+} 
