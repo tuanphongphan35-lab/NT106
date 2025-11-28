@@ -19,7 +19,6 @@ namespace Server
             // CẦN THAY THẾ bằng URL của bạn!
             var storageBucketUrl = "YOUR_FIREBASE_STORAGE_BUCKET_URL";
 
-            // Tên file trên Storage: avatars/username_timestamp.jpg
             var fileName = $"avatars/{userName}_{DateTime.Now.Ticks}.jpg";
 
             var storage = new FirebaseStorage(storageBucketUrl);
