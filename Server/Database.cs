@@ -357,6 +357,7 @@ namespace Server
             public DateTime NgaySinh { get; set; }
             public string? GioiTinh { get; set; }
             public byte[]? Avatar { get; set; } // Giữ lại cho UI cũ, nhưng giá trị sẽ luôn là NULL
+            public object? Id { get; set; }
         }
     }
 }

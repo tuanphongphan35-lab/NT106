@@ -2,125 +2,121 @@
 {
     partial class DanhSachBanBe
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        private System.Windows.Forms.Label lblTitle;
+        private Login.RoundTextBox txtSearch;
+        private System.Windows.Forms.ListView listViewFriends;
+        private System.Windows.Forms.ImageList imageListAvatars;
+        private System.Windows.Forms.Panel panelTop;
+        private System.Windows.Forms.Panel panelContent;
+
         protected override void Dispose(bool disposing)
         {
-            if (disposing && (components != null))
-            {
+            if (disposing && components != null)
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
         private void InitializeComponent()
         {
-            lblTieuDe = new Label();
-            txtTimKiem = new TextBox();
-            btnTimKiem = new Button();
-            lvDanhSach = new ListView();
-            btnQuayLai = new Button();
+            components = new System.ComponentModel.Container();
+            lblTitle = new Label();
+            txtSearch = new RoundTextBox();
+            listViewFriends = new ListView();
+            imageListAvatars = new ImageList(components);
+            panelTop = new Panel();
+            panelContent = new Panel();
+            panelTop.SuspendLayout();
+            panelContent.SuspendLayout();
             SuspendLayout();
             // 
-            // lblTieuDe
+            // lblTitle
             // 
-            lblTieuDe.AutoSize = true;
-            lblTieuDe.BackColor = Color.Transparent;
-            lblTieuDe.Font = new Font("Arial", 12F, FontStyle.Bold);
-            lblTieuDe.ForeColor = SystemColors.ButtonHighlight;
-            lblTieuDe.Location = new Point(140, 23);
-            lblTieuDe.Margin = new Padding(4, 0, 4, 0);
-            lblTieuDe.Name = "lblTieuDe";
-            lblTieuDe.Size = new Size(172, 19);
-            lblTieuDe.TabIndex = 0;
-            lblTieuDe.Text = "DANH SÁCH BẠN BÈ";
+            lblTitle.AutoSize = true;
+            lblTitle.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
+            lblTitle.ForeColor = Color.White;
+            lblTitle.Location = new Point(12, 12);
+            lblTitle.Name = "lblTitle";
+            lblTitle.Size = new Size(168, 25);
+            lblTitle.TabIndex = 0;
+            lblTitle.Text = "Danh sách bạn bè";
             // 
-            // txtTimKiem
+            // txtSearch
             // 
-            txtTimKiem.Location = new Point(47, 69);
-            txtTimKiem.Margin = new Padding(4, 3, 4, 3);
-            txtTimKiem.Name = "txtTimKiem";
-            txtTimKiem.Size = new Size(233, 23);
-            txtTimKiem.TabIndex = 1;
+            txtSearch.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            txtSearch.BackColor = Color.White;
+            txtSearch.BorderColor = Color.White;
+            txtSearch.BorderFocusColor = Color.Cyan;
+            txtSearch.BorderRadius = 15;
+            txtSearch.BorderSize = 0;
+            txtSearch.Location = new Point(370, 10);
+            txtSearch.Multiline = false;
+            txtSearch.Name = "txtSearch";
+            txtSearch.Padding = new Padding(10, 7, 10, 7);
+            txtSearch.PasswordChar = false;
+            txtSearch.Size = new Size(230, 30);
+            txtSearch.TabIndex = 1;
+            txtSearch.Texts = "";
+            txtSearch.UnderlinedStyle = false;
+            txtSearch._TextChanged += txtSearch_TextChanged;
             // 
-            // btnTimKiem
+            // listViewFriends
             // 
-            btnTimKiem.BackColor = Color.LightSkyBlue;
-            btnTimKiem.FlatStyle = FlatStyle.Popup;
-            btnTimKiem.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            btnTimKiem.ForeColor = SystemColors.ButtonHighlight;
-            btnTimKiem.Location = new Point(292, 67);
-            btnTimKiem.Margin = new Padding(4, 3, 4, 3);
-            btnTimKiem.Name = "btnTimKiem";
-            btnTimKiem.Size = new Size(105, 29);
-            btnTimKiem.TabIndex = 2;
-            btnTimKiem.Text = "Tìm kiếm";
-            btnTimKiem.UseVisualStyleBackColor = false;
+            listViewFriends.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            listViewFriends.BackColor = Color.Gray;
+            listViewFriends.Font = new Font("Segoe UI", 11F);
+            listViewFriends.Location = new Point(12, 12);
+            listViewFriends.Name = "listViewFriends";
+            listViewFriends.Size = new Size(998, 693);
+            listViewFriends.SmallImageList = imageListAvatars;
+            listViewFriends.TabIndex = 0;
+            listViewFriends.UseCompatibleStateImageBehavior = false;
+            listViewFriends.View = View.SmallIcon;
+            listViewFriends.DoubleClick += listViewFriends_DoubleClick;
             // 
-            // lvDanhSach
+            // imageListAvatars
             // 
-            lvDanhSach.BackColor = Color.Gray;
-            lvDanhSach.Location = new Point(47, 115);
-            lvDanhSach.Margin = new Padding(4, 3, 4, 3);
-            lvDanhSach.Name = "lvDanhSach";
-            lvDanhSach.Size = new Size(349, 207);
-            lvDanhSach.TabIndex = 3;
-            lvDanhSach.UseCompatibleStateImageBehavior = false;
-            lvDanhSach.View = View.Details;
+            imageListAvatars.ColorDepth = ColorDepth.Depth32Bit;
+            imageListAvatars.ImageSize = new Size(50, 50);
+            imageListAvatars.TransparentColor = Color.Transparent;
             // 
-            // btnQuayLai
+            // panelTop
             // 
-            btnQuayLai.BackColor = Color.LightGreen;
-            btnQuayLai.FlatStyle = FlatStyle.Popup;
-            btnQuayLai.Font = new Font("Segoe UI", 11.25F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            btnQuayLai.Location = new Point(152, 346);
-            btnQuayLai.Margin = new Padding(4, 3, 4, 3);
-            btnQuayLai.Name = "btnQuayLai";
-            btnQuayLai.Size = new Size(140, 35);
-            btnQuayLai.TabIndex = 4;
-            btnQuayLai.Text = "Quay Lại";
-            btnQuayLai.UseVisualStyleBackColor = false;
-            btnQuayLai.Click += btnQuayLai_Click;
+            panelTop.BackColor = Color.FromArgb(15, 15, 20);
+            panelTop.BackgroundImage = Properties.Resources.nền_đăng_nhập;
+            panelTop.Controls.Add(lblTitle);
+            panelTop.Controls.Add(txtSearch);
+            panelTop.Dock = DockStyle.Top;
+            panelTop.Location = new Point(0, 0);
+            panelTop.Name = "panelTop";
+            panelTop.Size = new Size(610, 55);
+            panelTop.TabIndex = 1;
+            // 
+            // panelContent
+            // 
+            panelContent.BackColor = Color.FromArgb(25, 25, 30);
+            panelContent.BackgroundImage = Properties.Resources.nền_đăng_nhập;
+            panelContent.Controls.Add(listViewFriends);
+            panelContent.Dock = DockStyle.Fill;
+            panelContent.Location = new Point(0, 55);
+            panelContent.Name = "panelContent";
+            panelContent.Size = new Size(610, 405);
+            panelContent.TabIndex = 0;
             // 
             // DanhSachBanBe
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
-            AutoScaleMode = AutoScaleMode.Font;
-            BackColor = Color.LightGray;
-            BackgroundImage = Properties.Resources.nền_đăng_nhập;
-            ClientSize = new Size(443, 415);
-            Controls.Add(btnQuayLai);
-            Controls.Add(lvDanhSach);
-            Controls.Add(btnTimKiem);
-            Controls.Add(txtTimKiem);
-            Controls.Add(lblTieuDe);
-            Margin = new Padding(4, 3, 4, 3);
+            ClientSize = new Size(610, 460);
+            Controls.Add(panelContent);
+            Controls.Add(panelTop);
             Name = "DanhSachBanBe";
-            Text = "Danh Sách Bạn Bè";
+            StartPosition = FormStartPosition.CenterParent;
+            Text = "Bạn bè";
+            Load += DanhSachBanBe_Load;
+            panelTop.ResumeLayout(false);
+            panelTop.PerformLayout();
+            panelContent.ResumeLayout(false);
             ResumeLayout(false);
-            PerformLayout();
-
         }
-
-        #endregion
-
-        private System.Windows.Forms.Label lblTieuDe;
-        private System.Windows.Forms.TextBox txtTimKiem;
-        private System.Windows.Forms.Button btnTimKiem;
-        private System.Windows.Forms.ListView lvDanhSach;
-        private System.Windows.Forms.Button btnQuayLai;
     }
 }
