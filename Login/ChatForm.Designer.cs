@@ -37,6 +37,8 @@
             roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
             roundTextBox2 = new RoundTextBox();
             panel1.SuspendLayout();
+            panel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
             panel2.SuspendLayout();
             roundFlowLayoutPanel1.SuspendLayout();
             SuspendLayout();
@@ -44,13 +46,17 @@
             // panel1
             // 
             panel1.BackgroundImage = Properties.Resources.BackList;
+            panel1.Controls.Add(roundButton8);
+            panel1.Controls.Add(panel3);
             panel1.Controls.Add(roundTextBox1);
             panel1.Controls.Add(roundFlowLayoutPanel2);
             panel1.Dock = DockStyle.Left;
             panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(4);
             panel1.Name = "panel1";
-            panel1.Size = new Size(280, 666);
+            panel1.Size = new Size(434, 832);
             panel1.TabIndex = 0;
+            panel1.Paint += panel1_Paint;
             // 
             // roundTextBox1
             // 
@@ -129,46 +135,50 @@
             roundTextBox3.Texts = "";
             roundTextBox3.UnderlinedStyle = false;
             // 
-            // roundFlowLayoutPanel1
+            // panel3
             // 
-            roundFlowLayoutPanel1.BackgroundImage = Properties.Resources.BackGroundChat2;
-            roundFlowLayoutPanel1.BorderColor = Color.Transparent;
-            roundFlowLayoutPanel1.BorderRadius = 20;
-            roundFlowLayoutPanel1.BorderThickness = 0F;
-            roundFlowLayoutPanel1.Controls.Add(roundTextBox2);
-            roundFlowLayoutPanel1.Location = new Point(24, 39);
-            roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
-            roundFlowLayoutPanel1.Size = new Size(672, 527);
-            roundFlowLayoutPanel1.TabIndex = 0;
+            panel3.BackColor = Color.Black;
+            panel3.Controls.Add(roundButton6);
+            panel3.Controls.Add(roundButton5);
+            panel3.Controls.Add(roundButton4);
+            panel3.Controls.Add(roundButton3);
+            panel3.Controls.Add(roundButton2);
+            panel3.Controls.Add(circularPictureBox1);
+            panel3.Dock = DockStyle.Left;
+            panel3.Location = new Point(0, 0);
+            panel3.Margin = new Padding(4);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(102, 832);
+            panel3.TabIndex = 2;
             // 
             // roundTextBox2
             // 
-            roundTextBox2.BackColor = Color.FromArgb(64, 68, 75);
-            roundTextBox2.BorderColor = Color.MediumSlateBlue;
-            roundTextBox2.BorderFocusColor = Color.HotPink;
-            roundTextBox2.BorderRadius = 15;
-            roundTextBox2.BorderSize = 0;
-            roundTextBox2.ForeColor = Color.Gray;
-            roundTextBox2.Location = new Point(3, 3);
-            roundTextBox2.Multiline = false;
-            roundTextBox2.Name = "roundTextBox2";
-            roundTextBox2.Padding = new Padding(10, 7, 10, 7);
-            roundTextBox2.PasswordChar = false;
-            roundTextBox2.Size = new Size(163, 35);
-            roundTextBox2.TabIndex = 1;
-            roundTextBox2.Texts = "#";
-            roundTextBox2.UnderlinedStyle = false;
+            roundFlowLayoutPanel2.BackColor = Color.FromArgb(64, 68, 75);
+            roundFlowLayoutPanel2.BorderColor = Color.Transparent;
+            roundFlowLayoutPanel2.BorderRadius = 20;
+            roundFlowLayoutPanel2.BorderThickness = 0F;
+            roundFlowLayoutPanel2.Location = new Point(139, 92);
+            roundFlowLayoutPanel2.Margin = new Padding(4);
+            roundFlowLayoutPanel2.Name = "roundFlowLayoutPanel2";
+            roundFlowLayoutPanel2.Size = new Size(252, 709);
+            roundFlowLayoutPanel2.TabIndex = 0;
+            // 
+            // panel2
             // 
             // ChatForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1005, 666);
+            ClientSize = new Size(1256, 832);
             Controls.Add(panel2);
             Controls.Add(panel1);
+            Margin = new Padding(4);
             Name = "ChatForm";
             Text = "ChatForm";
+            Load += ChatForm_Load;
             panel1.ResumeLayout(false);
+            panel3.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox1).EndInit();
             panel2.ResumeLayout(false);
             roundFlowLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
@@ -183,6 +193,15 @@
         private RoundFlowLayoutPanel roundFlowLayoutPanel2;
         private RoundTextBox roundTextBox2;
         private RoundButton roundButton1;
-        private RoundTextBox roundTextBox3;
+        private RoundTextBox txtNoiDungTinNhan;
+        private Panel panel3;
+        private CircularPictureBox circularPictureBox1;
+        private RoundButton roundButton4;
+        private RoundButton roundButton3;
+        private RoundButton roundButton2;
+        private RoundButton roundButton5;
+        private RoundButton roundButton6;
+        private RoundButton roundButton7;
+        private RoundButton roundButton8;
     }
 }

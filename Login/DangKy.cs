@@ -44,7 +44,7 @@ namespace Login
                 string.IsNullOrWhiteSpace(maOTP) ||
                 string.IsNullOrWhiteSpace(tenDangNhap) ||
                 string.IsNullOrWhiteSpace(matKhau) ||
-                string.IsNullOrWhiteSpace(xacNhanMatKhau)) 
+                string.IsNullOrWhiteSpace(xacNhanMatKhau))
 
             {
                 MessageBox.Show("Vui lòng điền đầy đủ thông tin.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -128,7 +128,7 @@ namespace Login
             try
             {
                 // Sử dụng phương thức từ lớp Database để kiểm tra tồn tại email
-                bool emailExists =await Server.Database.KiemTraTonTaiEmail(email);
+                bool emailExists = await Server.Database.KiemTraTonTaiEmail(email);
                 if (emailExists)
                 {
                     MessageBox.Show("Email này đã được sử dụng.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -186,6 +186,11 @@ namespace Login
         }
 
         private void panel1_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void DangKy_Load(object sender, EventArgs e)
         {
 
         }

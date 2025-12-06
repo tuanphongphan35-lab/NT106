@@ -12,7 +12,16 @@ namespace Login
     public partial class ThongTinNguoiDung : Form
     {
         private static readonly HttpClient client = new HttpClient();
+        private readonly string _loggedInUserID;
 
+        // 2. Chỉnh sửa Constructor để nhận ID người dùng
+        public ThongTinNguoiDung(string currentUserID)
+        {
+            InitializeComponent();
+
+            // Gán ID được truyền vào cho biến nội bộ
+            _loggedInUserID = currentUserID;
+        }
         public ThongTinNguoiDung()
         {
             InitializeComponent();

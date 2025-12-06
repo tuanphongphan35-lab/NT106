@@ -31,5 +31,10 @@ namespace Login
             // Hiển thị kết quả trong DataGridView
             dgvNguoiDung.DataSource = ketQua;
         }
+
+        private void TimKiemNguoiDung_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }
