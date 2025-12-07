@@ -28,19 +28,32 @@
         /// </summary>
         private void InitializeComponent()
         {
+            textBox1 = new TextBox();
             SuspendLayout();
+            // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(80, 79);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(397, 27);
+            textBox1.TabIndex = 0;
             // 
             // ThongBaoTinNhan
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(64, 68, 75);
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(547, 178);
+            Controls.Add(textBox1);
             Name = "ThongBaoTinNhan";
             Text = "ThongBaoTinNhan";
+            Load += ThongBaoTinNhan_Load;
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private TextBox textBox1;
     }
 }
