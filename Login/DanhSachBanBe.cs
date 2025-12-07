@@ -17,7 +17,9 @@ namespace Login
             InitializeComponent();
         }
 
-        private void btnQuayLai_Click(object sender, EventArgs e)
+        
+
+        private void DanhSachBanBe_Load(object sender, EventArgs e)
         {
 
         }

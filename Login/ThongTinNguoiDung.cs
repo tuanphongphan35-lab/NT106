@@ -67,25 +67,25 @@ namespace Login
                 if (info != null)
                 {
 
-                    textBox1.Text = info.TenNguoiDung;
-                    textBox4.Text = info.Email;
+                    textBox1.Texts = info.TenNguoiDung;
+                    textBox4.Texts = info.Email;
 
                     if (info.NgaySinh.Year > 1900)
                     {
-                        textBox2.Text = info.NgaySinh.ToString("dd/MM/yyyy");
+                        textBox2.Texts = info.NgaySinh.ToString("dd/MM/yyyy");
                     }
                     else
                     {
-                        textBox2.Text = "Chưa cập nhật";
+                        textBox2.Texts = "Chưa cập nhật";
                     }
 
                     if (!string.IsNullOrEmpty(info.GioiTinh))
                     {
-                        textBox3.Text = info.GioiTinh;
+                        textBox3.Texts = info.GioiTinh;
                     }
                     else
                     {
-                        textBox3.Text = "Chưa cập nhật";
+                        textBox3.Texts = "Chưa cập nhật";
                     }
                 }
                 else
@@ -143,19 +143,19 @@ namespace Login
             dragging = false;
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            // Mở form chỉnh sửa thông tin (ChinhSuaTTND)
-            ChinhSuaTTND chinhSuaTTND = new ChinhSuaTTND();
-            chinhSuaTTND.Show();
-            this.Hide();
-        }
-
         // ... (Các hàm không sử dụng) ...
 
         private void circularPictureBox1_Click(object sender, EventArgs e) { }
         private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
         private void textBox1_TextChanged(object sender, EventArgs e) { }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            // Mở form chỉnh sửa thông tin (ChinhSuaTTND)
+            ChinhSuaTTND chinhSuaTTND = new ChinhSuaTTND();
+            chinhSuaTTND.Show();
+            this.Hide();
+        }
     }
 }

@@ -29,260 +29,219 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
-            button3 = new Button();
-            textBoxOTP = new TextBox();
-            label5 = new Label();
-            button2 = new Button();
-            pictureBox1 = new PictureBox();
-            button1 = new Button();
-            textBox5 = new TextBox();
-            textBox4 = new TextBox();
-            textBox3 = new TextBox();
-            textBox2 = new TextBox();
-            textBox1 = new TextBox();
-            label4 = new Label();
-            label3 = new Label();
-            label2 = new Label();
-            label1 = new Label();
-            label = new Label();
+            button1 = new RoundButton();
+            button3 = new RoundButton();
+            textBox5 = new RoundTextBox();
+            textBox4 = new RoundTextBox();
+            textBox3 = new RoundTextBox();
+            textBoxOTP = new RoundTextBox();
+            textBox2 = new RoundTextBox();
+            textBox1 = new RoundTextBox();
             panel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // panel1
             // 
-            panel1.BackColor = SystemColors.WindowFrame;
-            panel1.Controls.Add(button3);
-            panel1.Controls.Add(textBoxOTP);
-            panel1.Controls.Add(label5);
-            panel1.Controls.Add(button2);
-            panel1.Controls.Add(pictureBox1);
+            panel1.BackColor = Color.FromArgb(62, 66, 75);
             panel1.Controls.Add(button1);
+            panel1.Controls.Add(button3);
             panel1.Controls.Add(textBox5);
             panel1.Controls.Add(textBox4);
             panel1.Controls.Add(textBox3);
+            panel1.Controls.Add(textBoxOTP);
             panel1.Controls.Add(textBox2);
             panel1.Controls.Add(textBox1);
-            panel1.Controls.Add(label4);
-            panel1.Controls.Add(label3);
-            panel1.Controls.Add(label2);
-            panel1.Controls.Add(label1);
-            panel1.Controls.Add(label);
-            panel1.Location = new Point(81, 35);
-            panel1.Margin = new Padding(2, 2, 2, 2);
+            panel1.Location = new Point(50, 49);
             panel1.Name = "panel1";
-            panel1.Size = new Size(477, 534);
+            panel1.Size = new Size(399, 518);
             panel1.TabIndex = 0;
-            panel1.Paint += panel1_Paint;
+            // 
+            // button1
+            // 
+            button1.BackColor = Color.MediumSlateBlue;
+            button1.BackgroundImage = Properties.Resources.CyanToViolet;
+            button1.BackgroundImageLayout = ImageLayout.Stretch;
+            button1.BorderColor = Color.Transparent;
+            button1.BorderRadius = 20;
+            button1.BorderThickness = 0F;
+            button1.FlatAppearance.BorderSize = 0;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button1.ForeColor = Color.White;
+            button1.Location = new Point(82, 420);
+            button1.Name = "button1";
+            button1.Size = new Size(239, 38);
+            button1.TabIndex = 7;
+            button1.Text = "Đăng kí";
+            button1.UseVisualStyleBackColor = false;
+            button1.Click += button1_Click_1;
             // 
             // button3
             // 
-            button3.BackColor = Color.DeepSkyBlue;
-            button3.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic);
-            button3.ForeColor = SystemColors.ButtonHighlight;
-            button3.Location = new Point(267, 119);
-            button3.Margin = new Padding(2, 2, 2, 2);
+            button3.BackColor = Color.MediumSlateBlue;
+            button3.BackgroundImage = Properties.Resources.CyanToViolet;
+            button3.BackgroundImageLayout = ImageLayout.Stretch;
+            button3.BorderColor = Color.Transparent;
+            button3.BorderRadius = 20;
+            button3.BorderThickness = 0F;
+            button3.FlatAppearance.BorderSize = 0;
+            button3.FlatStyle = FlatStyle.Flat;
+            button3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button3.ForeColor = Color.White;
+            button3.Location = new Point(261, 119);
             button3.Name = "button3";
-            button3.Size = new Size(91, 36);
-            button3.TabIndex = 20;
+            button3.Size = new Size(107, 35);
+            button3.TabIndex = 6;
             button3.Text = "Gửi OTP";
             button3.UseVisualStyleBackColor = false;
             button3.Click += button3_Click;
             // 
-            // textBoxOTP
-            // 
-            textBoxOTP.Location = new Point(200, 160);
-            textBoxOTP.Margin = new Padding(2, 2, 2, 2);
-            textBoxOTP.Name = "textBoxOTP";
-            textBoxOTP.Size = new Size(234, 27);
-            textBoxOTP.TabIndex = 19;
-            // 
-            // label5
-            // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label5.ForeColor = Color.White;
-            label5.Location = new Point(39, 164);
-            label5.Margin = new Padding(2, 0, 2, 0);
-            label5.Name = "label5";
-            label5.Size = new Size(115, 19);
-            label5.TabIndex = 18;
-            label5.Text = "OTP Xác Thực";
-            // 
-            // button2
-            // 
-            button2.BackColor = Color.LimeGreen;
-            button2.Font = new Font("Segoe UI", 10F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            button2.ForeColor = SystemColors.ButtonHighlight;
-            button2.Location = new Point(62, 379);
-            button2.Margin = new Padding(2, 2, 2, 2);
-            button2.Name = "button2";
-            button2.Size = new Size(167, 39);
-            button2.TabIndex = 17;
-            button2.Text = "Chọn ảnh đại diện ";
-            button2.UseVisualStyleBackColor = false;
-            button2.Click += button2_Click;
-            // 
-            // pictureBox1
-            // 
-            pictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            pictureBox1.Location = new Point(296, 366);
-            pictureBox1.Margin = new Padding(2, 2, 2, 2);
-            pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(78, 66);
-            pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
-            pictureBox1.TabIndex = 14;
-            pictureBox1.TabStop = false;
-            // 
-            // button1
-            // 
-            button1.BackColor = Color.LimeGreen;
-            button1.Font = new Font("Segoe UI Semibold", 11F, FontStyle.Bold | FontStyle.Italic);
-            button1.ForeColor = SystemColors.ButtonHighlight;
-            button1.Location = new Point(102, 458);
-            button1.Margin = new Padding(2, 2, 2, 2);
-            button1.Name = "button1";
-            button1.Size = new Size(250, 38);
-            button1.TabIndex = 13;
-            button1.Text = "Đăng Ký ";
-            button1.UseVisualStyleBackColor = false;
-            button1.Click += button1_Click;
-            // 
             // textBox5
             // 
-            textBox5.Location = new Point(200, 321);
-            textBox5.Margin = new Padding(2, 2, 2, 2);
+            textBox5.BackColor = Color.FromArgb(40, 43, 51);
+            textBox5.BorderColor = Color.MediumSlateBlue;
+            textBox5.BorderFocusColor = Color.HotPink;
+            textBox5.BorderRadius = 15;
+            textBox5.BorderSize = 0;
+            textBox5.ForeColor = Color.Silver;
+            textBox5.Location = new Point(31, 363);
+            textBox5.Multiline = false;
             textBox5.Name = "textBox5";
-            textBox5.Size = new Size(234, 27);
-            textBox5.TabIndex = 12;
+            textBox5.Padding = new Padding(10, 7, 10, 7);
+            textBox5.PasswordChar = false;
+            textBox5.Size = new Size(337, 35);
+            textBox5.TabIndex = 5;
+            textBox5.Texts = "Verify Password";
+            textBox5.UnderlinedStyle = false;
+            textBox5.Enter += textBox5_Enter;
+            textBox5.Leave += textBox5_Leave;
             // 
             // textBox4
             // 
-            textBox4.Location = new Point(200, 268);
-            textBox4.Margin = new Padding(2, 2, 2, 2);
+            textBox4.BackColor = Color.FromArgb(40, 43, 51);
+            textBox4.BorderColor = Color.MediumSlateBlue;
+            textBox4.BorderFocusColor = Color.HotPink;
+            textBox4.BorderRadius = 15;
+            textBox4.BorderSize = 0;
+            textBox4.ForeColor = Color.Silver;
+            textBox4.Location = new Point(31, 302);
+            textBox4.Multiline = false;
             textBox4.Name = "textBox4";
-            textBox4.Size = new Size(234, 27);
-            textBox4.TabIndex = 11;
+            textBox4.Padding = new Padding(10, 7, 10, 7);
+            textBox4.PasswordChar = false;
+            textBox4.Size = new Size(337, 35);
+            textBox4.TabIndex = 4;
+            textBox4.Texts = "Password";
+            textBox4.UnderlinedStyle = false;
+            textBox4.Enter += textBox4_Enter;
+            textBox4.Leave += textBox4_Leave;
             // 
             // textBox3
             // 
-            textBox3.Location = new Point(200, 212);
-            textBox3.Margin = new Padding(2, 2, 2, 2);
+            textBox3.BackColor = Color.FromArgb(40, 43, 51);
+            textBox3.BorderColor = Color.MediumSlateBlue;
+            textBox3.BorderFocusColor = Color.HotPink;
+            textBox3.BorderRadius = 15;
+            textBox3.BorderSize = 0;
+            textBox3.ForeColor = Color.Silver;
+            textBox3.Location = new Point(31, 239);
+            textBox3.Multiline = false;
             textBox3.Name = "textBox3";
-            textBox3.Size = new Size(234, 27);
-            textBox3.TabIndex = 10;
+            textBox3.Padding = new Padding(10, 7, 10, 7);
+            textBox3.PasswordChar = false;
+            textBox3.Size = new Size(337, 35);
+            textBox3.TabIndex = 3;
+            textBox3.Texts = "Username";
+            textBox3.UnderlinedStyle = false;
+            textBox3.Enter += textBox3_Enter;
+            textBox3.Leave += textBox3_Leave;
+            // 
+            // textBoxOTP
+            // 
+            textBoxOTP.BackColor = Color.FromArgb(40, 43, 51);
+            textBoxOTP.BorderColor = Color.MediumSlateBlue;
+            textBoxOTP.BorderFocusColor = Color.HotPink;
+            textBoxOTP.BorderRadius = 15;
+            textBoxOTP.BorderSize = 0;
+            textBoxOTP.ForeColor = Color.Silver;
+            textBoxOTP.Location = new Point(31, 180);
+            textBoxOTP.Multiline = false;
+            textBoxOTP.Name = "textBoxOTP";
+            textBoxOTP.Padding = new Padding(10, 7, 10, 7);
+            textBoxOTP.PasswordChar = false;
+            textBoxOTP.Size = new Size(337, 35);
+            textBoxOTP.TabIndex = 2;
+            textBoxOTP.Texts = "Verify OTP";
+            textBoxOTP.UnderlinedStyle = false;
+            textBoxOTP._TextChanged += roundTextBox2__TextChanged;
+            textBoxOTP.Enter += textBoxOTP_Enter;
+            textBoxOTP.Leave += textBoxOTP_Leave;
             // 
             // textBox2
             // 
-            textBox2.Location = new Point(200, 90);
-            textBox2.Margin = new Padding(2, 2, 2, 2);
+            textBox2.BackColor = Color.FromArgb(40, 43, 51);
+            textBox2.BorderColor = Color.MediumSlateBlue;
+            textBox2.BorderFocusColor = Color.HotPink;
+            textBox2.BorderRadius = 15;
+            textBox2.BorderSize = 0;
+            textBox2.ForeColor = Color.Silver;
+            textBox2.Location = new Point(31, 119);
+            textBox2.Multiline = false;
             textBox2.Name = "textBox2";
-            textBox2.Size = new Size(234, 27);
-            textBox2.TabIndex = 9;
+            textBox2.Padding = new Padding(10, 7, 10, 7);
+            textBox2.PasswordChar = false;
+            textBox2.Size = new Size(224, 35);
+            textBox2.TabIndex = 1;
+            textBox2.Texts = "Email";
+            textBox2.UnderlinedStyle = false;
+            textBox2.Enter += textBox2_Enter;
+            textBox2.Leave += textBox2_Leave;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(200, 36);
-            textBox1.Margin = new Padding(2, 2, 2, 2);
+            textBox1.BackColor = Color.FromArgb(40, 43, 51);
+            textBox1.BorderColor = Color.MediumSlateBlue;
+            textBox1.BorderFocusColor = Color.HotPink;
+            textBox1.BorderRadius = 15;
+            textBox1.BorderSize = 0;
+            textBox1.ForeColor = Color.Silver;
+            textBox1.Location = new Point(31, 58);
+            textBox1.Multiline = false;
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(234, 27);
-            textBox1.TabIndex = 8;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label4.ForeColor = Color.White;
-            label4.Location = new Point(39, 327);
-            label4.Margin = new Padding(2, 0, 2, 0);
-            label4.Name = "label4";
-            label4.Size = new Size(155, 19);
-            label4.TabIndex = 7;
-            label4.Text = "Xác Nhận Mật Khẩu";
-            // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label3.ForeColor = Color.White;
-            label3.Location = new Point(39, 272);
-            label3.Margin = new Padding(2, 0, 2, 0);
-            label3.Name = "label3";
-            label3.Size = new Size(85, 19);
-            label3.TabIndex = 6;
-            label3.Text = "Mật Khẩu ";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label2.ForeColor = Color.White;
-            label2.Location = new Point(39, 216);
-            label2.Margin = new Padding(2, 0, 2, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(120, 19);
-            label2.TabIndex = 5;
-            label2.Text = "Tên Đăng Nhập";
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label1.ForeColor = Color.White;
-            label1.Location = new Point(39, 94);
-            label1.Margin = new Padding(2, 0, 2, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(54, 19);
-            label1.TabIndex = 4;
-            label1.Text = "Email";
-            // 
-            // label
-            // 
-            label.AutoSize = true;
-            label.Font = new Font("Times New Roman", 10F, FontStyle.Bold);
-            label.ForeColor = Color.White;
-            label.Location = new Point(39, 40);
-            label.Margin = new Padding(2, 0, 2, 0);
-            label.Name = "label";
-            label.Size = new Size(27, 19);
-            label.TabIndex = 3;
-            label.Text = "ID";
+            textBox1.Padding = new Padding(10, 7, 10, 7);
+            textBox1.PasswordChar = false;
+            textBox1.Size = new Size(337, 35);
+            textBox1.TabIndex = 0;
+            textBox1.Texts = "ID tự tạo";
+            textBox1.UnderlinedStyle = false;
             // 
             // DangKy
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackgroundImage = Properties.Resources.nền_đăng_nhập;
-            ClientSize = new Size(641, 601);
+            BackgroundImage = Properties.Resources.GreenLake;
+            BackgroundImageLayout = ImageLayout.Stretch;
+            ClientSize = new Size(495, 618);
             Controls.Add(panel1);
-            Margin = new Padding(2, 2, 2, 2);
+            DoubleBuffered = true;
+            Margin = new Padding(2);
             Name = "DangKy";
             Text = "DangKy";
             Load += DangKy_Load;
             panel1.ResumeLayout(false);
-            panel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
         }
 
         #endregion
 
         private Panel panel1;
-        private Label label4;
-        private Label label3;
-        private Label label2;
-        private Label label1;
-        private Label label;
-        private TextBox textBox5;
-        private TextBox textBox4;
-        private TextBox textBox3;
-        private TextBox textBox2;
-        private TextBox textBox1;
-        private Button button1;
-        private Button button2;
-        private PictureBox pictureBox1;
-        private TextBox textBoxOTP;
-        private Label label5;
-        private Button button3;
+        private RoundTextBox textBox1;
+        private RoundTextBox textBox5;
+        private RoundTextBox textBox4;
+        private RoundTextBox textBox3;
+        private RoundTextBox textBoxOTP;
+        private RoundTextBox textBox2;
+        private RoundButton button1;
+        private RoundButton button3;
     }
 }

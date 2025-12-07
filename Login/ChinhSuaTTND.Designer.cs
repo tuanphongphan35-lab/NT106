@@ -29,204 +29,179 @@ namespace Login
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
-            label3 = new Label();
-            label4 = new Label();
-            label5 = new Label();
-            label6 = new Label();
-            roundPanel1 = new RoundPanel();
-            button2 = new Button();
+            circularPictureBox1 = new CircularPictureBox();
+            textBox1 = new TextBox();
             dateTimePicker1 = new DateTimePicker();
             comboBox1 = new ComboBox();
-            textBox1 = new TextBox();
-            circularPictureBox1 = new CircularPictureBox();
-            label7 = new Label();
-            button1 = new Button();
-            roundPanel1.SuspendLayout();
+            button2 = new RoundButton();
+            panel1 = new Panel();
+            label4 = new Label();
+            label3 = new Label();
+            label2 = new Label();
+            label1 = new Label();
+            button1 = new RoundButton();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
+            panel1.SuspendLayout();
             SuspendLayout();
             // 
-            // label1
+            // circularPictureBox1
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Source Han Sans CN Bold", 8F, FontStyle.Bold);
-            label1.ForeColor = Color.RoyalBlue;
-            label1.Location = new Point(33, 153);
-            label1.Name = "label1";
-            label1.Size = new Size(134, 24);
-            label1.TabIndex = 0;
-            label1.Text = "Tên Người Dùng";
+            circularPictureBox1.Location = new Point(173, 36);
+            circularPictureBox1.Name = "circularPictureBox1";
+            circularPictureBox1.Size = new Size(99, 94);
+            circularPictureBox1.TabIndex = 0;
+            circularPictureBox1.TabStop = false;
             // 
-            // label3
+            // textBox1
             // 
-            label3.AutoSize = true;
-            label3.Font = new Font("Source Han Sans CN Bold", 8F, FontStyle.Bold);
-            label3.ForeColor = Color.RoyalBlue;
-            label3.Location = new Point(33, 235);
-            label3.Name = "label3";
-            label3.Size = new Size(93, 24);
-            label3.TabIndex = 2;
-            label3.Text = "Ngày Sinh ";
+            textBox1.Location = new Point(131, 89);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(241, 27);
+            textBox1.TabIndex = 1;
+            // 
+            // dateTimePicker1
+            // 
+            dateTimePicker1.Location = new Point(131, 170);
+            dateTimePicker1.Name = "dateTimePicker1";
+            dateTimePicker1.Size = new Size(241, 27);
+            dateTimePicker1.TabIndex = 2;
+            // 
+            // comboBox1
+            // 
+            comboBox1.FormattingEnabled = true;
+            comboBox1.Location = new Point(131, 241);
+            comboBox1.Name = "comboBox1";
+            comboBox1.Size = new Size(241, 28);
+            comboBox1.TabIndex = 3;
+            // 
+            // button2
+            // 
+            button2.BackColor = Color.MediumSlateBlue;
+            button2.BackgroundImage = Properties.Resources.Colored_Sky;
+            button2.BorderColor = Color.Transparent;
+            button2.BorderRadius = 20;
+            button2.BorderThickness = 0F;
+            button2.FlatAppearance.BorderSize = 0;
+            button2.FlatStyle = FlatStyle.Flat;
+            button2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button2.ForeColor = Color.White;
+            button2.Location = new Point(173, 136);
+            button2.Name = "button2";
+            button2.Size = new Size(99, 31);
+            button2.TabIndex = 4;
+            button2.Text = "Thêm ảnh";
+            button2.UseVisualStyleBackColor = false;
+            button2.Click += button2_Click;
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.FromArgb(40, 43, 51);
+            panel1.Controls.Add(label4);
+            panel1.Controls.Add(label3);
+            panel1.Controls.Add(label2);
+            panel1.Controls.Add(label1);
+            panel1.Controls.Add(textBox1);
+            panel1.Controls.Add(comboBox1);
+            panel1.Controls.Add(dateTimePicker1);
+            panel1.Location = new Point(29, 190);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(393, 354);
+            panel1.TabIndex = 5;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Font = new Font("Source Han Sans CN Bold", 8F, FontStyle.Bold);
-            label4.ForeColor = Color.RoyalBlue;
-            label4.Location = new Point(33, 331);
+            label4.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label4.ForeColor = Color.White;
+            label4.Location = new Point(83, 17);
             label4.Name = "label4";
-            label4.Size = new Size(80, 24);
-            label4.TabIndex = 3;
-            label4.Text = "Giới Tính";
+            label4.Size = new Size(227, 31);
+            label4.TabIndex = 7;
+            label4.Text = "Chỉnh sửa thông tin";
             // 
-            // label5
+            // label3
             // 
-            label5.AutoSize = true;
-            label5.Font = new Font("Segoe UI Black", 10F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            label5.ForeColor = SystemColors.ControlText;
-            label5.Location = new Point(170, 50);
-            label5.Name = "label5";
-            label5.Size = new Size(399, 28);
-            label5.TabIndex = 4;
-            label5.Text = "CHỈNH SỬA THÔNG TIN NGƯỜI DÙNG";
-            label5.Click += label5_Click;
+            label3.AutoSize = true;
+            label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label3.ForeColor = Color.White;
+            label3.Location = new Point(36, 249);
+            label3.Name = "label3";
+            label3.Size = new Size(33, 20);
+            label3.TabIndex = 6;
+            label3.Text = "Sex";
             // 
-            // label6
+            // label2
             // 
-            label6.AutoSize = true;
-            label6.BackColor = SystemColors.GradientInactiveCaption;
-            label6.Font = new Font("Segoe UI Semibold", 9F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            label6.ForeColor = SystemColors.HotTrack;
-            label6.Location = new Point(56, 97);
-            label6.Name = "label6";
-            label6.Size = new Size(213, 25);
-            label6.TabIndex = 5;
-            label6.Text = "Nhập Các Thông Tin Sau:";
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label2.ForeColor = Color.White;
+            label2.Location = new Point(20, 175);
+            label2.Name = "label2";
+            label2.Size = new Size(100, 20);
+            label2.TabIndex = 5;
+            label2.Text = "Date of Birth";
             // 
-            // roundPanel1
+            // label1
             // 
-            roundPanel1.BorderColor = Color.Gray;
-            roundPanel1.BorderRadius = 10;
-            roundPanel1.BorderThickness = 1F;
-            roundPanel1.Controls.Add(button2);
-            roundPanel1.Controls.Add(dateTimePicker1);
-            roundPanel1.Controls.Add(comboBox1);
-            roundPanel1.Controls.Add(textBox1);
-            roundPanel1.Controls.Add(circularPictureBox1);
-            roundPanel1.Controls.Add(label7);
-            roundPanel1.Controls.Add(label1);
-            roundPanel1.Controls.Add(label3);
-            roundPanel1.Controls.Add(label4);
-            roundPanel1.Location = new Point(46, 125);
-            roundPanel1.Name = "roundPanel1";
-            roundPanel1.Size = new Size(650, 407);
-            roundPanel1.TabIndex = 6;
-            roundPanel1.Paint += roundPanel1_Paint;
-            // 
-            // button2
-            // 
-            button2.BackColor = Color.PaleGreen;
-            button2.Font = new Font("Bell MT", 8F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            button2.Location = new Point(263, 54);
-            button2.Name = "button2";
-            button2.Size = new Size(106, 30);
-            button2.TabIndex = 11;
-            button2.Text = "Thêm Ảnh";
-            button2.UseVisualStyleBackColor = false;
-            button2.Click += button2_Click;
-            // 
-            // dateTimePicker1
-            // 
-            dateTimePicker1.CustomFormat = "dd/MM/yyyy";
-            dateTimePicker1.Location = new Point(203, 229);
-            dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(259, 31);
-            dateTimePicker1.TabIndex = 10;
-            // 
-            // comboBox1
-            // 
-            comboBox1.DropDownStyle = ComboBoxStyle.DropDownList;
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Items.AddRange(new object[] { "Nam", "", "Nữ", "Không Muốn Tiết Lộ" });
-            comboBox1.Location = new Point(203, 322);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(163, 33);
-            comboBox1.TabIndex = 9;
-            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged;
-            // 
-            // textBox1
-            // 
-            textBox1.Location = new Point(203, 149);
-            textBox1.Name = "textBox1";
-            textBox1.Size = new Size(354, 31);
-            textBox1.TabIndex = 6;
-            // 
-            // circularPictureBox1
-            // 
-            circularPictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            circularPictureBox1.Location = new Point(413, 14);
-            circularPictureBox1.Name = "circularPictureBox1";
-            circularPictureBox1.Size = new Size(122, 120);
-            circularPictureBox1.TabIndex = 5;
-            circularPictureBox1.TabStop = false;
-            // 
-            // label7
-            // 
-            label7.AutoSize = true;
-            label7.Font = new Font("Source Han Sans CN Bold", 8F, FontStyle.Bold);
-            label7.ForeColor = Color.RoyalBlue;
-            label7.Location = new Point(33, 55);
-            label7.Name = "label7";
-            label7.Size = new Size(186, 24);
-            label7.TabIndex = 4;
-            label7.Text = "Lựa Chọn Ảnh Đại Diện";
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            label1.ForeColor = Color.White;
+            label1.Location = new Point(20, 96);
+            label1.Name = "label1";
+            label1.Size = new Size(80, 20);
+            label1.TabIndex = 4;
+            label1.Text = "Username";
             // 
             // button1
             // 
-            button1.BackColor = SystemColors.Highlight;
-            button1.Font = new Font("Segoe UI", 10F, FontStyle.Bold | FontStyle.Italic, GraphicsUnit.Point, 0);
-            button1.ForeColor = Color.FromArgb(128, 255, 255);
-            button1.Location = new Point(249, 538);
+            button1.BackColor = Color.MediumSlateBlue;
+            button1.BackgroundImage = Properties.Resources.Colored_Sky;
+            button1.BorderColor = Color.Transparent;
+            button1.BorderRadius = 20;
+            button1.BorderThickness = 0F;
+            button1.FlatAppearance.BorderSize = 0;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            button1.ForeColor = Color.White;
+            button1.Location = new Point(141, 522);
             button1.Name = "button1";
-            button1.Size = new Size(274, 42);
-            button1.TabIndex = 7;
-            button1.Text = "Xác Nhận Chỉnh Sửa";
+            button1.Size = new Size(188, 50);
+            button1.TabIndex = 6;
+            button1.Text = "Xác nhận";
             button1.UseVisualStyleBackColor = false;
-            button1.Click += button1_Click;
+            button1.Click += button1_Click_1;
             // 
             // ChinhSuaTTND
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.GradientInactiveCaption;
-            ClientSize = new Size(750, 592);
+            BackColor = Color.FromArgb(62, 66, 75);
+            ClientSize = new Size(449, 615);
             Controls.Add(button1);
-            Controls.Add(roundPanel1);
-            Controls.Add(label6);
-            Controls.Add(label5);
+            Controls.Add(button2);
+            Controls.Add(circularPictureBox1);
+            Controls.Add(panel1);
+            Margin = new Padding(2);
             Name = "ChinhSuaTTND";
             Text = "ChinhSuaTTND";
-            roundPanel1.ResumeLayout(false);
-            roundPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).EndInit();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();
         }
 
         #endregion
 
-        private Label label1;
-        private Label label3;
-        private Label label4;
-        private Label label5;
-        private Label label6;
-        private RoundPanel roundPanel1;
-        private Label label7;
-        private ComboBox comboBox1;
-        private TextBox textBox1;
         private CircularPictureBox circularPictureBox1;
-        private Button button1;
+        private TextBox textBox1;
         private DateTimePicker dateTimePicker1;
-        private Button button2;
+        private ComboBox comboBox1;
+        private RoundButton button2;
+        private Panel panel1;
+        private Label label3;
+        private Label label2;
+        private Label label1;
+        private Label label4;
+        private RoundButton button1;
     }
 }

@@ -15,15 +15,21 @@ namespace Login
             InitializeComponent();
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e) { }
+
+        private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
+
+        private void label5_Click(object sender, EventArgs e) { }
+
+        private async void button1_Click_1(object sender, EventArgs e)
         {
             button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
 
             string id = PhienDangNhap.IDNguoiDungHienTai;
-
+            string gioiTinh = comboBox1.SelectedItem?.ToString() ?? "";
             string tenNguoiDung = textBox1.Text.Trim();
             DateTime ngaySinh = dateTimePicker1.Value;
-            string gioiTinh = comboBox1.SelectedItem?.ToString() ?? "";
+
 
             if (string.IsNullOrEmpty(tenNguoiDung) || string.IsNullOrEmpty(gioiTinh))
             {
@@ -43,7 +49,6 @@ namespace Login
                 MessageBox.Show("Lưu thông tin thất bại. Vui lòng kiểm tra cấu hình Firebase.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
 
         private void button2_Click(object sender, EventArgs e)
         {
@@ -69,11 +74,5 @@ namespace Login
                 }
             }
         }
-
-        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e){ }
-
-        private void roundPanel1_Paint(object sender, PaintEventArgs e) { }
-
-        private void label5_Click(object sender, EventArgs e) { }
     }
 }

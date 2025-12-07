@@ -23,11 +23,12 @@ namespace Login
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            this.ActiveControl = panel1; // Đặt focus vào panel1 khi form load
         }
 
-        private async void buttonOTP_Click(object sender, EventArgs e)
+        private async void buttonOTP_Click_1(object sender, EventArgs e)
         {
-            string email = textBox2.Text.Trim();
+            string email = textBox2.Texts.Trim();
             if (string.IsNullOrWhiteSpace(email))
             {
                 MessageBox.Show("Vui lòng nhập địa chỉ email.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -54,13 +55,13 @@ namespace Login
             }
         }
 
-        private async void button1_Click(object sender, EventArgs e)
+        private async void button1_Click_1(object sender, EventArgs e)
         {
             button1.Enabled = false; // Vô hiệu hóa nút để tránh nhấn nhiều lần
-            string email = textBox2.Text.Trim();
-            string maOTP = textBoxOTP.Text.Trim();
-            string matKhau = textBox3.Text.Trim();
-            string xacNhanMatKhau = textBox4.Text.Trim();
+            string email = textBox2.Texts.Trim();
+            string maOTP = textBoxOTP.Texts.Trim();
+            string matKhau = textBox3.Texts.Trim();
+            string xacNhanMatKhau = textBox4.Texts.Trim();
 
             // 1. Kiểm tra dữ liệu đầu vào và OTP
             if (string.IsNullOrWhiteSpace(email) ||
@@ -121,6 +122,78 @@ namespace Login
             catch (Exception ex)
             {
                 MessageBox.Show("Đã xảy ra lỗi khi cập nhật mật khẩu: " + ex.Message, "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void textBox2_Enter(object sender, EventArgs e)
+        {
+            if (textBox2.Texts == "Email")
+            {
+                textBox2.Texts = "";
+                textBox2.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBox2_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBox2.Texts))
+            {
+                textBox2.Texts = "Email";
+                textBox2.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBoxOTP_Enter(object sender, EventArgs e)
+        {
+            if (textBoxOTP.Texts == "Verify OTP")
+            {
+                textBoxOTP.Texts = "";
+                textBoxOTP.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBoxOTP_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBoxOTP.Texts))
+            {
+                textBoxOTP.Texts = "Verify OTP";
+                textBoxOTP.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBox3_Enter(object sender, EventArgs e)
+        {
+            if (textBox3.Texts == "Password")
+            {
+                textBox3.Texts = "";
+                textBox3.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBox3_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBox3.Texts))
+            {
+                textBox3.Texts = "Password";
+                textBox3.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBox4_Enter(object sender, EventArgs e)
+        {
+            if (textBox4.Texts == "Verify Password")
+            {
+                textBox4.Texts = "";
+                textBox4.ForeColor = System.Drawing.Color.Silver;
+            }
+        }
+
+        private void textBox4_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(textBox4.Texts))
+            {
+                textBox4.Texts = "Verify Password";
+                textBox4.ForeColor = System.Drawing.Color.Silver;
             }
         }
     }

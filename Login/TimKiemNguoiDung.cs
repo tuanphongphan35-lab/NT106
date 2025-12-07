@@ -12,10 +12,20 @@ namespace Login
             InitializeComponent();
         }
 
-        // ✅ Hàm xử lý sự kiện khi nhấn nút "Tìm kiếm"
-        private void btnTimKiem_Click(object sender, EventArgs e)
+
+        private void TimKiemNguoiDung_Load(object sender, EventArgs e)
         {
-            string ten = txtTimKiem.Text.Trim();
+
+        }
+
+        private void roundButton3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void roundButton1_Click(object sender, EventArgs e)
+        {
+            string ten = txtTimKiem.Texts.Trim();
 
             // Giả lập dữ liệu mẫu (bạn có thể thay bằng dữ liệu từ DB)
             var ds = new List<dynamic>()
@@ -30,11 +40,6 @@ namespace Login
 
             // Hiển thị kết quả trong DataGridView
             dgvNguoiDung.DataSource = ketQua;
-        }
-
-        private void TimKiemNguoiDung_Load(object sender, EventArgs e)
-        {
-
         }
     }
 }
