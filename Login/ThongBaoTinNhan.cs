@@ -16,10 +16,5 @@ namespace Login
         {
             InitializeComponent();
         }
-
-        private void ThongBaoTinNhan_Load(object sender, EventArgs e)
-        {
-
-        }
     }
 }
