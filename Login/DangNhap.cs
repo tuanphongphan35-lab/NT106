@@ -59,7 +59,7 @@ namespace Login
                     MessageBox.Show("Đăng nhập thành công!");
 
                     // 3. Mở form chính
-                    ChatForm mainForm = new ChatForm(currentUserId);
+                    ChatForm mainForm = new ChatForm(currentUserId, tenDangNhap, matKhau);
                     mainForm.Show();
                     this.Hide();
                 }
@@ -121,7 +121,7 @@ namespace Login
                     MessageBox.Show("Đăng nhập thành công!");
 
                     // 3. Mở form chính
-                    ChatForm mainForm = new ChatForm(currentUserId);
+                    ChatForm mainForm = new ChatForm(currentUserId, tenDangNhap, matKhau);
                     mainForm.Show();
                     this.Hide();
                 }

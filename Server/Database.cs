@@ -358,5 +358,69 @@ namespace Server
             public string? GioiTinh { get; set; }
             public byte[]? Avatar { get; set; } // Giữ lại cho UI cũ, nhưng giá trị sẽ luôn là NULL
         }
+
+        // Hàm tìm kiếm người dùng theo tên (Gần đúng)
+        public static async Task<List<string>> TimKiemNguoiDung(string tuKhoa)
+        {
+            Console.WriteLine($"[DEBUG] Bắt đầu tìm kiếm từ khóa: '{tuKhoa}'"); // Log 1
+
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            List<string> ketQua = new List<string>();
+
+            try
+            {
+                // 1. Kiểm tra đúng tên Collection (Phải khớp với hàm ThemTaiKhoan)
+                // Thông thường là "Users" (Viết hoa chữ U)
+                CollectionReference colRef = db.Collection("Users");
+                QuerySnapshot snap = await colRef.GetSnapshotAsync();
+
+                Console.WriteLine($"[DEBUG] Tổng số user trong DB: {snap.Documents.Count}"); // Log 2
+
+                foreach (DocumentSnapshot doc in snap.Documents)
+                {
+                    if (doc.Exists)
+                    {
+                        // 2. Lấy dữ liệu theo kiểu Dictionary để kiểm tra tên trường chính xác
+                        Dictionary<string, object> data = doc.ToDictionary();
+
+                        string tenUser = "";
+
+                        // 3. Kiểm tra xem trong DB nó lưu là "username" hay "Username" hay "taiKhoan"
+                        if (data.ContainsKey("username"))
+                        {
+                            tenUser = data["username"].ToString();
+                        }
+                        else if (data.ContainsKey("Username"))
+                        {
+                            tenUser = data["Username"].ToString();
+                        }
+                        else if (data.ContainsKey("taiKhoan"))
+                        {
+                            tenUser = data["taiKhoan"].ToString();
+                        }
+
+                        // Log ra từng user để xem code có đọc được không
+                        // Console.WriteLine($"[DEBUG] Đang duyệt user: {tenUser}"); 
+
+                        // 4. So sánh (Chuyển về chữ thường để tìm không phân biệt hoa thường)
+                        if (!string.IsNullOrEmpty(tenUser) &&
+                            tenUser.ToLower().Contains(tuKhoa.ToLower()))
+                        {
+                            string userId = doc.Id;
+                            ketQua.Add($"{tenUser}:{userId}");
+
+                            Console.WriteLine($"[DEBUG] -> Tìm thấy: {tenUser} (ID: {userId})");
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[LỖI NGHIÊM TRỌNG] TimKiemNguoiDung: " + ex.Message);
+            }
+
+            Console.WriteLine($"[DEBUG] Kết thúc tìm kiếm. Trả về {ketQua.Count} kết quả.");
+            return ketQua;
+        }
     }
 }

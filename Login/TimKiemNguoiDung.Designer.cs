@@ -21,8 +21,7 @@
             btnSua = new RoundButton();
             btnXoa = new RoundButton();
             label1 = new Label();
-            dgvNguoiDung = new DataGridView();
-            ((System.ComponentModel.ISupportInitialize)dgvNguoiDung).BeginInit();
+            flpDanhSach = new FlowLayoutPanel();
             SuspendLayout();
             // 
             // txtTimKiem
@@ -126,15 +125,13 @@
             label1.TabIndex = 3;
             label1.Text = "Tìm kiếm người dùng";
             // 
-            // dgvNguoiDung
+            // flpDanhSach
             // 
-            dgvNguoiDung.BackgroundColor = Color.FromArgb(40, 43, 51);
-            dgvNguoiDung.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dgvNguoiDung.Location = new Point(23, 110);
-            dgvNguoiDung.Name = "dgvNguoiDung";
-            dgvNguoiDung.RowHeadersWidth = 51;
-            dgvNguoiDung.Size = new Size(451, 433);
-            dgvNguoiDung.TabIndex = 4;
+            flpDanhSach.BackColor = Color.FromArgb(40, 43, 51);
+            flpDanhSach.Location = new Point(23, 124);
+            flpDanhSach.Name = "flpDanhSach";
+            flpDanhSach.Size = new Size(451, 399);
+            flpDanhSach.TabIndex = 5;
             // 
             // TimKiemNguoiDung
             // 
@@ -142,7 +139,7 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(62, 66, 75);
             ClientSize = new Size(496, 630);
-            Controls.Add(dgvNguoiDung);
+            Controls.Add(flpDanhSach);
             Controls.Add(label1);
             Controls.Add(btnXoa);
             Controls.Add(btnSua);
@@ -152,8 +149,6 @@
             Margin = new Padding(2, 3, 2, 3);
             Name = "TimKiemNguoiDung";
             Text = "Tìm kiếm người dùng";
-            Load += TimKiemNguoiDung_Load;
-            ((System.ComponentModel.ISupportInitialize)dgvNguoiDung).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -163,6 +158,6 @@
         private RoundButton roundButton1;
         private RoundButton btnXem;
         private Label label1;
-        private DataGridView dgvNguoiDung;
+        private FlowLayoutPanel flpDanhSach;
     }
 }
