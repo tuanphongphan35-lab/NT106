@@ -28,19 +28,49 @@
         /// </summary>
         private void InitializeComponent()
         {
+            pnlThongBaoContainer = new Panel();
+            flowLayoutPanel1 = new FlowLayoutPanel();
+            pnlThongBaoContainer.SuspendLayout();
             SuspendLayout();
+            // 
+            // pnlThongBaoContainer
+            // 
+            pnlThongBaoContainer.Controls.Add(flowLayoutPanel1);
+            pnlThongBaoContainer.Location = new Point(0, 0);
+            pnlThongBaoContainer.Name = "pnlThongBaoContainer";
+            pnlThongBaoContainer.Size = new Size(923, 572);
+            pnlThongBaoContainer.TabIndex = 0;
+            // 
+            // flowLayoutPanel1
+            // 
+            flowLayoutPanel1.AutoScroll = true;
+            flowLayoutPanel1.Dock = DockStyle.Fill;
+            flowLayoutPanel1.FlowDirection = FlowDirection.TopDown;
+            flowLayoutPanel1.Location = new Point(0, 0);
+            flowLayoutPanel1.Name = "flowLayoutPanel1";
+            flowLayoutPanel1.Size = new Size(923, 572);
+            flowLayoutPanel1.TabIndex = 0;
+            flowLayoutPanel1.WrapContents = false;
+            flowLayoutPanel1.Paint += flowLayoutPanel1_Paint;
             // 
             // ThongBaoTinNhan
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(64, 68, 75);
-            ClientSize = new Size(800, 450);
+            ClientSize = new Size(925, 570);
+            Controls.Add(pnlThongBaoContainer);
+            Margin = new Padding(4);
             Name = "ThongBaoTinNhan";
             Text = "ThongBaoTinNhan";
+            Load += ThongBaoTinNhan_Load;
+            pnlThongBaoContainer.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
+
+        private Panel pnlThongBaoContainer;
+        private FlowLayoutPanel flowLayoutPanel1;
     }
 }

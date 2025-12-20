@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ChatForm));
             panel1 = new Panel();
             roundButton8 = new RoundButton();
             panel3 = new Panel();
@@ -40,16 +41,18 @@
             roundTextBox1 = new RoundTextBox();
             roundFlowLayoutPanel2 = new RoundFlowLayoutPanel();
             panel2 = new Panel();
+            roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
+            lblTenPhong = new RoundTextBox();
+            btnCall = new RoundButton();
             roundButton7 = new RoundButton();
             btnSend = new RoundButton();
             txtInput = new RoundTextBox();
             txtChatBox = new RoundFlowLayoutPanel();
-            lblTenPhong = new RoundTextBox();
             panel1.SuspendLayout();
             panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
             panel2.SuspendLayout();
-            txtChatBox.SuspendLayout();
+            roundFlowLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
@@ -61,8 +64,9 @@
             panel1.Controls.Add(roundFlowLayoutPanel2);
             panel1.Dock = DockStyle.Left;
             panel1.Location = new Point(0, 0);
+            panel1.Margin = new Padding(4);
             panel1.Name = "panel1";
-            panel1.Size = new Size(347, 666);
+            panel1.Size = new Size(434, 832);
             panel1.TabIndex = 0;
             panel1.Paint += panel1_Paint;
             // 
@@ -77,10 +81,10 @@
             roundButton8.FlatAppearance.BorderSize = 0;
             roundButton8.FlatStyle = FlatStyle.Flat;
             roundButton8.ForeColor = Color.White;
-            roundButton8.Location = new Point(286, 21);
+            roundButton8.Location = new Point(358, 26);
             roundButton8.Margin = new Padding(2);
             roundButton8.Name = "roundButton8";
-            roundButton8.Size = new Size(42, 35);
+            roundButton8.Size = new Size(52, 44);
             roundButton8.TabIndex = 3;
             roundButton8.UseVisualStyleBackColor = false;
             // 
@@ -95,8 +99,9 @@
             panel3.Controls.Add(circularPictureBox1);
             panel3.Dock = DockStyle.Left;
             panel3.Location = new Point(0, 0);
+            panel3.Margin = new Padding(4);
             panel3.Name = "panel3";
-            panel3.Size = new Size(82, 666);
+            panel3.Size = new Size(102, 832);
             panel3.TabIndex = 2;
             // 
             // roundButton6
@@ -110,10 +115,10 @@
             roundButton6.FlatAppearance.BorderSize = 0;
             roundButton6.FlatStyle = FlatStyle.Flat;
             roundButton6.ForeColor = Color.White;
-            roundButton6.Location = new Point(10, 334);
+            roundButton6.Location = new Point(12, 418);
             roundButton6.Margin = new Padding(2);
             roundButton6.Name = "roundButton6";
-            roundButton6.Size = new Size(56, 86);
+            roundButton6.Size = new Size(70, 108);
             roundButton6.TabIndex = 10;
             roundButton6.UseVisualStyleBackColor = false;
             roundButton6.Click += roundButton6_Click;
@@ -129,9 +134,10 @@
             roundButton5.FlatAppearance.BorderSize = 0;
             roundButton5.FlatStyle = FlatStyle.Flat;
             roundButton5.ForeColor = Color.Transparent;
-            roundButton5.Location = new Point(3, 108);
+            roundButton5.Location = new Point(4, 135);
+            roundButton5.Margin = new Padding(4);
             roundButton5.Name = "roundButton5";
-            roundButton5.Size = new Size(67, 32);
+            roundButton5.Size = new Size(84, 40);
             roundButton5.TabIndex = 9;
             roundButton5.UseVisualStyleBackColor = false;
             roundButton5.Click += roundButton5_Click;
@@ -147,9 +153,10 @@
             roundButton4.FlatAppearance.BorderSize = 0;
             roundButton4.FlatStyle = FlatStyle.Flat;
             roundButton4.ForeColor = Color.Transparent;
-            roundButton4.Location = new Point(3, 275);
+            roundButton4.Location = new Point(4, 344);
+            roundButton4.Margin = new Padding(4);
             roundButton4.Name = "roundButton4";
-            roundButton4.Size = new Size(67, 32);
+            roundButton4.Size = new Size(84, 44);
             roundButton4.TabIndex = 8;
             roundButton4.UseVisualStyleBackColor = false;
             roundButton4.Click += roundButton4_Click;
@@ -165,11 +172,13 @@
             roundButton3.FlatAppearance.BorderSize = 0;
             roundButton3.FlatStyle = FlatStyle.Flat;
             roundButton3.ForeColor = Color.Transparent;
-            roundButton3.Location = new Point(3, 192);
+            roundButton3.Location = new Point(4, 240);
+            roundButton3.Margin = new Padding(4);
             roundButton3.Name = "roundButton3";
-            roundButton3.Size = new Size(67, 32);
+            roundButton3.Size = new Size(84, 40);
             roundButton3.TabIndex = 7;
             roundButton3.UseVisualStyleBackColor = false;
+            roundButton3.Click += roundButton3_Click_1;
             // 
             // roundButton2
             // 
@@ -182,9 +191,10 @@
             roundButton2.FlatAppearance.BorderSize = 0;
             roundButton2.FlatStyle = FlatStyle.Flat;
             roundButton2.ForeColor = Color.Transparent;
-            roundButton2.Location = new Point(11, 591);
+            roundButton2.Location = new Point(14, 739);
+            roundButton2.Margin = new Padding(4);
             roundButton2.Name = "roundButton2";
-            roundButton2.Size = new Size(67, 32);
+            roundButton2.Size = new Size(84, 40);
             roundButton2.TabIndex = 0;
             roundButton2.UseVisualStyleBackColor = false;
             roundButton2.Click += roundButton2_Click;
@@ -193,10 +203,10 @@
             // 
             circularPictureBox1.BackgroundImage = Properties.Resources.user_default;
             circularPictureBox1.BackgroundImageLayout = ImageLayout.Stretch;
-            circularPictureBox1.Location = new Point(11, 11);
+            circularPictureBox1.Location = new Point(14, 14);
             circularPictureBox1.Margin = new Padding(2);
             circularPictureBox1.Name = "circularPictureBox1";
-            circularPictureBox1.Size = new Size(56, 56);
+            circularPictureBox1.Size = new Size(70, 70);
             circularPictureBox1.TabIndex = 6;
             circularPictureBox1.TabStop = false;
             circularPictureBox1.Click += circularPictureBox1_Click;
@@ -209,12 +219,13 @@
             roundTextBox1.BorderRadius = 15;
             roundTextBox1.BorderSize = 0;
             roundTextBox1.ForeColor = Color.Gray;
-            roundTextBox1.Location = new Point(97, 21);
+            roundTextBox1.Location = new Point(121, 26);
+            roundTextBox1.Margin = new Padding(4);
             roundTextBox1.Multiline = false;
             roundTextBox1.Name = "roundTextBox1";
-            roundTextBox1.Padding = new Padding(10, 7, 10, 7);
+            roundTextBox1.Padding = new Padding(12, 9, 12, 9);
             roundTextBox1.PasswordChar = false;
-            roundTextBox1.Size = new Size(231, 35);
+            roundTextBox1.Size = new Size(289, 44);
             roundTextBox1.TabIndex = 1;
             roundTextBox1.Texts = "Tìm bạn bè...";
             roundTextBox1.UnderlinedStyle = false;
@@ -225,23 +236,75 @@
             roundFlowLayoutPanel2.BorderColor = Color.Transparent;
             roundFlowLayoutPanel2.BorderRadius = 20;
             roundFlowLayoutPanel2.BorderThickness = 0F;
-            roundFlowLayoutPanel2.Location = new Point(111, 74);
+            roundFlowLayoutPanel2.Location = new Point(139, 92);
+            roundFlowLayoutPanel2.Margin = new Padding(4);
             roundFlowLayoutPanel2.Name = "roundFlowLayoutPanel2";
-            roundFlowLayoutPanel2.Size = new Size(202, 567);
+            roundFlowLayoutPanel2.Size = new Size(252, 709);
             roundFlowLayoutPanel2.TabIndex = 0;
             // 
             // panel2
             // 
             panel2.BackgroundImage = Properties.Resources.BackGroundChat1;
+            panel2.Controls.Add(roundFlowLayoutPanel1);
             panel2.Controls.Add(roundButton7);
             panel2.Controls.Add(btnSend);
             panel2.Controls.Add(txtInput);
             panel2.Controls.Add(txtChatBox);
             panel2.Dock = DockStyle.Fill;
-            panel2.Location = new Point(347, 0);
+            panel2.Location = new Point(434, 0);
+            panel2.Margin = new Padding(4);
             panel2.Name = "panel2";
-            panel2.Size = new Size(658, 666);
+            panel2.Size = new Size(822, 832);
             panel2.TabIndex = 1;
+            // 
+            // roundFlowLayoutPanel1
+            // 
+            roundFlowLayoutPanel1.BackColor = Color.Transparent;
+            roundFlowLayoutPanel1.BorderColor = Color.Transparent;
+            roundFlowLayoutPanel1.BorderRadius = 20;
+            roundFlowLayoutPanel1.BorderThickness = 0F;
+            roundFlowLayoutPanel1.Controls.Add(lblTenPhong);
+            roundFlowLayoutPanel1.Controls.Add(btnCall);
+            roundFlowLayoutPanel1.Location = new Point(43, 3);
+            roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
+            roundFlowLayoutPanel1.Size = new Size(714, 57);
+            roundFlowLayoutPanel1.TabIndex = 14;
+            // 
+            // lblTenPhong
+            // 
+            lblTenPhong.BackColor = Color.FromArgb(64, 68, 75);
+            lblTenPhong.BorderColor = Color.MediumSlateBlue;
+            lblTenPhong.BorderFocusColor = Color.HotPink;
+            lblTenPhong.BorderRadius = 15;
+            lblTenPhong.BorderSize = 0;
+            lblTenPhong.ForeColor = Color.White;
+            lblTenPhong.Location = new Point(4, 4);
+            lblTenPhong.Margin = new Padding(4);
+            lblTenPhong.Multiline = false;
+            lblTenPhong.Name = "lblTenPhong";
+            lblTenPhong.Padding = new Padding(12, 9, 12, 9);
+            lblTenPhong.PasswordChar = false;
+            lblTenPhong.Size = new Size(204, 44);
+            lblTenPhong.TabIndex = 14;
+            lblTenPhong.Texts = "#";
+            lblTenPhong.UnderlinedStyle = false;
+            // 
+            // btnCall
+            // 
+            btnCall.BackColor = Color.Transparent;
+            btnCall.BackgroundImage = (Image)resources.GetObject("btnCall.BackgroundImage");
+            btnCall.BackgroundImageLayout = ImageLayout.Stretch;
+            btnCall.BorderColor = Color.Transparent;
+            btnCall.BorderRadius = 20;
+            btnCall.BorderThickness = 0F;
+            btnCall.FlatAppearance.BorderSize = 0;
+            btnCall.FlatStyle = FlatStyle.Flat;
+            btnCall.ForeColor = Color.White;
+            btnCall.Location = new Point(215, 3);
+            btnCall.Name = "btnCall";
+            btnCall.Size = new Size(51, 45);
+            btnCall.TabIndex = 15;
+            btnCall.UseVisualStyleBackColor = false;
             // 
             // roundButton7
             // 
@@ -254,10 +317,10 @@
             roundButton7.FlatAppearance.BorderSize = 0;
             roundButton7.FlatStyle = FlatStyle.Flat;
             roundButton7.ForeColor = Color.White;
-            roundButton7.Location = new Point(24, 578);
+            roundButton7.Location = new Point(30, 722);
             roundButton7.Margin = new Padding(2);
             roundButton7.Name = "roundButton7";
-            roundButton7.Size = new Size(59, 58);
+            roundButton7.Size = new Size(74, 72);
             roundButton7.TabIndex = 3;
             roundButton7.UseVisualStyleBackColor = false;
             roundButton7.Click += roundButton7_Click;
@@ -274,9 +337,10 @@
             btnSend.FlatStyle = FlatStyle.Flat;
             btnSend.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSend.ForeColor = Color.White;
-            btnSend.Location = new Point(533, 572);
+            btnSend.Location = new Point(667, 722);
+            btnSend.Margin = new Padding(4);
             btnSend.Name = "btnSend";
-            btnSend.Size = new Size(100, 69);
+            btnSend.Size = new Size(125, 86);
             btnSend.TabIndex = 2;
             btnSend.UseVisualStyleBackColor = false;
             btnSend.Click += btnSend_Click;
@@ -288,12 +352,13 @@
             txtInput.BorderFocusColor = Color.HotPink;
             txtInput.BorderRadius = 15;
             txtInput.BorderSize = 0;
-            txtInput.Location = new Point(88, 591);
+            txtInput.Location = new Point(110, 739);
+            txtInput.Margin = new Padding(4);
             txtInput.Multiline = false;
             txtInput.Name = "txtInput";
-            txtInput.Padding = new Padding(10, 7, 10, 7);
+            txtInput.Padding = new Padding(12, 9, 12, 9);
             txtInput.PasswordChar = false;
-            txtInput.Size = new Size(439, 35);
+            txtInput.Size = new Size(549, 44);
             txtInput.TabIndex = 1;
             txtInput.Texts = "";
             txtInput.UnderlinedStyle = false;
@@ -304,37 +369,20 @@
             txtChatBox.BorderColor = Color.Transparent;
             txtChatBox.BorderRadius = 20;
             txtChatBox.BorderThickness = 0F;
-            txtChatBox.Controls.Add(lblTenPhong);
-            txtChatBox.Location = new Point(24, 39);
+            txtChatBox.Location = new Point(30, 64);
+            txtChatBox.Margin = new Padding(4);
             txtChatBox.Name = "txtChatBox";
-            txtChatBox.Size = new Size(609, 527);
+            txtChatBox.Size = new Size(751, 652);
             txtChatBox.TabIndex = 0;
-            // 
-            // lblTenPhong
-            // 
-            lblTenPhong.BackColor = Color.FromArgb(64, 68, 75);
-            lblTenPhong.BorderColor = Color.MediumSlateBlue;
-            lblTenPhong.BorderFocusColor = Color.HotPink;
-            lblTenPhong.BorderRadius = 15;
-            lblTenPhong.BorderSize = 0;
-            lblTenPhong.ForeColor = Color.White;
-            lblTenPhong.Location = new Point(3, 3);
-            lblTenPhong.Multiline = false;
-            lblTenPhong.Name = "lblTenPhong";
-            lblTenPhong.Padding = new Padding(10, 7, 10, 7);
-            lblTenPhong.PasswordChar = false;
-            lblTenPhong.Size = new Size(163, 35);
-            lblTenPhong.TabIndex = 1;
-            lblTenPhong.Texts = "#";
-            lblTenPhong.UnderlinedStyle = false;
             // 
             // ChatForm
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1005, 666);
+            ClientSize = new Size(1256, 832);
             Controls.Add(panel2);
             Controls.Add(panel1);
+            Margin = new Padding(4);
             Name = "ChatForm";
             Text = "ChatForm";
             Load += ChatForm_Load;
@@ -342,7 +390,7 @@
             panel3.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).EndInit();
             panel2.ResumeLayout(false);
-            txtChatBox.ResumeLayout(false);
+            roundFlowLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -353,7 +401,6 @@
         private RoundFlowLayoutPanel txtChatBox;
         private RoundTextBox roundTextBox1;
         private RoundFlowLayoutPanel roundFlowLayoutPanel2;
-        private RoundTextBox lblTenPhong;
         private RoundButton btnSend;
         private RoundTextBox txtInput;
         private Panel panel3;
@@ -365,5 +412,8 @@
         private RoundButton roundButton6;
         private RoundButton roundButton7;
         private RoundButton roundButton8;
+        private RoundFlowLayoutPanel roundFlowLayoutPanel1;
+        private RoundTextBox lblTenPhong;
+        private RoundButton btnCall;
     }
 }

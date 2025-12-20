@@ -46,33 +46,39 @@ namespace Login
             // 
             // circularPictureBox1
             // 
-            circularPictureBox1.Location = new Point(173, 36);
+            circularPictureBox1.Location = new Point(216, 45);
+            circularPictureBox1.Margin = new Padding(4);
             circularPictureBox1.Name = "circularPictureBox1";
-            circularPictureBox1.Size = new Size(99, 94);
+            circularPictureBox1.Size = new Size(124, 118);
             circularPictureBox1.TabIndex = 0;
             circularPictureBox1.TabStop = false;
             // 
             // textBox1
             // 
-            textBox1.Location = new Point(131, 89);
+            textBox1.Location = new Point(164, 111);
+            textBox1.Margin = new Padding(4);
             textBox1.Name = "textBox1";
-            textBox1.Size = new Size(241, 27);
+            textBox1.Size = new Size(300, 31);
             textBox1.TabIndex = 1;
             // 
             // dateTimePicker1
             // 
-            dateTimePicker1.Location = new Point(131, 170);
+            dateTimePicker1.Location = new Point(164, 212);
+            dateTimePicker1.Margin = new Padding(4);
             dateTimePicker1.Name = "dateTimePicker1";
-            dateTimePicker1.Size = new Size(241, 27);
+            dateTimePicker1.Size = new Size(300, 31);
             dateTimePicker1.TabIndex = 2;
             // 
             // comboBox1
             // 
             comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(131, 241);
+            comboBox1.Items.AddRange(new object[] { "Nam", "Nữ " });
+            comboBox1.Location = new Point(164, 301);
+            comboBox1.Margin = new Padding(4);
             comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(241, 28);
+            comboBox1.Size = new Size(300, 33);
             comboBox1.TabIndex = 3;
+            comboBox1.SelectedIndexChanged += comboBox1_SelectedIndexChanged_1;
             // 
             // button2
             // 
@@ -85,9 +91,10 @@ namespace Login
             button2.FlatStyle = FlatStyle.Flat;
             button2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             button2.ForeColor = Color.White;
-            button2.Location = new Point(173, 136);
+            button2.Location = new Point(216, 170);
+            button2.Margin = new Padding(4);
             button2.Name = "button2";
-            button2.Size = new Size(99, 31);
+            button2.Size = new Size(124, 39);
             button2.TabIndex = 4;
             button2.Text = "Thêm ảnh";
             button2.UseVisualStyleBackColor = false;
@@ -103,9 +110,10 @@ namespace Login
             panel1.Controls.Add(textBox1);
             panel1.Controls.Add(comboBox1);
             panel1.Controls.Add(dateTimePicker1);
-            panel1.Location = new Point(29, 190);
+            panel1.Location = new Point(36, 238);
+            panel1.Margin = new Padding(4);
             panel1.Name = "panel1";
-            panel1.Size = new Size(393, 354);
+            panel1.Size = new Size(491, 442);
             panel1.TabIndex = 5;
             // 
             // label4
@@ -113,9 +121,10 @@ namespace Login
             label4.AutoSize = true;
             label4.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label4.ForeColor = Color.White;
-            label4.Location = new Point(83, 17);
+            label4.Location = new Point(104, 21);
+            label4.Margin = new Padding(4, 0, 4, 0);
             label4.Name = "label4";
-            label4.Size = new Size(227, 31);
+            label4.Size = new Size(278, 38);
             label4.TabIndex = 7;
             label4.Text = "Chỉnh sửa thông tin";
             // 
@@ -124,9 +133,10 @@ namespace Login
             label3.AutoSize = true;
             label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label3.ForeColor = Color.White;
-            label3.Location = new Point(36, 249);
+            label3.Location = new Point(45, 311);
+            label3.Margin = new Padding(4, 0, 4, 0);
             label3.Name = "label3";
-            label3.Size = new Size(33, 20);
+            label3.Size = new Size(42, 25);
             label3.TabIndex = 6;
             label3.Text = "Sex";
             // 
@@ -135,9 +145,10 @@ namespace Login
             label2.AutoSize = true;
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = Color.White;
-            label2.Location = new Point(20, 175);
+            label2.Location = new Point(25, 219);
+            label2.Margin = new Padding(4, 0, 4, 0);
             label2.Name = "label2";
-            label2.Size = new Size(100, 20);
+            label2.Size = new Size(123, 25);
             label2.TabIndex = 5;
             label2.Text = "Date of Birth";
             // 
@@ -146,9 +157,10 @@ namespace Login
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.White;
-            label1.Location = new Point(20, 96);
+            label1.Location = new Point(25, 120);
+            label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
-            label1.Size = new Size(80, 20);
+            label1.Size = new Size(97, 25);
             label1.TabIndex = 4;
             label1.Text = "Username";
             // 
@@ -163,9 +175,10 @@ namespace Login
             button1.FlatStyle = FlatStyle.Flat;
             button1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             button1.ForeColor = Color.White;
-            button1.Location = new Point(141, 522);
+            button1.Location = new Point(176, 652);
+            button1.Margin = new Padding(4);
             button1.Name = "button1";
-            button1.Size = new Size(188, 50);
+            button1.Size = new Size(235, 62);
             button1.TabIndex = 6;
             button1.Text = "Xác nhận";
             button1.UseVisualStyleBackColor = false;
@@ -173,10 +186,10 @@ namespace Login
             // 
             // ChinhSuaTTND
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(62, 66, 75);
-            ClientSize = new Size(449, 615);
+            ClientSize = new Size(561, 769);
             Controls.Add(button1);
             Controls.Add(button2);
             Controls.Add(circularPictureBox1);

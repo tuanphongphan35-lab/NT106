@@ -16,7 +16,6 @@ namespace Server
 
         private static async Task<string> UploadAvatar(byte[] fileData, string userName)
         {
-            // CẦN THAY THẾ bằng URL của bạn!
             var storageBucketUrl = "YOUR_FIREBASE_STORAGE_BUCKET_URL";
 
             var fileName = $"avatars/{userName}_{DateTime.Now.Ticks}.jpg";
@@ -104,6 +103,72 @@ namespace Server
                 Console.WriteLine("Lỗi LuuThongTinNguoiDung Firestore: " + ex.Message);
                 return false;
             }
+        }
+        public static async Task ThemBanBe(string tenUserA, string tenUserB)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                // Bước A: Lấy ID của cả 2 người
+                string idA = await LayIDNguoiDung(tenUserA);
+                string idB = await LayIDNguoiDung(tenUserB);
+
+                if (idA == null || idB == null) return;
+
+                // Bước B: Thêm B vào danh sách của A
+                // Đường dẫn: Users -> idA -> Friends -> idB
+                DocumentReference docRefA = db.Collection("Users").Document(idA).Collection("Friends").Document(idB);
+                Dictionary<string, object> dataA = new Dictionary<string, object>
+            {
+                { "username", tenUserB } // Lưu tên để hiển thị cho nhanh
+            };
+                await docRefA.SetAsync(dataA);
+
+                // Bước C: Thêm A vào danh sách của B (Ngược lại)
+                DocumentReference docRefB = db.Collection("Users").Document(idB).Collection("Friends").Document(idA);
+                Dictionary<string, object> dataB = new Dictionary<string, object>
+            {
+                { "username", tenUserA }
+            };
+                await docRefB.SetAsync(dataB);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[Lỗi DB] Không thể thêm bạn: " + ex.Message);
+            }
+        }
+        public static async Task<List<string>> LayDanhSachBanBe(string tenUser)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            List<string> danhSachTen = new List<string>();
+            try
+            {
+                // Bước A: Lấy ID của user hiện tại
+                string idUser = await LayIDNguoiDung(tenUser);
+                if (idUser == null) return danhSachTen;
+
+                // Bước B: Truy vấn vào sub-collection "Friends"
+                CollectionReference friendsRef = db.Collection("Users").Document(idUser).Collection("Friends");
+                QuerySnapshot snapshot = await friendsRef.GetSnapshotAsync();
+
+                // Bước C: Duyệt qua kết quả và lấy tên
+                foreach (DocumentSnapshot document in snapshot.Documents)
+                {
+                    if (document.Exists)
+                    {
+                        Dictionary<string, object> data = document.ToDictionary();
+                        if (data.ContainsKey("username"))
+                        {
+                            danhSachTen.Add(data["username"].ToString());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[Lỗi DB] Lấy danh sách bạn thất bại: " + ex.Message);
+            }
+            return danhSachTen;
         }
 
         public static async Task<bool> KiemTraDangNhap(string taiKhoan, string matKhau)
@@ -196,7 +261,76 @@ namespace Server
                 return false;
             }
         }
+        private static string TaoIDPhong(string user1, string user2)
+        {
+            // So sánh chuỗi để luôn sắp xếp theo Alpha b (Ví dụ: Luôn là An_Binh, không bao giờ là Binh_An)
+            if (string.Compare(user1, user2) < 0)
+                return $"{user1}_{user2}";
+            else
+                return $"{user2}_{user1}";
+        }
+        // 2. HÀM LƯU TIN NHẮN (Gọi khi Server nhận lệnh CHAT)
+        public static async Task LuuTinNhan(string nguoiGui, string nguoiNhan, string noiDung)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                string roomID = TaoIDPhong(nguoiGui, nguoiNhan);
 
+                // Tạo data
+                Dictionary<string, object> msgData = new Dictionary<string, object>
+            {
+                { "sender", nguoiGui },
+                { "content", noiDung },
+                { "timestamp", DateTime.UtcNow } // Lưu giờ quốc tế
+            };
+
+                // Lưu vào: Messages -> RoomID -> SubCollection "ChatHistory" -> AutoID
+                await db.Collection("Messages").Document(roomID).Collection("ChatHistory").AddAsync(msgData);
+
+                Console.WriteLine($"[Firebase] Đã lưu tin nhắn vào phòng {roomID}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[Lỗi Lưu Tin]: " + ex.Message);
+            }
+        }
+
+        // 3. HÀM TẢI LỊCH SỬ (Gọi khi Client chuyển chế độ chat)
+        public static async Task<List<string>> LayLichSuChat(string user1, string user2)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            List<string> history = new List<string>();
+            try
+            {
+                string roomID = TaoIDPhong(user1, user2);
+
+                // Lấy dữ liệu, sắp xếp theo thời gian tăng dần (Cũ trước, Mới sau)
+                Query query = db.Collection("Messages").Document(roomID)
+                                .Collection("ChatHistory")
+                                .OrderBy("timestamp");
+
+                QuerySnapshot snap = await query.GetSnapshotAsync();
+
+                foreach (DocumentSnapshot doc in snap.Documents)
+                {
+                    if (doc.Exists)
+                    {
+                        Dictionary<string, object> data = doc.ToDictionary();
+                        string sender = data["sender"].ToString();
+                        string content = data["content"].ToString();
+
+                        // Format gửi về Client: Sender|Content
+                        history.Add($"{sender}|{content}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("[Lỗi Tải Sử]: " + ex.Message);
+            }
+            return history;
+        }
         public static async Task<string> LayAvatarUrl(string taiKhoan)
         {
             FirestoreDb db = FirestoreHelper.GetDatabase();

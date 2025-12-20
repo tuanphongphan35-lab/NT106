@@ -63,7 +63,8 @@ namespace Login
         }
 
         // --- 2. Nút THÊM BẠN BÈ (Lấy từ người đang chọn trong flpDanhSach) ---
-        private void btnThemBanBe_Click(object sender, EventArgs e)
+        // Nút thêm bạn bè 
+        private void btnSua_Click(object sender, EventArgs e)
         {
             // Kiểm tra xem người dùng đã chọn ai chưa
             if (string.IsNullOrEmpty(_selectedUserId))
@@ -77,7 +78,6 @@ namespace Login
                 MessageBox.Show("Không thể kết bạn với chính mình!");
                 return;
             }
-
             try
             {
                 // Gửi lệnh kết bạn kèm theo Tên người đó (hoặc ID tùy server bạn xử lý)
@@ -87,17 +87,13 @@ namespace Login
                 _serverStream.Flush();
 
                 MessageBox.Show($"Đã gửi lời mời kết bạn tới {_selectedUserName}!");
+                // làm sao phải thông báo cho người nhận biết được có lời mời kết bạn
+                // phần này để server xử lý gửi tin nhắn thông báo
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Lỗi khi gửi lời mời: " + ex.Message);
             }
-        }
-
-        // Nút Đóng
-        private void roundButton3_Click(object sender, EventArgs e)
-        {
-            this.Close();
         }
 
         // --- 3. HÀM XỬ LÝ KẾT QUẢ TỪ SERVER (Public để Form chính gọi vào) ---
@@ -112,7 +108,8 @@ namespace Login
             string[] listUsers = dataPart.Split(';');
 
             // Dùng Invoke để vẽ giao diện an toàn từ luồng khác
-            flpDanhSach.Invoke(new Action(() => {
+            flpDanhSach.Invoke(new Action(() =>
+            {
                 flpDanhSach.Controls.Clear(); // Xóa danh sách cũ
 
                 foreach (string item in listUsers)
@@ -162,7 +159,8 @@ namespace Login
             btn.ForeColor = Color.FromArgb(220, 221, 222);
 
             // --- SỰ KIỆN CLICK (LOGIC CHỌN NGƯỜI DÙNG) ---
-            btn.Click += (s, e) => {
+            btn.Click += (s, e) =>
+            {
                 // 1. Trả màu nút cũ về bình thường (nếu có)
                 if (_currentSelectedButton != null)
                 {
@@ -182,6 +180,39 @@ namespace Login
             };
 
             flpDanhSach.Controls.Add(btn);
+        }
+
+        private void btnXem_Click(object sender, EventArgs e)
+        {
+            // Nút Xem Thông Tin của người dùng đang chọn
+            if (string.IsNullOrEmpty(_selectedUserId))
+            {
+                MessageBox.Show("Vui lòng bấm chọn một người trong danh sách bên dưới trước!", "Chưa chọn người dùng");
+                return;
+            }
+            try
+            {
+                // Gửi lệnh xem thông tin kèm theo Tên người đó (hoặc ID tùy server bạn xử lý)
+                byte[] buffer = Encoding.UTF8.GetBytes($"XEM_THONG_TIN|{_selectedUserName}");
+                _serverStream.Write(buffer, 0, buffer.Length);
+                _serverStream.Flush();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi khi gửi yêu cầu xem thông tin: " + ex.Message);
+            }
+            // hiện vào trang thông tin người dùng
+
+        }
+
+        private void btnXoa_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void flpDanhSach_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

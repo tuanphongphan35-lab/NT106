@@ -31,12 +31,14 @@
             txtTimKiem.BorderFocusColor = Color.HotPink;
             txtTimKiem.BorderRadius = 15;
             txtTimKiem.BorderSize = 0;
-            txtTimKiem.Location = new Point(23, 69);
+            txtTimKiem.ForeColor = SystemColors.ButtonHighlight;
+            txtTimKiem.Location = new Point(29, 86);
+            txtTimKiem.Margin = new Padding(4);
             txtTimKiem.Multiline = false;
             txtTimKiem.Name = "txtTimKiem";
-            txtTimKiem.Padding = new Padding(10, 7, 10, 7);
+            txtTimKiem.Padding = new Padding(12, 9, 12, 9);
             txtTimKiem.PasswordChar = false;
-            txtTimKiem.Size = new Size(326, 35);
+            txtTimKiem.Size = new Size(408, 44);
             txtTimKiem.TabIndex = 1;
             txtTimKiem.Texts = "";
             txtTimKiem.UnderlinedStyle = false;
@@ -52,9 +54,10 @@
             roundButton1.FlatStyle = FlatStyle.Flat;
             roundButton1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             roundButton1.ForeColor = Color.White;
-            roundButton1.Location = new Point(355, 69);
+            roundButton1.Location = new Point(444, 86);
+            roundButton1.Margin = new Padding(4);
             roundButton1.Name = "roundButton1";
-            roundButton1.Size = new Size(119, 35);
+            roundButton1.Size = new Size(149, 44);
             roundButton1.TabIndex = 2;
             roundButton1.Text = "Tìm kiếm";
             roundButton1.UseVisualStyleBackColor = false;
@@ -71,12 +74,14 @@
             btnXem.FlatStyle = FlatStyle.Flat;
             btnXem.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnXem.ForeColor = Color.White;
-            btnXem.Location = new Point(23, 549);
+            btnXem.Location = new Point(29, 686);
+            btnXem.Margin = new Padding(4);
             btnXem.Name = "btnXem";
-            btnXem.Size = new Size(111, 43);
+            btnXem.Size = new Size(139, 54);
             btnXem.TabIndex = 0;
             btnXem.Text = "Xem";
             btnXem.UseVisualStyleBackColor = false;
+            btnXem.Click += btnXem_Click;
             // 
             // btnSua
             // 
@@ -89,13 +94,14 @@
             btnSua.FlatStyle = FlatStyle.Flat;
             btnSua.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnSua.ForeColor = Color.White;
-            btnSua.Location = new Point(173, 549);
+            btnSua.Location = new Point(216, 686);
+            btnSua.Margin = new Padding(4);
             btnSua.Name = "btnSua";
-            btnSua.Size = new Size(140, 43);
+            btnSua.Size = new Size(175, 54);
             btnSua.TabIndex = 1;
             btnSua.Text = "Thêm bạn bè";
             btnSua.UseVisualStyleBackColor = false;
-            btnSua.Click += roundButton3_Click;
+            btnSua.Click += btnSua_Click;
             // 
             // btnXoa
             // 
@@ -107,38 +113,43 @@
             btnXoa.FlatStyle = FlatStyle.Flat;
             btnXoa.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             btnXoa.ForeColor = Color.White;
-            btnXoa.Location = new Point(355, 549);
+            btnXoa.Location = new Point(444, 686);
+            btnXoa.Margin = new Padding(4);
             btnXoa.Name = "btnXoa";
-            btnXoa.Size = new Size(119, 43);
+            btnXoa.Size = new Size(149, 54);
             btnXoa.TabIndex = 2;
             btnXoa.Text = "Xóa";
             btnXoa.UseVisualStyleBackColor = false;
+            btnXoa.Click += btnXoa_Click;
             // 
             // label1
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Segoe UI", 13.8F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.Silver;
-            label1.Location = new Point(126, 23);
+            label1.Location = new Point(158, 29);
+            label1.Margin = new Padding(4, 0, 4, 0);
             label1.Name = "label1";
-            label1.Size = new Size(246, 31);
+            label1.Size = new Size(303, 38);
             label1.TabIndex = 3;
             label1.Text = "Tìm kiếm người dùng";
             // 
             // flpDanhSach
             // 
             flpDanhSach.BackColor = Color.FromArgb(40, 43, 51);
-            flpDanhSach.Location = new Point(23, 124);
+            flpDanhSach.Location = new Point(29, 155);
+            flpDanhSach.Margin = new Padding(4);
             flpDanhSach.Name = "flpDanhSach";
-            flpDanhSach.Size = new Size(451, 399);
+            flpDanhSach.Size = new Size(564, 499);
             flpDanhSach.TabIndex = 5;
+            flpDanhSach.Paint += flpDanhSach_Paint;
             // 
             // TimKiemNguoiDung
             // 
-            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(62, 66, 75);
-            ClientSize = new Size(496, 630);
+            ClientSize = new Size(620, 788);
             Controls.Add(flpDanhSach);
             Controls.Add(label1);
             Controls.Add(btnXoa);
@@ -146,7 +157,7 @@
             Controls.Add(btnXem);
             Controls.Add(roundButton1);
             Controls.Add(txtTimKiem);
-            Margin = new Padding(2, 3, 2, 3);
+            Margin = new Padding(2, 4, 2, 4);
             Name = "TimKiemNguoiDung";
             Text = "Tìm kiếm người dùng";
             ResumeLayout(false);

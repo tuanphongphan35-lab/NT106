@@ -13,15 +13,22 @@ namespace Login
 {
     public partial class ChatForm : Form
     {
-
+        private ThongBaoTinNhan _frmThongBao = new ThongBaoTinNhan();
         private TcpClient client;
         private NetworkStream stream;
         private string currentUserName;
         private string currentPassword;
+        private string _nguoiDangChat = "";
         private TimKiemNguoiDung frmTimKiem = null;
         private void ChatForm_Load(object sender, EventArgs e)
         {
+
             lblTenPhong.Texts = "Phòng Chat Chung";
+
+            lblTenPhong.Click += (s, ev) =>
+            {
+                ChuyenCheDoChat(""); // Truyền chuỗi rỗng để về chat chung
+            };
             try
             {
                 client = new TcpClient("127.0.0.1", 8080);
@@ -57,9 +64,10 @@ namespace Login
         {
             if (System.Windows.Forms.SystemInformation.TerminalServerSession)
                 return;
-            System.Reflection.PropertyInfo aProp = typeof(Control).GetProperty("DoubleBuffered",
-                System.Reflection.BindingFlags.NonPublic |
-                System.Reflection.BindingFlags.Instance);
+            System.Reflection.PropertyInfo? propertyInfo = typeof(Control).GetProperty("DoubleBuffered",
+            System.Reflection.BindingFlags.NonPublic |
+            System.Reflection.BindingFlags.Instance);
+            System.Reflection.PropertyInfo? aProp = propertyInfo;
             aProp.SetValue(c, true, null);
         }
         private void ReceiveMessages()
@@ -69,48 +77,216 @@ namespace Login
             {
                 try
                 {
+                    if (stream == null || !client.Connected) break; // Kiểm tra kết nối
+
                     int bytesRead = stream.Read(buffer, 0, buffer.Length);
                     if (bytesRead > 0)
                     {
                         string data = Encoding.UTF8.GetString(buffer, 0, bytesRead);
-                        string[] parts = data.Split('|');
-                        string command = parts[0]; // Lấy lệnh đầu tiên
-
-                        // ----------------------------------------------------
-                        // CASE 1: TIN NHẮN CHAT (Code cũ của bạn)
-                        // ----------------------------------------------------
-                        if (command == "CHAT")
+                        string[] commands = data.Split(new char[] { '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                        foreach (string singleCommand in commands)
                         {
-                            string senderID = parts[1];
-                            string content = parts[2];
+                            string[] parts = singleCommand.Split('|');
+                            string command = parts[0];
 
-                            if (senderID != _loggedInUserID)
+                            // Dùng Switch Case để xử lý lệnh
+                            switch (command)
                             {
-                                AddMessage($"{senderID}:\n{content}", false);
-                            }
-                        }
+                                case "LIST_BAN_BE":
+                                    string[] cacBan = parts[1].Split(';');
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        roundFlowLayoutPanel2.Controls.Clear(); // Xóa cũ
+                                        foreach (string ban in cacBan)
+                                        {
+                                            ThemBanVaoList(ban); // Vẽ nút
+                                        }
+                                    }));
+                                    break;
+                                case "CHAT":
+                                    HandleChatMessage(parts);
+                                    break;
 
-                        // ----------------------------------------------------
-                        // CASE 2: KẾT QUẢ TÌM KIẾM (THÊM MỚI VÀO ĐÂY)
-                        // ----------------------------------------------------
-                        else if (command == "TIM_THAY")
-                        {
-                            // Kiểm tra xem Form tìm kiếm có đang mở không
-                            if (frmTimKiem != null && !frmTimKiem.IsDisposed)
-                            {
-                                // Gọi hàm hiển thị bên Form tìm kiếm
-                                // data chính là toàn bộ chuỗi: "TIM_THAY|Tuan:001;Lan:002..."
-                                frmTimKiem.XuLyKetQuaTuServer(data);
+                                case "HISTORY_DATA":
+                                    // Server gửi: HISTORY_DATA | NguoiGui | NoiDung
+                                    string hSender = parts[1];
+                                    string hContent = parts[2];
+
+                                    // Kiểm tra xem tin nhắn này là của MÌNH (true) hay BẠN (false)
+                                    bool isMe = (hSender == currentUserName);
+
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        AddMessage(hContent, isMe);
+                                    }));
+                                    break;
+
+                                case "HISTORY_END":
+                                    // Tải xong thì cuộn xuống dưới cùng
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        try { txtChatBox.ScrollControlIntoView(txtChatBox.Controls[txtChatBox.Controls.Count - 1]); } catch { }
+                                    }));
+                                    break;
+                                case "STATUS":
+                                    // Server gửi: STATUS | Phong12345 | ONLINE (hoặc OFFLINE)
+                                    string userStatus = parts[1];
+                                    string status = parts[2];
+
+                                    // Gọi hàm đổi màu
+                                    CapNhatTrangThai(userStatus, (status == "ONLINE"));
+                                    break;
+                                case "TIM_THAY":
+                                    HandleSearchResult(data);
+                                    break;
+
+                                case "INCOMING_CALL":
+                                    HandleIncomingCall(parts);
+                                    break;
+
+                                case "CALL_RESULT": // Hoặc RESPONSE_CALL (tùy Server gửi về)
+                                    HandleCallResponse(parts);
+                                    break;
+
+                                case "END_CALL":
+                                    HandleEndCall(parts);
+                                    break;
+                                case "LOI_MOI":
+                                    HandleKetBan(parts);
+                                    break;
+                                case "KET_QUA_KET_BAN":
+                                    string tenNguoiTraLoi = parts[1];
+                                    string ketQuaCuoi = parts[2];
+
+                                    this.Invoke(new Action(() =>
+                                    {
+                                        if (ketQuaCuoi == "DONG_Y")
+                                        {
+                                            MessageBox.Show($"{tenNguoiTraLoi} đã chấp nhận kết bạn! Giờ 2 bạn có thể chat.");
+                                            ThemBanVaoList(tenNguoiTraLoi);
+                                        }
+                                        else
+                                            MessageBox.Show($"{tenNguoiTraLoi} đã từ chối lời mời.");
+                                    }));
+                                    break;
                             }
                         }
                     }
                 }
                 catch (Exception ex)
                 {
-                    // ... Code xử lý lỗi cũ của bạn ...
+                    // Tránh hiện MessageBox liên tục khi tắt form
+                    if (!this.IsDisposed)
+                    {
+                        MessageBox.Show("Mất kết nối: " + ex.Message);
+                    }
                     break;
                 }
             }
+        }
+        private void HandleChatMessage(string[] parts)
+        {
+            string senderID = parts[1];
+            string content = parts[2];
+
+            if (senderID != _loggedInUserID)
+            {
+                AddMessage($"{senderID}:\n{content}", false);
+            }
+        }
+
+        private void HandleSearchResult(string data)
+        {
+            if (frmTimKiem != null && !frmTimKiem.IsDisposed)
+            {
+                frmTimKiem.XuLyKetQuaTuServer(data);
+            }
+        }
+        // Hàm xử lý phản hồi từ User (Đồng ý hoặc Từ chối kết bạn)
+        private void HandleKetBan(string[] parts)
+        {
+            string nguoiGui = parts[1];
+
+            this.Invoke(new Action(() =>
+            {
+                // 1. Tạo UserControl (viên gạch)
+                // Truyền hàm XuLyPhanHoiTuUser vào để khi bấm nút nó biết gọi ai
+                var item = new UC_ThongBaoKetBan(nguoiGui, XuLyPhanHoiTuUser);
+
+                // 2. Thêm nó vào Form Thông Báo (dù Form đang ẩn vẫn thêm được)
+                _frmThongBao.ThemThongBaoMoi(item);
+
+            }));
+        }
+        private void XuLyPhanHoiTuUser(string nguoiGui, string ketQua)
+        {
+            try
+            {
+                // 1. Tạo lệnh gửi đi: PHAN_HOI_KET_BAN | Người_Mời | DONG_Y (hoặc TU_CHOI)
+                string msg = $"PHAN_HOI_KET_BAN|{nguoiGui}|{ketQua}";
+
+
+                byte[] buffer = Encoding.UTF8.GetBytes(msg + "\n"); // Thêm \n cho chắc
+                client.GetStream().Write(buffer, 0, buffer.Length);
+
+                // Debug để biết là đã gửi
+                Console.WriteLine("Client đã gửi phản hồi: " + msg);
+                if (ketQua == "DONG_Y")
+                {
+                    // Nếu đồng ý, thêm bạn vào danh sách luôn
+                    ThemBanVaoList(nguoiGui);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi gửi phản hồi: " + ex.Message);
+            }
+        }
+        // Xử lý khi có người gọi ĐẾN
+        private void HandleIncomingCall(string[] parts)
+        {
+            string callerName = parts[1];
+            string agoraRoom = parts[2];
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                // Mở Form PhoneCall ở chế độ NGƯỜI NHẬN (isCaller = false)
+                PhoneCall incomingForm = new PhoneCall(this.stream, callerName, _loggedInUserID, agoraRoom, false);
+                incomingForm.Show();
+            });
+        }
+
+        // Xử lý phản hồi (người kia đồng ý hay từ chối)
+        private void HandleCallResponse(string[] parts)
+        {
+            // Cấu trúc: CALL_RESULT | NguoiTraLoi | ACCEPT/REJECT
+            string responder = parts[1];
+            string decision = parts[2];
+
+            this.Invoke((MethodInvoker)delegate
+            {
+                if (decision == "REJECT")
+                {
+                    MessageBox.Show($"{responder} đang bận hoặc đã từ chối cuộc gọi.");
+                    // Tìm Form PhoneCall đang mở để đóng lại (nếu cần)
+                }
+                else if (decision == "ACCEPT")
+                {
+                    // Người kia đã đồng ý, Agora tự kết nối, có thể hiện thông báo nhỏ
+                    // MessageBox.Show($"{responder} đã bắt máy!"); 
+                }
+            });
+        }
+
+        // Xử lý khi đối phương tắt máy
+        private void HandleEndCall(string[] parts)
+        {
+            this.Invoke((MethodInvoker)delegate
+            {
+                MessageBox.Show("Cuộc gọi đã kết thúc.");
+                // Code này sẽ tự động đóng các Form PhoneCall đang mở (nếu bạn quản lý list form)
+                // Hoặc Form PhoneCall tự lắng nghe sự kiện này bên trong nó (như hướng dẫn PhoneCall.cs trước)
+            });
         }
 
         private void ChatForm_FormClosing(object sender, FormClosingEventArgs e)
@@ -152,8 +328,13 @@ namespace Login
 
         private void roundButton2_Click(object sender, EventArgs e)
         {
-            DangNhap loginform = new DangNhap();
-            loginform.Show();
+            DialogResult result = MessageBox.Show("Bạn có chắc chắn muốn đăng xuất?", "Xác nhận", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+            if (result == DialogResult.Yes)
+            {
+                // Khởi động lại toàn bộ ứng dụng
+                Application.Restart();
+                Environment.Exit(0);
+            }
         }
 
         private void circularPictureBox1_Click(object sender, EventArgs e)
@@ -175,9 +356,23 @@ namespace Login
 
         private void roundButton4_Click(object sender, EventArgs e)
         {
-            roundButton4.Enabled = false;
-            ThongBaoTinNhan thongBaoTinNhan = new ThongBaoTinNhan();
-            thongBaoTinNhan.Show();
+            if (_frmThongBao.Visible)
+            {
+                _frmThongBao.Hide(); // Đóng (Ẩn)
+            }
+            else
+            {
+                // 1. Tính toán vị trí để Form thông báo hiện ra ngay cạnh Form chính cho đẹp
+                // (Ví dụ: Hiện bên phải Form chính, hoặc đè lên một góc)
+                int x = this.Location.X + 60; // Dịch sang phải 60px so với mép trái Form chính
+                int y = this.Location.Y + 100; // Dịch xuống 100px so với mép trên
+
+                _frmThongBao.Location = new Point(x, y);
+
+                // 2. Hiện form
+                _frmThongBao.Show();
+                _frmThongBao.BringToFront(); // Đưa lên trên cùng
+            }
         }
 
         private void roundButton5_Click(object sender, EventArgs e)
@@ -207,33 +402,28 @@ namespace Login
 
         private void btnSend_Click(object sender, EventArgs e)
         {
-            // Dùng .Texts cho Custom Control của bạn
             string message = txtInput.Texts.Trim();
 
             if (!string.IsNullOrEmpty(message))
             {
-                // 1. Gửi qua Server
                 if (stream != null)
                 {
                     try
                     {
-                        // --- SỬA DÒNG NÀY ---
-                        // Chỉ gửi: LỆNH | NỘI DUNG
-                        string data = $"CHAT|{message}";
+                        // Xác định người nhận: Nếu _nguoiDangChat rỗng thì là chat chung (ALL)
+                        string receiver = string.IsNullOrEmpty(_nguoiDangChat) ? "ALL" : _nguoiDangChat;
+
+                        // Cấu trúc gửi mới: CHAT | Nội Dung | Người Nhận
+                        string data = $"CHAT|{message}|{receiver}";
 
                         byte[] buffer = Encoding.UTF8.GetBytes(data);
                         stream.Write(buffer, 0, buffer.Length);
-
-                        // (Tùy chọn) Xóa ô nhập tin nhắn sau khi gửi
-                        // txtMessage.Clear(); 
                     }
                     catch { MessageBox.Show("Lỗi kết nối server!"); }
                 }
 
-                // 2. Hiển thị tin nhắn của TÔI (true)
-                AddMessage(message, true); // true = Tin nhắn của mình (Bên phải, màu xanh)
-
-                // 3. Xóa ô nhập
+                // Hiện tin nhắn của mình lên luôn
+                AddMessage(message, true);
                 txtInput.Texts = "";
             }
         }
@@ -315,12 +505,147 @@ namespace Login
             }
             catch { }
         }
+        private void ChuyenCheDoChat(string tenNguoiNhan)
+        {
+            Console.WriteLine($"[DEBUG] ChuyenCheDoChat gọi với tên: '{tenNguoiNhan}'");
+            _nguoiDangChat = tenNguoiNhan;
 
+            this.Invoke(new Action(() =>
+            {
+                txtChatBox.Controls.Clear();
+                txtChatBox.Invalidate();
+
+                if (string.IsNullOrEmpty(tenNguoiNhan))
+                {
+                    Console.WriteLine("[DEBUG] Đang về Chat Chung");
+                    lblTenPhong.Texts = "Phòng Chat Chung";
+                }
+                else
+                {
+                    Console.WriteLine("[DEBUG] Đang về Chat Chung");
+                    lblTenPhong.Texts = "Chat với: " + tenNguoiNhan;
+
+                    // --- THÊM ĐOẠN NÀY: Xin Server lịch sử chat cũ ---
+                    try
+                    {
+                        string cmd = $"LAY_LICH_SU|{tenNguoiNhan}";
+                        byte[] buffer = Encoding.UTF8.GetBytes(cmd);
+                        client.GetStream().Write(buffer, 0, buffer.Length);
+                    }
+                    catch { }
+                }
+            }));
+        }
         private void lblTenPhong__TextChanged(object sender, EventArgs e)
         {
+            // hien thi ten nguoi dung khi thay doi phong
 
         }
+        // Hàm này dùng để thêm 1 người vào danh sách bên trái
+        private void ThemBanVaoList(string tenBanBe)
+        {
+            // 1. Tạo một UserControl mới (hoặc Button) đại diện cho người bạn đó
+            // (Ở đây mình dùng Button cho nhanh, nếu bạn có UserControl riêng thì thay vào)
+            Button btnBanBe = new Button();
+            btnBanBe.Name = "btn_" + tenBanBe;
+            btnBanBe.Text = "● " + tenBanBe;
+            btnBanBe.ForeColor = Color.Gray;
+            // 2. Trang trí cho đẹp (Giống giao diện Discord của bạn)
+            btnBanBe.Text = tenBanBe;
+            btnBanBe.Size = new Size(250, 50); // Chiều rộng bằng panel, cao 50
+            btnBanBe.BackColor = Color.FromArgb(58, 59, 60); // Màu xám tối
+            btnBanBe.ForeColor = Color.White;
+            btnBanBe.FlatStyle = FlatStyle.Flat;
+            btnBanBe.FlatAppearance.BorderSize = 0;
+            btnBanBe.TextAlign = ContentAlignment.MiddleLeft;
+            btnBanBe.Padding = new Padding(10, 0, 0, 0); // Thụt lề chữ vào
+            btnBanBe.Cursor = Cursors.Hand;
 
 
+            // Thêm icon nếu muốn (Optional)
+            // btnBanBe.Image = Properties.Resources.user_icon; 
+            // btnBanBe.ImageAlign = ContentAlignment.MiddleLeft;
+
+            // 3. Sự kiện khi bấm vào tên người này (để chat)
+            btnBanBe.Click += (s, e) =>
+            {
+                ChuyenCheDoChat(tenBanBe);
+            };
+
+            // 4. Thêm vào Panel danh sách (Cái Panel gạch xanh trong hình bạn gửi)
+            if (roundFlowLayoutPanel2.InvokeRequired)
+            {
+                roundFlowLayoutPanel2.Invoke(new Action(() => roundFlowLayoutPanel2.Controls.Add(btnBanBe)));
+            }
+            else
+            {
+                roundFlowLayoutPanel2.Controls.Add(btnBanBe);
+            }
+        }
+        private void CapNhatTrangThai(string tenUser, bool isOnline)
+        {
+            this.Invoke(new Action(() =>
+            {
+                // 1. Tìm cái nút có tên là "btn_TenUser" trong danh sách
+                Control[] founds = roundFlowLayoutPanel2.Controls.Find("btn_" + tenUser, true);
+
+                if (founds.Length > 0 && founds[0] is Button btn)
+                {
+                    // 2. Đổi màu và icon
+                    if (isOnline)
+                    {
+                        btn.ForeColor = Color.LimeGreen; // Màu xanh lá sáng
+                                                         // Nếu muốn đổi text thì: btn.Text = "● " + tenUser;
+                    }
+                    else
+                    {
+                        btn.ForeColor = Color.Gray; // Màu xám tối
+                    }
+                }
+            }));
+        }
+  
+        private void roundButton3_Click_1(object sender, EventArgs e)
+        {
+            ChuyenCheDoChat("");
+        }
+
+        private void btnCall_Click_1(object sender, EventArgs e)
+        {
+            string myName = PhienDangNhap.TaiKhoanHienTai;
+            string receiverName = lblTenPhong.Text; // Tên người muốn gọi (lấy từ Label giao diện)
+
+            // Kiểm tra kết nối
+            if (stream == null) // Đảm bảo bạn đang dùng đúng tên biến stream kết nối (có thể là _stream hoặc clientStream)
+            {
+                MessageBox.Show("Chưa kết nối tới Server!");
+                return;
+            }
+
+            // 2. Tạo tên phòng (Channel ID) duy nhất
+            // Quy tắc: Luôn xếp theo alphabet để A gọi B hay B gọi A thì ID phòng vẫn giống nhau
+            string channelID = (String.Compare(myName, receiverName) < 0)
+                                ? $"{myName}_{receiverName}"
+                                : $"{receiverName}_{myName}";
+
+            // 3. Mở Form PhoneCall ngay lập tức
+            // Tham số: Stream, Tên mình, Tên đối phương, ID phòng, isCaller = true (vì mình là người gọi)
+            PhoneCall callForm = new PhoneCall(stream, myName, receiverName, channelID, true);
+            callForm.Show();
+
+            // 4. Gửi yêu cầu lên Server (QUAN TRỌNG: Dùng lệnh REQUEST_CALL)
+            try
+            {
+                // Gói tin: REQUEST_CALL | Người Nhận | ID Phòng
+                // Server sẽ đọc gói tin này và báo cho người nhận biết
+                string data = $"REQUEST_CALL|{receiverName}|{channelID}";
+                byte[] buffer = Encoding.UTF8.GetBytes(data);
+                stream.Write(buffer, 0, buffer.Length);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi gửi tín hiệu: " + ex.Message);
+            }
+        }
     }
 }

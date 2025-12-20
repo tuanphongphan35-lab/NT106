@@ -1,12 +1,13 @@
-﻿using System.Net;
+﻿using Server;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using System.Windows.Forms;
-using Server;
-using System;
 using System.Threading.Tasks;
-using System.Collections.Generic;
+using System.Windows.Forms;
 
 namespace Server
 {
@@ -68,9 +69,8 @@ namespace Server
             }
         }
 
-        // Xóa chữ 'async' ở đây đi
-        // 1. Đổi void thành async Task
-        private async void HandleClientComm(object? client)
+
+        private async Task HandleClientComm(object? client)
         {
             TcpClient tcpClient = (TcpClient)client!;
             NetworkStream clientStream = tcpClient.GetStream();
@@ -114,14 +114,12 @@ namespace Server
                                 break;
 
                             case "CHAT":
-                                string userSender = "Ẩn danh";
-                                lock (connectedUsers) { if (connectedUsers.ContainsKey(clientStream)) userSender = connectedUsers[clientStream]; }
-                                string content = (requestParts.Length > 1) ? requestParts[1] : "";
-                                // Chat không cần await cũng được, nhưng Broadcast nên nhanh
-                                BroadcastMessage($"CHAT|{userSender}|{content}", clientStream);
-                                UpdateUILabel($"{userSender}: {content}");
+                                await HandelChatMessage(requestParts, clientStream);
                                 break;
 
+                            case "LAY_LICH_SU":
+                                await HandelLayLS(requestParts, clientStream);
+                                break;
                             case "TIM_KIEM":
                                 // 1. Lấy từ khóa từ gói tin (Format: TIM_KIEM|TuKhoa)
                                 string keyword = (requestParts.Length > 1) ? requestParts[1] : "";
@@ -143,10 +141,28 @@ namespace Server
 
                                 Console.WriteLine($"[Server] Đã trả về {ketQua.Count} kết quả.");
                                 break;
-
+                            case "KET_BAN":
+                                // Xử lý lời mời kết bạn
+                                await HandleFriendRequest(requestParts, clientStream);
+                                break;
+                            case "PHAN_HOI_KET_BAN":
+                                // Xử lý phản hồi lời mời kết bạn
+                                await HandleFriendResponse(requestParts, clientStream);
+                                break;
                             // Các case khác nhớ thêm 'await' nếu gọi hàm async
                             case "DANGKI":
                                 await HandleRegistration(requestParts, clientStream);
+                                break;
+                            case "REQUEST_CALL":
+                                await HandleRequestCall(requestParts, clientStream);
+                                break;
+
+                            case "RESPONSE_CALL":
+                                await HandleResponseCall(requestParts, clientStream);
+                                break;
+
+                            case "END_CALL":
+                                HandleEndCall(requestParts, clientStream);
                                 break;
                         }
                     }
@@ -162,13 +178,241 @@ namespace Server
             }
             finally
             {
-                lock (clientStreams) { clientStreams.Remove(clientStream); }
-                // Xóa khỏi danh sách user online
-                lock (connectedUsers) { if (connectedUsers.ContainsKey(clientStream)) connectedUsers.Remove(clientStream); }
+                lock (connectedUsers)
+                {
+                    // Kiểm tra xem ai vừa thoát
+                    if (connectedUsers.ContainsKey(clientStream))
+                    {
+                        string userDisconnected = connectedUsers[clientStream];
 
+                        // 1. Báo cho tất cả người còn lại biết: User này đã OFFLINE
+                        foreach (var user in connectedUsers)
+                        {
+                            // Không gửi cho chính người vừa thoát
+                            if (user.Key != clientStream)
+                            {
+                                SendResponse(user.Key, $"STATUS|{userDisconnected}|OFFLINE");
+                            }
+                        }
+
+                        // 2. Giờ mới xóa khỏi danh sách
+                        connectedUsers.Remove(clientStream);
+                        UpdateUILabel($"User {userDisconnected} đã ngắt kết nối.");
+                    }
+                }
+
+                lock (clientStreams) { clientStreams.Remove(clientStream); }
                 tcpClient.Close();
                 UpdateUILabel("Client đã ngắt kết nối.");
             }
+        }
+        // --- 1. HÀM XỬ LÝ TIN NHẮN (CHAT) ---
+        private  async Task HandelChatMessage(string[] parts, NetworkStream clientStream)
+        {
+            try
+            {
+                // parts[0] là "CHAT"
+                // parts[1] là Nội dung
+                // parts[2] là Người nhận (nếu có)
+
+                string content = (parts.Length > 1) ? parts[1] : "";
+                string receiver = (parts.Length > 2) ? parts[2] : "ALL";
+
+                // Lấy tên người gửi từ danh sách đang kết nối
+                string sender = "AnDanh";
+                if (connectedUsers.ContainsKey(clientStream))
+                {
+                    sender = connectedUsers[clientStream];
+                }
+
+                // --- TRƯỜNG HỢP 1: CHAT CHUNG (ALL) ---
+                if (string.IsNullOrEmpty(receiver) || receiver == "ALL")
+                {
+                    // Gửi cho tất cả mọi người (trừ người gửi)
+                    BroadcastMessage($"CHAT|{sender}|{content}",
+                                     clientStream);
+                    Console.WriteLine($"[Chat Chung] {sender}: {content}");
+                }
+                // --- TRƯỜNG HỢP 2: CHAT RIÊNG ---
+                else
+                {
+                    // Tìm người nhận trong danh sách đang online
+                    var clientNhan = connectedUsers.FirstOrDefault(x => x.Value == receiver);
+
+                    if (clientNhan.Key != null)
+                    {
+                        // Gửi tin nhắn sang cho người nhận
+                        // Format: CHAT | Người Gửi | Nội Dung
+                        SendResponse(clientNhan.Key, $"CHAT|{sender}|{content}");
+                    }
+
+                    // QUAN TRỌNG: Lưu tin nhắn vào Firebase để sau này tải lại
+                    // (Chạy ngầm không cần đợi)
+                    _ = Database.LuuTinNhan(sender, receiver, content);
+
+                    Console.WriteLine($"[Chat Riêng] {sender} -> {receiver}: {content}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi xử lý tin nhắn: " + ex.Message);
+            }
+        }
+
+        // --- 2. HÀM XỬ LÝ TẢI LỊCH SỬ (LAY_LICH_SU) ---
+        private  async Task HandelLayLS(string[] parts, NetworkStream clientStream)
+        {
+            try
+            {
+                // parts[1] là tên người bạn muốn xem lịch sử
+                string friendName = parts[1];
+
+                // Lấy tên mình
+                string myName = connectedUsers[clientStream];
+
+                Console.WriteLine($"[Server] {myName} đang tải lịch sử với {friendName}...");
+
+                // 1. Gọi Database lấy danh sách tin nhắn cũ
+                List<string> history = await Database.LayLichSuChat(myName, friendName);
+
+                // 2. Gửi lần lượt từng dòng về cho Client
+                foreach (string msg in history)
+                {
+                    // msg có dạng: "TênNgườiGửi|NộiDung" (do hàm Database trả về)
+                    // Gửi về Client: HISTORY_DATA | TênNgườiGửi | NộiDung
+                    SendResponse(clientStream, $"HISTORY_DATA|{msg}\n");
+                }
+
+                // 3. Báo hiệu đã gửi xong
+                SendResponse(clientStream, "HISTORY_END\n");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi tải lịch sử: " + ex.Message);
+            }
+        }
+        private async Task HandleFriendRequest(string[] requestParts, NetworkStream senderStream)
+        {
+            // Cấu trúc nhận: KET_BAN | Ten_Nguoi_Muon_Ket (B)
+            string targetUserName = requestParts[1];
+
+            // Lấy tên người gửi (A) từ danh sách đã lưu lúc đăng nhập
+            string senderName = connectedUsers[senderStream];
+
+            Console.WriteLine($"[Server] {senderName} muốn kết bạn với {targetUserName}");
+
+            // 1. Tìm xem người B có đang online không
+            var targetClientPair = connectedUsers.FirstOrDefault(x => x.Value == targetUserName);
+
+            if (targetClientPair.Key != null) // Nếu B đang online
+            {
+                // Gửi lệnh xuống cho B: LOI_MOI | Tên_A
+                string msg = $"LOI_MOI|{senderName}";
+                SendResponse(targetClientPair.Key, msg); // Dùng hàm gửi có sẵn của bạn
+            }
+            else
+            {
+                // Báo lại cho A biết là B không online (Tùy chọn)
+                SendResponse(senderStream, "SERVER_MSG|Người này hiện không online.");
+            }
+            UpdateUILabel($"[Friend] {senderName} đã gửi lời mời kết bạn tới {targetUserName}.");
+            await Task.CompletedTask; // Để thỏa mãn kiểu trả về async Task
+        }
+        private async Task HandleFriendResponse(string[] requestParts, NetworkStream responderStream)
+        {
+            // Cấu trúc nhận: PHAN_HOI_KET_BAN | Ten_Nguoi_Gui_Loi_Moi (A) | DONG_Y (hoặc TU_CHOI)
+            string originalSenderName = requestParts[1];
+            string decision = requestParts[2];
+            string responderName = connectedUsers[responderStream]; // Tên người trả lời (B)
+
+            // 1. Nếu Đồng ý -> Lưu vào Database (QUAN TRỌNG)
+            if (decision == "DONG_Y")
+            {
+                // Lưu quan hệ bạn bè vào DB
+                await Database.ThemBanBe(originalSenderName, responderName);
+
+                Console.WriteLine($"[Server] Đã thiết lập quan hệ bạn bè: {originalSenderName} - {responderName}");
+            }
+
+            // 2. Báo kết quả về cho người A
+            var senderPair = connectedUsers.FirstOrDefault(x => x.Value == originalSenderName);
+            if (senderPair.Key != null)
+            {
+                // Gửi: KET_QUA_KET_BAN | Tên_B | DONG_Y
+                string msg = $"KET_QUA_KET_BAN|{responderName}|{decision}";
+                SendResponse(senderPair.Key, msg);
+            }
+            UpdateUILabel($"[Friend] {responderName} đã {decision} lời mời kết bạn từ {originalSenderName}.");
+            await Task.CompletedTask;
+        }
+        private async void HandleEndCall(string[] parts, NetworkStream senderStream)
+        {
+            string receiverName = parts[1];
+            string channelID = parts[2];
+
+            // Lấy tên người gọi (Sender) từ dictionary
+            string senderName = "";
+            lock (connectedUsers)
+            {
+                if (connectedUsers.ContainsKey(senderStream))
+                    senderName = connectedUsers[senderStream];
+            }
+
+            if (string.IsNullOrEmpty(senderName)) return; // Không xác định được người gọi
+
+            // Tìm stream của người nhận
+            NetworkStream receiverStream = GetStreamByUsername(receiverName);
+
+            if (receiverStream != null)
+            {
+                // Gửi tín hiệu đến người nhận: "Có cuộc gọi đến từ A"
+                // Gói tin gửi đi: INCOMING_CALL | SenderName | ChannelID
+                string msg = $"INCOMING_CALL|{senderName}|{channelID}";
+                SendResponse(receiverStream, msg);
+
+                UpdateUILabel($"[Call] {senderName} đang gọi {receiverName}...");
+            }
+            else
+            {
+                // Người nhận không online, báo lại cho người gọi
+                SendResponse(senderStream, "CALL_ERROR|User Offline");
+            }
+        }
+
+        private async Task HandleResponseCall(string[] parts, NetworkStream receiverStream)
+        {
+            string callerName = parts[1];
+            string status = parts[2]; // "ACCEPT" hoặc "REJECT"
+
+            // Tìm stream của người gọi (người lúc nãy đã gọi)
+            NetworkStream callerStream = GetStreamByUsername(callerName);
+
+            // Lấy tên người nhận (chính là người đang gửi response này)
+            string receiverName = "";
+            lock (connectedUsers) { if (connectedUsers.ContainsKey(receiverStream)) receiverName = connectedUsers[receiverStream]; }
+
+            if (callerStream != null)
+            {
+                // Chuyển tiếp phản hồi về cho người gọi
+                // Gói tin gửi đi: CALL_RESPONSE | ReceiverName | ACCEPT (hoặc REJECT)
+                SendResponse(callerStream, $"CALL_RESPONSE|{receiverName}|{status}");
+
+                UpdateUILabel($"[Call] {receiverName} đã {status} cuộc gọi của {callerName}.");
+            }
+        }
+
+        private async Task HandleRequestCall(string[] parts, NetworkStream senderStream)
+        {
+            string targetName = parts[1];
+
+            // Tìm stream của đối phương để báo tin ngắt kết nối
+            NetworkStream targetStream = GetStreamByUsername(targetName);
+
+            if (targetStream != null)
+            {
+                SendResponse(targetStream, "CALL_ENDED");
+            }
+            UpdateUILabel($"[Call] Cuộc gọi với {targetName} đã kết thúc.");
         }
 
         private async Task HandleRegistration(string[] requestParts, NetworkStream clientStream)
@@ -210,9 +454,33 @@ namespace Server
                         connectedUsers.Add(clientStream, taiKhoan);
                     }
                 }
-
+                List<string> danhSachBanBe = await Database.LayDanhSachBanBe(taiKhoan);
+                if (danhSachBanBe.Count > 0)
+                {
+                    string friendString = string.Join(";", danhSachBanBe);
+                    SendResponse(clientStream, "LIST_BAN_BE|" + friendString);
+                }
                 string userID = await Database.LayIDNguoiDung(taiKhoan);
                 SendResponse(clientStream, "DANGNHAP_SUCCESS|" + taiKhoan);
+                // 1. Báo cho MỌI NGƯỜI biết TÔI vừa Online
+                foreach (var user in connectedUsers)
+                {
+                    // Gửi cho người khác: STATUS | Phong12345 | ONLINE
+                    if (user.Value != taiKhoan)
+                    {
+                        SendResponse(user.Key, $"STATUS|{taiKhoan}|ONLINE");
+                    }
+                }
+
+                // 2. Báo cho TÔI biết ai ĐANG Online sẵn
+                foreach (var user in connectedUsers)
+                {
+                    if (user.Value != taiKhoan)
+                    {
+                        // Gửi về cho mình: STATUS | NgườiKhác | ONLINE
+                        SendResponse(clientStream, $"STATUS|{user.Value}|ONLINE");
+                    }
+                }
                 UpdateUILabel($"User {taiKhoan} đã đăng nhập.");
             }
             else
@@ -234,11 +502,34 @@ namespace Server
 
         private void UpdateUILabel(string message)
         {
-            if (label1.InvokeRequired) label1.Invoke(new Action(() => label1.Text = message));
-            else label1.Text = message;
-        }
+            string msgWithNewLine = message + Environment.NewLine;
 
-        private void SendResponse(NetworkStream clientStream, string response)
+            if (label1.InvokeRequired)
+            {
+                // Sửa "=" thành "+="
+                label1.Invoke(new Action(() => label1.Text += msgWithNewLine));
+            }
+            else
+            {
+                // Sửa "=" thành "+="
+                label1.Text += msgWithNewLine;
+            }
+        }
+        private NetworkStream GetStreamByUsername(string username)
+        {
+            lock (connectedUsers)
+            {
+                foreach (var item in connectedUsers)
+                {
+                    if (item.Value.Equals(username, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return item.Key; // Trả về stream của người đó
+                    }
+                }
+            }
+            return null; // Không tìm thấy (người đó offline)
+        }
+        private  void SendResponse(NetworkStream clientStream, string response)
         {
             byte[] responseData = Encoding.UTF8.GetBytes(response);
             try { clientStream.Write(responseData, 0, responseData.Length); }
@@ -255,8 +546,8 @@ namespace Server
                 while (true)
                 {
                     TcpClient client = tcpListener.AcceptTcpClient();
-                    Thread clientThread = new Thread(new ParameterizedThreadStart(HandleClientComm));
-                    clientThread.Start(client);
+                    Thread clientThread = new Thread(() => HandleClientComm(client).Wait());
+                    clientThread.Start();
                 }
             }
             catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }

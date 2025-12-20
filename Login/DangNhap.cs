@@ -67,6 +67,8 @@ namespace Login
                 {
                     // Tên đăng nhập được tìm thấy nhưng mật khẩu sai HOẶC Tên đăng nhập không tồn tại
                     MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    // Kích hoạt lại nút đăng nhập
+                    button1.Enabled = true;
                 }
             }
             catch (Exception ex)
@@ -129,6 +131,8 @@ namespace Login
                 {
                     // Tên đăng nhập được tìm thấy nhưng mật khẩu sai HOẶC Tên đăng nhập không tồn tại
                     MessageBox.Show("Tên đăng nhập hoặc mật khẩu không đúng.");
+                    // Kích hoạt lại nút đăng nhập
+                    button1.Enabled = true;
                 }
             }
             catch (Exception ex)

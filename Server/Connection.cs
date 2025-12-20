@@ -8,7 +8,7 @@ namespace Server
     public static class FirestoreHelper // Hoặc giữ tên Connection nếu muốn
     {
         private static FirestoreDb db;
-
+        private const string CallsCollection = "ActiveCalls";
         // CẬP NHẬT TÊN FILE JSON BẠN ĐÃ LƯU
         private const string JsonPath = "nt106-7d101-firebase-adminsdk-fbsvc-aa1a28b8ca.json";
         // CẬP NHẬT PROJECT ID CỦA BẠN
@@ -35,5 +35,28 @@ namespace Server
             }
             return db;
         }
+        // Hàm tạo yêu cầu gọi (Signaling)
+        public static async Task CreateCallSession(string callerId, string receiverId, string channelName)
+        {
+            var db = GetDatabase();
+            DocumentReference docRef = db.Collection(CallsCollection).Document(receiverId);
+            Dictionary<string, object> callData = new Dictionary<string, object>
+        {
+            { "CallerId", callerId },
+            { "ChannelName", channelName },
+            { "Status", "Calling" },
+            { "Timestamp", Timestamp.GetCurrentTimestamp() }
+        };
+            await docRef.SetAsync(callData);
+        }
+
+        // Hàm hủy cuộc gọi khi kết thúc
+        public static async Task EndCallSession(string receiverId)
+        {
+            var db = GetDatabase();
+            DocumentReference docRef = db.Collection(CallsCollection).Document(receiverId);
+            await docRef.DeleteAsync();
+        }
     }
+
 }    
