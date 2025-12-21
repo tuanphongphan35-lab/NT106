@@ -86,6 +86,7 @@
             roundButton8.Size = new Size(42, 35);
             roundButton8.TabIndex = 3;
             roundButton8.UseVisualStyleBackColor = false;
+            roundButton8.Click += roundButton8_Click;
             // 
             // panel3
             // 
@@ -257,7 +258,7 @@
             roundFlowLayoutPanel1.Controls.Add(lblTenPhong);
             roundFlowLayoutPanel1.Controls.Add(btnCall);
             roundFlowLayoutPanel1.Location = new Point(34, 2);
-            roundFlowLayoutPanel1.Margin = new Padding(2, 2, 2, 2);
+            roundFlowLayoutPanel1.Margin = new Padding(2);
             roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
             roundFlowLayoutPanel1.Size = new Size(571, 46);
             roundFlowLayoutPanel1.TabIndex = 14;
@@ -279,6 +280,7 @@
             lblTenPhong.TabIndex = 14;
             lblTenPhong.Texts = "#";
             lblTenPhong.UnderlinedStyle = false;
+            lblTenPhong._TextChanged += lblTenPhong__TextChanged_1;
             // 
             // btnCall
             // 
@@ -292,7 +294,7 @@
             btnCall.FlatStyle = FlatStyle.Flat;
             btnCall.ForeColor = Color.White;
             btnCall.Location = new Point(171, 2);
-            btnCall.Margin = new Padding(2, 2, 2, 2);
+            btnCall.Margin = new Padding(2);
             btnCall.Name = "btnCall";
             btnCall.Size = new Size(41, 36);
             btnCall.TabIndex = 15;
@@ -359,6 +361,7 @@
             txtChatBox.BorderColor = Color.Transparent;
             txtChatBox.BorderRadius = 20;
             txtChatBox.BorderThickness = 0F;
+            txtChatBox.FlowDirection = FlowDirection.TopDown;
             txtChatBox.Location = new Point(24, 51);
             txtChatBox.Name = "txtChatBox";
             txtChatBox.Size = new Size(601, 522);

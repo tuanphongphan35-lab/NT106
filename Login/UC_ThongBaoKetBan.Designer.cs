@@ -90,14 +90,8 @@ namespace Login
             Controls.Add(label1);
             Name = "UC_ThongBaoKetBan";
             Size = new Size(821, 81);
-            Load += UC_ThongBaoKetBan_Load;
             ResumeLayout(false);
             PerformLayout();
-        }
-
-        private void UC_ThongBaoKetBan_Load(object sender, EventArgs e)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion

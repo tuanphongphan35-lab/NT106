@@ -28,57 +28,57 @@
         /// </summary>
         private void InitializeComponent()
         {
-            roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
-            roundTextBox1 = new RoundTextBox();
-            roundButton1 = new RoundButton();
+            flpDanhSach = new RoundFlowLayoutPanel();
+            txtTimKiem = new RoundTextBox();
+            btnTim = new RoundButton();
             roundButton2 = new RoundButton();
             label1 = new Label();
             SuspendLayout();
             // 
-            // roundFlowLayoutPanel1
+            // flpDanhSach
             // 
-            roundFlowLayoutPanel1.BackColor = Color.FromArgb(40, 43, 51);
-            roundFlowLayoutPanel1.BorderColor = Color.Transparent;
-            roundFlowLayoutPanel1.BorderRadius = 20;
-            roundFlowLayoutPanel1.BorderThickness = 0F;
-            roundFlowLayoutPanel1.Location = new Point(32, 142);
-            roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
-            roundFlowLayoutPanel1.Size = new Size(443, 421);
-            roundFlowLayoutPanel1.TabIndex = 0;
+            flpDanhSach.BackColor = Color.FromArgb(40, 43, 51);
+            flpDanhSach.BorderColor = Color.Transparent;
+            flpDanhSach.BorderRadius = 20;
+            flpDanhSach.BorderThickness = 0F;
+            flpDanhSach.Location = new Point(32, 142);
+            flpDanhSach.Name = "flpDanhSach";
+            flpDanhSach.Size = new Size(443, 421);
+            flpDanhSach.TabIndex = 0;
             // 
-            // roundTextBox1
+            // txtTimKiem
             // 
-            roundTextBox1.BackColor = Color.FromArgb(40, 43, 51);
-            roundTextBox1.BorderColor = Color.MediumSlateBlue;
-            roundTextBox1.BorderFocusColor = Color.HotPink;
-            roundTextBox1.BorderRadius = 15;
-            roundTextBox1.BorderSize = 0;
-            roundTextBox1.Location = new Point(32, 84);
-            roundTextBox1.Multiline = false;
-            roundTextBox1.Name = "roundTextBox1";
-            roundTextBox1.Padding = new Padding(10, 7, 10, 7);
-            roundTextBox1.PasswordChar = false;
-            roundTextBox1.Size = new Size(325, 35);
-            roundTextBox1.TabIndex = 1;
-            roundTextBox1.Texts = "";
-            roundTextBox1.UnderlinedStyle = false;
+            txtTimKiem.BackColor = Color.FromArgb(40, 43, 51);
+            txtTimKiem.BorderColor = Color.MediumSlateBlue;
+            txtTimKiem.BorderFocusColor = Color.HotPink;
+            txtTimKiem.BorderRadius = 15;
+            txtTimKiem.BorderSize = 0;
+            txtTimKiem.Location = new Point(32, 84);
+            txtTimKiem.Multiline = false;
+            txtTimKiem.Name = "txtTimKiem";
+            txtTimKiem.Padding = new Padding(10, 7, 10, 7);
+            txtTimKiem.PasswordChar = false;
+            txtTimKiem.Size = new Size(325, 35);
+            txtTimKiem.TabIndex = 1;
+            txtTimKiem.Texts = "";
+            txtTimKiem.UnderlinedStyle = false;
             // 
-            // roundButton1
+            // btnTim
             // 
-            roundButton1.BackColor = Color.MediumSlateBlue;
-            roundButton1.BorderColor = Color.Transparent;
-            roundButton1.BorderRadius = 20;
-            roundButton1.BorderThickness = 0F;
-            roundButton1.FlatAppearance.BorderSize = 0;
-            roundButton1.FlatStyle = FlatStyle.Flat;
-            roundButton1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            roundButton1.ForeColor = Color.White;
-            roundButton1.Location = new Point(363, 86);
-            roundButton1.Name = "roundButton1";
-            roundButton1.Size = new Size(112, 33);
-            roundButton1.TabIndex = 2;
-            roundButton1.Text = "Tìm";
-            roundButton1.UseVisualStyleBackColor = false;
+            btnTim.BackColor = Color.MediumSlateBlue;
+            btnTim.BorderColor = Color.Transparent;
+            btnTim.BorderRadius = 20;
+            btnTim.BorderThickness = 0F;
+            btnTim.FlatAppearance.BorderSize = 0;
+            btnTim.FlatStyle = FlatStyle.Flat;
+            btnTim.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            btnTim.ForeColor = Color.White;
+            btnTim.Location = new Point(363, 86);
+            btnTim.Name = "btnTim";
+            btnTim.Size = new Size(112, 33);
+            btnTim.TabIndex = 2;
+            btnTim.Text = "Tìm";
+            btnTim.UseVisualStyleBackColor = false;
             // 
             // roundButton2
             // 
@@ -118,13 +118,12 @@
             ClientSize = new Size(506, 620);
             Controls.Add(label1);
             Controls.Add(roundButton2);
-            Controls.Add(roundButton1);
-            Controls.Add(roundTextBox1);
-            Controls.Add(roundFlowLayoutPanel1);
+            Controls.Add(btnTim);
+            Controls.Add(txtTimKiem);
+            Controls.Add(flpDanhSach);
             Margin = new Padding(5, 4, 5, 4);
             Name = "DanhSachBanBe";
             Text = "Danh Sách Bạn Bè";
-            Load += DanhSachBanBe_Load;
             ResumeLayout(false);
             PerformLayout();
 
@@ -132,9 +131,9 @@
 
         #endregion
 
-        private RoundFlowLayoutPanel roundFlowLayoutPanel1;
-        private RoundTextBox roundTextBox1;
-        private RoundButton roundButton1;
+        private RoundFlowLayoutPanel flpDanhSach;
+        private RoundTextBox txtTimKiem;
+        private RoundButton btnTim;
         private RoundButton roundButton2;
         private Label label1;
     }

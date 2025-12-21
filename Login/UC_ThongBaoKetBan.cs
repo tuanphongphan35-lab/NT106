@@ -16,6 +16,7 @@ namespace Login
             // QUAN TRỌNG: Gán dữ liệu từ bên ngoài vào biến nội bộ
             this._nguoiGui = nguoiGui;
             this._callback = callback;
+            label1.Text = nguoiGui + " đã gửi lời mời kết bạn";
         }
 
         // --- 3. Nút ĐỒNG Ý ---

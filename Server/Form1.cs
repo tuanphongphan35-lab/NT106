@@ -45,21 +45,28 @@ namespace Server
         // Hàm này gửi tin nhắn đến tất cả client
         private void BroadcastMessage(string message, NetworkStream senderStream)
         {
+            // [QUAN TRỌNG]: Đảm bảo luôn có xuống dòng ở cuối
+            if (!message.EndsWith("\n"))
+            {
+                message += "\n";
+            }
+
             byte[] buffer = Encoding.UTF8.GetBytes(message);
 
             lock (clientStreams)
             {
                 for (int i = clientStreams.Count - 1; i >= 0; i--)
                 {
-                    // --- QUAN TRỌNG: Kiểm tra nếu là người gửi thì BỎ QUA ---
-                    if (clientStreams[i] == senderStream)
-                    {
-                        continue; // Không gửi lại cho chính người này
-                    }
+                    // Không gửi lại cho người gửi
+                    if (clientStreams[i] == senderStream) continue;
 
                     try
                     {
-                        clientStreams[i].Write(buffer, 0, buffer.Length);
+                        if (clientStreams[i].CanWrite)
+                        {
+                            clientStreams[i].Write(buffer, 0, buffer.Length);
+                            clientStreams[i].Flush();
+                        }
                     }
                     catch
                     {
@@ -78,136 +85,149 @@ namespace Server
             lock (clientStreams) { clientStreams.Add(clientStream); }
             UpdateUILabel("Kết nối mới được chấp nhận.");
 
-            byte[] message = new byte[4096];
-            int bytesRead;
-
-            try
+            // [THAY ĐỔI QUAN TRỌNG]: Dùng StreamReader để đọc theo dòng lệnh
+            using (StreamReader reader = new StreamReader(clientStream))
             {
-                while (true)
+                try
                 {
-                    bytesRead = 0;
-                    try
+                    while (true)
                     {
-                        // 2. Dùng ReadAsync thay vì Read (Quan trọng!)
-                        // Để Server không bị treo khi đợi tin nhắn
-                        bytesRead = await clientStream.ReadAsync(message, 0, 4096);
-                    }
-                    catch
-                    {
-                        break;
-                    }
+                        // Đọc từng dòng (chờ cho đến khi nhận được ký tự \n từ Client)
+                        string dataReceived = await reader.ReadLineAsync();
 
-                    if (bytesRead == 0) break;
+                        if (dataReceived == null) break; // Client ngắt kết nối
 
-                    string dataReceived = Encoding.UTF8.GetString(message, 0, bytesRead);
-                    Console.WriteLine($"[SERVER NHẬN]: {dataReceived}");
+                        // Console.WriteLine($"[SERVER NHẬN]: {dataReceived}"); // Debug nếu cần
 
-                    try
-                    {
-                        string[] requestParts = dataReceived.Split(new char[] { '|' }, StringSplitOptions.None);
-                        string command = requestParts[0];
-                        switch (command)
+                        try
                         {
-                            case "DANGNHAP":
-                                // 3. Có chữ 'await' để đợi đăng nhập xong mới làm việc khác
-                                await HandleLogin(requestParts, clientStream);
-                                break;
+                            string[] requestParts = dataReceived.Split('|');
+                            string command = requestParts[0];
 
-                            case "CHAT":
-                                await HandelChatMessage(requestParts, clientStream);
-                                break;
-
-                            case "LAY_LICH_SU":
-                                await HandelLayLS(requestParts, clientStream);
-                                break;
-                            case "TIM_KIEM":
-                                // 1. Lấy từ khóa từ gói tin (Format: TIM_KIEM|TuKhoa)
-                                string keyword = (requestParts.Length > 1) ? requestParts[1] : "";
-
-                                // Log ra Server biết (Dùng UpdateUILabel thay vì MessageBox để đỡ bị treo Server)
-                                UpdateUILabel($"[Search] Client đang tìm: {keyword}");
-
-                                // 2. Gọi Database 
-                                // Lưu ý: Hàm Database.TimKiemNguoiDung cần trả về List dạng "TenUser:ID" như đã sửa ở bài trước
-                                List<string> ketQua = await Database.TimKiemNguoiDung(keyword);
-
-                                // 3. Nối chuỗi kết quả bằng dấu chấm phẩy ";"
-                                // Kết quả sẽ là: "TenA:ID1;TenB:ID2;TenC:ID3"
-                                string dataTraVe = string.Join(";", ketQua);
-
-                                // 4. Gửi phản hồi về Client
-                                // Header phải là "TIM_THAY" để khớp với code Client: if (message.StartsWith("TIM_THAY|"))
-                                SendResponse(clientStream, "TIM_THAY|" + dataTraVe);
-
-                                Console.WriteLine($"[Server] Đã trả về {ketQua.Count} kết quả.");
-                                break;
-                            case "KET_BAN":
-                                // Xử lý lời mời kết bạn
-                                await HandleFriendRequest(requestParts, clientStream);
-                                break;
-                            case "PHAN_HOI_KET_BAN":
-                                // Xử lý phản hồi lời mời kết bạn
-                                await HandleFriendResponse(requestParts, clientStream);
-                                break;
-                            // Các case khác nhớ thêm 'await' nếu gọi hàm async
-                            case "DANGKI":
-                                await HandleRegistration(requestParts, clientStream);
-                                break;
-                            case "REQUEST_CALL":
-                                await HandleRequestCall(requestParts, clientStream);
-                                break;
-
-                            case "RESPONSE_CALL":
-                                await HandleResponseCall(requestParts, clientStream);
-                                break;
-
-                            case "END_CALL":
-                                HandleEndCall(requestParts, clientStream);
-                                break;
-                        }
-                    }
-                    catch (Exception exLogic)
-                    {
-                        Console.WriteLine($"[LỖI LOGIC]: {exLogic.Message}");
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[LỖI KẾT NỐI]: {ex.Message}");
-            }
-            finally
-            {
-                lock (connectedUsers)
-                {
-                    // Kiểm tra xem ai vừa thoát
-                    if (connectedUsers.ContainsKey(clientStream))
-                    {
-                        string userDisconnected = connectedUsers[clientStream];
-
-                        // 1. Báo cho tất cả người còn lại biết: User này đã OFFLINE
-                        foreach (var user in connectedUsers)
-                        {
-                            // Không gửi cho chính người vừa thoát
-                            if (user.Key != clientStream)
+                            switch (command)
                             {
-                                SendResponse(user.Key, $"STATUS|{userDisconnected}|OFFLINE");
+                                case "DANGNHAP":
+                                    await HandleLogin(requestParts, clientStream);
+                                    break;
+
+                                case "CHAT":
+                                    await HandelChatMessage(requestParts, clientStream);
+                                    break;
+
+                                case "LAY_LICH_SU":
+                                    await HandelLayLS(requestParts, clientStream);
+                                    break;
+
+                                case "TIM_KIEM":
+                                    // ... (Giữ nguyên logic TIM_KIEM cũ của bạn) ...
+                                    // Nhớ thêm \n vào SendResponse nếu hàm đó chưa tự thêm
+                                    string keyword = (requestParts.Length > 1) ? requestParts[1] : "";
+                                    UpdateUILabel($"[Search] Client đang tìm: {keyword}");
+                                    List<string> ketQua = await Database.TimKiemNguoiDung(keyword);
+                                    string dataTraVe = string.Join(";", ketQua);
+                                    SendResponse(clientStream, "TIM_THAY|" + dataTraVe + "\n");
+                                    break;
+
+                                // --- [THÊM LOGIC GỬI FILE VÀO ĐÂY] ---
+                                case "SEND_FILE":
+                                    if (requestParts.Length < 4) break;
+
+                                    string receiverName = requestParts[1];
+                                    string fileName = requestParts[2];
+                                    string fileContent = requestParts[3];
+
+                                    // Lấy tên người gửi
+                                    string senderName = "Unknown";
+                                    lock (connectedUsers)
+                                    {
+                                        if (connectedUsers.ContainsKey(clientStream))
+                                            senderName = connectedUsers[clientStream];
+                                    }
+
+                                    // Tạo gói tin GỬI ĐI. BẮT BUỘC PHẢI CÓ \n Ở CUỐI
+                                    string msgToSend = $"RECEIVE_FILE|{senderName}|{fileName}|{fileContent}\n";
+
+                                    if (receiverName == "ALL" || string.IsNullOrEmpty(receiverName))
+                                    {
+                                        BroadcastMessage(msgToSend, clientStream);
+                                        UpdateUILabel($"[File] {senderName} gửi file vào nhóm chung.");
+                                    }
+                                    else
+                                    {
+                                        NetworkStream destStream = GetStreamByUsername(receiverName);
+                                        if (destStream != null)
+                                        {
+                                            SendResponse(destStream, msgToSend);
+                                            UpdateUILabel($"[File] {senderName} gửi file tới {receiverName}.");
+                                        }
+                                    }
+                                    break;
+
+                                // ... Copy nốt các case khác (KET_BAN, CALL...) từ code cũ ...
+                                case "KET_BAN": await HandleFriendRequest(requestParts, clientStream); break;
+                                case "PHAN_HOI_KET_BAN": await HandleFriendResponse(requestParts, clientStream); break;
+                                case "REQUEST_CALL": await HandleRequestCall(requestParts, clientStream); break;
+                                case "RESPONSE_CALL": await HandleResponseCall(requestParts, clientStream); break;
+                                case "END_CALL": HandleEndCall(requestParts, clientStream); break;
+                                case "DANGKI": await HandleRegistration(requestParts, clientStream); break;
+                                case "XOA_BAN":
+                                    string nguoiCanXoa = requestParts[1];
+
+                                    // Lấy tên người gửi lệnh
+                                    string nguoiYeuCau = "";
+                                    lock (connectedUsers)
+                                    {
+                                        if (connectedUsers.ContainsKey(clientStream))
+                                            nguoiYeuCau = connectedUsers[clientStream];
+                                    }
+
+                                    if (!string.IsNullOrEmpty(nguoiYeuCau))
+                                    {
+                                        Console.WriteLine($"[INFO] Đang xóa DB: {nguoiYeuCau} - {nguoiCanXoa}...");
+
+                                        // GỌI HÀM DATABASE Ở BƯỚC 1
+                                        bool xoaThanhCong = await Database.XoaBanBe(nguoiYeuCau, nguoiCanXoa);
+
+                                        if (xoaThanhCong) Console.WriteLine("=> [SUCCESS] Đã xóa thành công trong DB.");
+                                        else Console.WriteLine("=> [FAIL] Không xóa được (Có thể do sai tên bảng/cột).");
+                                    }
+                                    break;
                             }
                         }
-
-                        // 2. Giờ mới xóa khỏi danh sách
-                        connectedUsers.Remove(clientStream);
-                        UpdateUILabel($"User {userDisconnected} đã ngắt kết nối.");
+                        catch (Exception exLogic)
+                        {
+                            Console.WriteLine($"[LỖI LOGIC]: {exLogic.Message}");
+                        }
                     }
                 }
-
-                lock (clientStreams) { clientStreams.Remove(clientStream); }
-                tcpClient.Close();
-                UpdateUILabel("Client đã ngắt kết nối.");
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"[LỖI KẾT NỐI]: {ex.Message}");
+                }
+                finally
+                {
+                    // Xử lý ngắt kết nối (giữ nguyên logic cũ của bạn)
+                    lock (connectedUsers)
+                    {
+                        if (connectedUsers.ContainsKey(clientStream))
+                        {
+                            string userDisconnected = connectedUsers[clientStream];
+                            foreach (var user in connectedUsers)
+                            {
+                                if (user.Key != clientStream)
+                                    SendResponse(user.Key, $"STATUS|{userDisconnected}|OFFLINE\n");
+                            }
+                            connectedUsers.Remove(clientStream);
+                            UpdateUILabel($"User {userDisconnected} đã ngắt kết nối.");
+                        }
+                    }
+                    lock (clientStreams) { clientStreams.Remove(clientStream); }
+                    tcpClient.Close();
+                }
             }
         }
         // --- 1. HÀM XỬ LÝ TIN NHẮN (CHAT) ---
-        private  async Task HandelChatMessage(string[] parts, NetworkStream clientStream)
+        private async Task HandelChatMessage(string[] parts, NetworkStream clientStream)
         {
             try
             {
@@ -260,7 +280,7 @@ namespace Server
         }
 
         // --- 2. HÀM XỬ LÝ TẢI LỊCH SỬ (LAY_LICH_SU) ---
-        private  async Task HandelLayLS(string[] parts, NetworkStream clientStream)
+        private async Task HandelLayLS(string[] parts, NetworkStream clientStream)
         {
             try
             {
@@ -529,10 +549,23 @@ namespace Server
             }
             return null; // Không tìm thấy (người đó offline)
         }
-        private  void SendResponse(NetworkStream clientStream, string response)
+        private void SendResponse(NetworkStream clientStream, string response)
         {
+            // [QUAN TRỌNG]: Đảm bảo luôn có xuống dòng ở cuối
+            if (!response.EndsWith("\n"))
+            {
+                response += "\n";
+            }
+
             byte[] responseData = Encoding.UTF8.GetBytes(response);
-            try { clientStream.Write(responseData, 0, responseData.Length); }
+            try
+            {
+                if (clientStream.CanWrite)
+                {
+                    clientStream.Write(responseData, 0, responseData.Length);
+                    clientStream.Flush(); // Đẩy đi ngay lập tức
+                }
+            }
             catch (Exception ex) { Console.WriteLine("Lỗi gửi: " + ex.Message); }
         }
 
@@ -552,5 +585,6 @@ namespace Server
             }
             catch (Exception ex) { MessageBox.Show("Lỗi: " + ex.Message); }
         }
+
     }
 }
