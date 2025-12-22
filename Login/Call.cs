@@ -9,7 +9,7 @@ namespace Login
     public partial class Call : Form
     {
         // --- CẤU HÌNH AGORA ---
-        private string _appID = "020845b04dfa45619f8ffaac218cf8fa"; // <--- ĐIỀN APP ID
+        private string _appID = "c505b6fe6e6549509d0c735b2335fe85"; // <--- ĐIỀN APP ID
         private IRtcEngine rtcEngine;
 
         private NetworkStream _serverStream;
@@ -33,6 +33,7 @@ namespace Login
             this.Text = "Đang gọi video với: " + _otherPersonName;
             InitAgoraEngine();
             JoinChannel();
+            this.Text = "Đang gọi tại phòng: " + this._channelName;
         }
 
         private void InitAgoraEngine()

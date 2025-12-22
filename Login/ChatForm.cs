@@ -53,7 +53,7 @@ namespace Login
 
             try
             {
-                client = new TcpClient("127.0.0.1", 8080);
+                client = new TcpClient("26.178.216.237", 8080);
                 stream = client.GetStream();
 
                 // Gửi lệnh đăng nhập kèm \n
