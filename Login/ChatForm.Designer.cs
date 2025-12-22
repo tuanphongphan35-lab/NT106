@@ -174,7 +174,7 @@
             roundButton3.Size = new Size(67, 32);
             roundButton3.TabIndex = 7;
             roundButton3.UseVisualStyleBackColor = false;
-            roundButton3.Click += roundButton3_Click_1;
+            roundButton3.Click += roundButton3_Click;
             // 
             // roundButton2
             // 
@@ -280,7 +280,7 @@
             lblTenPhong.TabIndex = 14;
             lblTenPhong.Texts = "#";
             lblTenPhong.UnderlinedStyle = false;
-            lblTenPhong._TextChanged += lblTenPhong__TextChanged_1;
+            lblTenPhong._TextChanged += lblTenPhong__TextChanged;
             // 
             // btnCall
             // 

@@ -675,7 +675,7 @@ namespace Login
             if (stream == null) return;
 
             string channelID = (String.Compare(myName, receiverName) < 0) ? $"{myName}_{receiverName}" : $"{receiverName}_{myName}";
-            PhoneCall callForm = new PhoneCall(stream, myName, receiverName, channelID, true);
+            PhoneCall callForm = new PhoneCall(stream, receiverName, channelID);
             callForm.Show();
 
             try
@@ -852,10 +852,10 @@ namespace Login
                 {
                     btnDauTien.PerformClick();
                 }
-            }));
+            }
         }
-
-        private void roundButton3_Click_1(object sender, EventArgs e)
+        
+        private void roundButton3_Click(object sender, EventArgs e)
         {
             ChuyenCheDoChat("");
         }
