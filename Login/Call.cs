@@ -1,108 +1,181 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
+﻿using Agora.Rtc;
+using System;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Agora.Rtc;
 
 namespace Login
 {
     public partial class Call : Form
     {
-        // Khai báo AgoraService (Class bên file Agora.cs)
-        private AgoraService agoraService;
-        private string currentChannelId;
-        private bool isMuted = false;
+        // --- CẤU HÌNH AGORA ---
+        private string _appID = "020845b04dfa45619f8ffaac218cf8fa"; // <--- ĐIỀN APP ID
+        private IRtcEngine rtcEngine;
 
-        // 1. Sửa Constructor để nhận ChannelID (Tên phòng) từ ChatForm truyền sang
-        // Lưu ý: Bạn cần sửa chỗ gọi form này ở ChatForm thành: new Call("TenPhong")
-        public Call(string channelId)
+        private NetworkStream _serverStream;
+        private string _channelName;
+        private string _otherPersonName;
+        private bool _isMicOn = true;
+
+        public Call(NetworkStream stream, string channelName, string otherPersonName)
         {
             InitializeComponent();
+            _serverStream = stream;
+            _channelName = channelName;
+            _otherPersonName = otherPersonName;
 
-            this.currentChannelId = channelId;
-            this.agoraService = new AgoraService();
+            // Tự động tắt khi Form đóng
+            this.FormClosing += Call_FormClosing;
         }
+
         private void Call_Load(object sender, EventArgs e)
         {
-            // Khởi tạo Engine và truyền vào bộ xử lý sự kiện (EventHandler)
-            agoraService.InitEngine(new AgoraEventHandler(this));
+            this.Text = "Đang gọi video với: " + _otherPersonName;
+            InitAgoraEngine();
+            JoinChannel();
+        }
 
-            // Vào phòng ngay lập tức
-            agoraService.JoinChannel(currentChannelId);
+        private void InitAgoraEngine()
+        {
+            try
+            {
+                rtcEngine = RtcEngine.CreateAgoraRtcEngine();
+                RtcEngineContext context = new RtcEngineContext(_appID, 0,
+                                            CHANNEL_PROFILE_TYPE.CHANNEL_PROFILE_COMMUNICATION,
+                                            AUDIO_SCENARIO_TYPE.AUDIO_SCENARIO_DEFAULT);
+
+                // --- BẮT LỖI TẠI ĐÂY ---
+                int ret = rtcEngine.Initialize(context);
+                if (ret != 0)
+                {
+                    MessageBox.Show($"AGORA KHỞI TẠO THẤT BẠI! Mã lỗi: {ret}\n" +
+                                    $"(Lỗi -1: Thiếu Visual C++ hoặc DLL)\n" +
+                                    $"(Lỗi -7: Sai App ID)");
+                    rtcEngine = null; // Đánh dấu là hỏng
+                    return;
+                }
+
+                // Nếu thành công thì mới làm tiếp
+                rtcEngine.InitEventHandler(new UserEventHandler(this));
+                rtcEngine.EnableVideo();
+                rtcEngine.EnableAudio();
+
+                // Join Channel
+                rtcEngine.JoinChannel("", _channelName, "", 0);
+
+                // Setup Camera Local
+                // (Đảm bảo tên circularPictureBox2 là đúng tên trên giao diện của bạn)
+                if (circularPictureBox2 != null)
+                {
+                    VideoCanvas localVideo = new VideoCanvas();
+                    localVideo.view = (long)circularPictureBox2.Handle;
+                    localVideo.renderMode = RENDER_MODE_TYPE.RENDER_MODE_HIDDEN;
+                    localVideo.uid = 0;
+                    rtcEngine.SetupLocalVideo(localVideo);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Lỗi Code Init: " + ex.Message);
+            }
+        }
+
+        private void JoinChannel()
+        {
+            if (rtcEngine != null)
+            {
+                rtcEngine.JoinChannel("", _channelName, "", 0);
+            }
+        }
+
+        // --- XỬ LÝ SỰ KIỆN TỪ AGORA (Người kia vào/ra) ---
+        public void OnUserJoined(uint uid)
+        {
+            this.Invoke(new Action(() =>
+            {
+                // Setup Video người kia (Remote)
+                // Lưu ý: Bạn cần tạo pbRemote trên giao diện Design
+                if (circularPictureBox1 != null)
+                {
+                    VideoCanvas remoteVideo = new VideoCanvas();
+                    remoteVideo.view = (long)circularPictureBox1.Handle;
+                    remoteVideo.renderMode = RENDER_MODE_TYPE.RENDER_MODE_HIDDEN;
+                    remoteVideo.uid = uid;
+
+                    rtcEngine.SetupRemoteVideo(remoteVideo);
+                }
+            }));
+        }
+
+        public void OnUserOffline(uint uid)
+        {
+            this.Invoke(new Action(() =>
+            {
+                MessageBox.Show("Cuộc gọi đã kết thúc.");
+                this.Close();
+            }));
+        }
+
+        // --- NÚT BẤM ---
+        private void button2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                // QUAN TRỌNG: Thêm + "\n" vào cuối cùng
+                string msg = $"END_CALL|{_otherPersonName}|{_channelName}\n";
+
+                byte[] buffer = Encoding.UTF8.GetBytes(msg);
+                _serverStream.Write(buffer, 0, buffer.Length);
+            }
+            catch { } // Kệ lỗi mạng, cứ tắt form
+
+            // Hủy Agora
+            if (rtcEngine != null)
+            {
+                rtcEngine.LeaveChannel();
+                rtcEngine.Dispose();
+                rtcEngine = null;
+            }
+            this.Close();
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // xử lý tắt micro ở đây
-            isMuted = !isMuted; // Đảo ngược trạng thái (Bật -> Tắt, Tắt -> Bật)
-
-            agoraService.MuteLocalAudio(isMuted); // Gọi hàm bên AgoraService
-
-            // Đổi text nút bấm cho dễ nhìn
-            if (isMuted) button1.Text = "Bật Mic";
-            else button1.Text = "Tắt Mic";
+            if (rtcEngine == null)
+            {
+                MessageBox.Show("Agora Engine chưa khởi động được! Kiểm tra lại file DLL hoặc AppID.");
+                return;
+            }
+            _isMicOn = !_isMicOn;
+            rtcEngine.EnableLocalAudio(_isMicOn);
+            button1.Text = _isMicOn ? "Mic: ON" : "Mic: OFF";
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void Call_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // Xử lý ngắt cuộc gọi ở đây
-            // Rời phòng Agora
-            if (agoraService != null)
+            if (rtcEngine != null)
             {
-                agoraService.LeaveChannel();
+                rtcEngine.LeaveChannel();
+                rtcEngine.Dispose();
+                rtcEngine = null;
             }
-
-            // --- PHẦN GỬI TÍN HIỆU TCP ---
-            // Bạn bỏ comment và thay bằng hàm gửi tin nhắn TCP thật của bạn
-            // Ví dụ: Client.Send("END_CALL"); 
-
-            // Đóng form
-            this.Close();
         }
-        internal class AgoraEventHandler : IRtcEngineEventHandler
+    }
+
+    // Class lắng nghe sự kiện
+    internal class UserEventHandler : IRtcEngineEventHandler
+    {
+        private Call _parent;
+        public UserEventHandler(Call parent) { _parent = parent; }
+
+        public override void OnUserJoined(RtcConnection connection, uint remoteUid, int elapsed)
         {
-            private Call parent;
+            _parent.OnUserJoined(remoteUid);
+        }
 
-            public AgoraEventHandler(Call p)
-            {
-                this.parent = p;
-            }
-
-            // Khi mình vào phòng thành công
-            public override void OnJoinChannelSuccess(RtcConnection connection, int elapsed)
-            {
-                // Dùng Invoke để cập nhật giao diện từ luồng khác
-                parent.Invoke((MethodInvoker)(() =>
-                {
-                    // Có thể hiện thông báo nhỏ hoặc đổi tiêu đề Form
-                    parent.Text = "Đang đợi người kia...";
-                }));
-            }
-
-            // Khi người kia vào phòng (Hai bên bắt đầu nghe thấy nhau)
-            public override void OnUserJoined(RtcConnection connection, uint remoteUid, int elapsed)
-            {
-                parent.Invoke((MethodInvoker)(() =>
-                {
-                    parent.Text = "Đã kết nối cuộc gọi!";
-                    MessageBox.Show("Người bên kia đã bắt máy.");
-                }));
-            }
-
-            // Khi người kia tắt máy hoặc mất mạng
-            public override void OnUserOffline(RtcConnection connection, uint remoteUid, USER_OFFLINE_REASON_TYPE reason)
-            {
-                parent.Invoke((MethodInvoker)(() =>
-                {
-                    MessageBox.Show("Cuộc gọi đã kết thúc.");
-                    parent.Close(); // Tự động đóng form
-                }));
-            }
+        public override void OnUserOffline(RtcConnection connection, uint remoteUid, USER_OFFLINE_REASON_TYPE reason)
+        {
+            _parent.OnUserOffline(remoteUid);
         }
     }
 }

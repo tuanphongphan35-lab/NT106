@@ -305,6 +305,7 @@
             btnCall.Size = new Size(51, 45);
             btnCall.TabIndex = 15;
             btnCall.UseVisualStyleBackColor = false;
+            btnCall.Click += btnCall_Click;
             // 
             // roundButton7
             // 

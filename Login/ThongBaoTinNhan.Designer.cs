@@ -58,8 +58,9 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(64, 68, 75);
-            ClientSize = new Size(925, 570);
+            ClientSize = new Size(877, 541);
             Controls.Add(pnlThongBaoContainer);
+            FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(4);
             Name = "ThongBaoTinNhan";
             Text = "ThongBaoTinNhan";

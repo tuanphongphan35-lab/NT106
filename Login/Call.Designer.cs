@@ -30,11 +30,15 @@
         {
             button1 = new Button();
             button2 = new Button();
+            circularPictureBox1 = new CircularPictureBox();
+            circularPictureBox2 = new CircularPictureBox();
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox2).BeginInit();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(94, 452);
+            button1.Location = new Point(90, 558);
             button1.Name = "button1";
             button1.Size = new Size(112, 34);
             button1.TabIndex = 0;
@@ -44,7 +48,7 @@
             // 
             // button2
             // 
-            button2.Location = new Point(270, 452);
+            button2.Location = new Point(267, 558);
             button2.Name = "button2";
             button2.Size = new Size(112, 34);
             button2.TabIndex = 1;
@@ -52,15 +56,36 @@
             button2.UseVisualStyleBackColor = true;
             button2.Click += button2_Click;
             // 
+            // circularPictureBox1
+            // 
+            circularPictureBox1.Location = new Point(30, 12);
+            circularPictureBox1.Name = "circularPictureBox1";
+            circularPictureBox1.Size = new Size(287, 259);
+            circularPictureBox1.TabIndex = 2;
+            circularPictureBox1.TabStop = false;
+            // 
+            // circularPictureBox2
+            // 
+            circularPictureBox2.Location = new Point(245, 277);
+            circularPictureBox2.Name = "circularPictureBox2";
+            circularPictureBox2.Size = new Size(253, 239);
+            circularPictureBox2.TabIndex = 3;
+            circularPictureBox2.TabStop = false;
+            // 
             // Call
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(510, 674);
+            Controls.Add(circularPictureBox2);
+            Controls.Add(circularPictureBox1);
             Controls.Add(button2);
             Controls.Add(button1);
             Name = "Call";
             Text = "Call";
+            Load += Call_Load;
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)circularPictureBox2).EndInit();
             ResumeLayout(false);
         }
 
@@ -68,5 +93,7 @@
 
         private Button button1;
         private Button button2;
+        private CircularPictureBox circularPictureBox1;
+        private CircularPictureBox circularPictureBox2;
     }
 }

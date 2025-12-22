@@ -246,20 +246,19 @@ namespace Login
         private void HandleIncomingCall(string[] parts)
         {
             string callerName = parts[1];
-            string agoraRoom = parts[2];
+            string channelID = parts[2];
 
             this.Invoke((MethodInvoker)delegate
             {
-                // Mở Form PhoneCall ở chế độ NGƯỜI NHẬN (isCaller = false)
-                PhoneCall incomingForm = new PhoneCall(this.stream, callerName, _loggedInUserID, agoraRoom, false);
-                incomingForm.Show();
+                // --- LOGIC MỚI: Mở form PhoneCall (Thông báo) ---
+                PhoneCall notifForm = new PhoneCall(this.stream, callerName, channelID);
+                notifForm.ShowDialog(); // ShowDialog để bắt buộc chọn Nghe hoặc Tắt
             });
         }
 
         // Xử lý phản hồi (người kia đồng ý hay từ chối)
         private void HandleCallResponse(string[] parts)
         {
-            // Cấu trúc: CALL_RESULT | NguoiTraLoi | ACCEPT/REJECT
             string responder = parts[1];
             string decision = parts[2];
 
@@ -267,13 +266,12 @@ namespace Login
             {
                 if (decision == "REJECT")
                 {
-                    MessageBox.Show($"{responder} đang bận hoặc đã từ chối cuộc gọi.");
-                    // Tìm Form PhoneCall đang mở để đóng lại (nếu cần)
+                    MessageBox.Show($"{responder} đã từ chối cuộc gọi.");
+                    // Ở đây nếu muốn xịn thì tìm form Call đang mở để Close() nó đi
                 }
                 else if (decision == "ACCEPT")
                 {
-                    // Người kia đã đồng ý, Agora tự kết nối, có thể hiện thông báo nhỏ
-                    // MessageBox.Show($"{responder} đã bắt máy!"); 
+                    // Bên kia đã vào phòng, Agora sẽ tự hiện hình -> Không cần làm gì thêm
                 }
             });
         }
@@ -604,48 +602,34 @@ namespace Login
                 }
             }));
         }
-  
+
         private void roundButton3_Click_1(object sender, EventArgs e)
         {
             ChuyenCheDoChat("");
         }
 
-        private void btnCall_Click_1(object sender, EventArgs e)
+        private void btnCall_Click(object sender, EventArgs e)
         {
-            string myName = PhienDangNhap.TaiKhoanHienTai;
-            string receiverName = lblTenPhong.Text; // Tên người muốn gọi (lấy từ Label giao diện)
-
-            // Kiểm tra kết nối
-            if (stream == null) // Đảm bảo bạn đang dùng đúng tên biến stream kết nối (có thể là _stream hoặc clientStream)
+            if (string.IsNullOrEmpty(_nguoiDangChat) || lblTenPhong.Texts == "Phòng Chat Chung")
             {
-                MessageBox.Show("Chưa kết nối tới Server!");
-                return;
+                MessageBox.Show("Chọn người để gọi!"); return;
             }
 
-            // 2. Tạo tên phòng (Channel ID) duy nhất
-            // Quy tắc: Luôn xếp theo alphabet để A gọi B hay B gọi A thì ID phòng vẫn giống nhau
+            string myName = this.currentUserName;
+            string receiverName = _nguoiDangChat; // Lấy tên từ biến lưu trữ chuẩn
+
+            // Tạo ID phòng
             string channelID = (String.Compare(myName, receiverName) < 0)
-                                ? $"{myName}_{receiverName}"
-                                : $"{receiverName}_{myName}";
+                             ? $"{myName}_{receiverName}" : $"{receiverName}_{myName}";
 
-            // 3. Mở Form PhoneCall ngay lập tức
-            // Tham số: Stream, Tên mình, Tên đối phương, ID phòng, isCaller = true (vì mình là người gọi)
-            PhoneCall callForm = new PhoneCall(stream, myName, receiverName, channelID, true);
-            callForm.Show();
+            // --- LOGIC MỚI: Mở form Call (Video) luôn ---
+            Call videoForm = new Call(stream, channelID, receiverName);
+            videoForm.Show();
 
-            // 4. Gửi yêu cầu lên Server (QUAN TRỌNG: Dùng lệnh REQUEST_CALL)
-            try
-            {
-                // Gói tin: REQUEST_CALL | Người Nhận | ID Phòng
-                // Server sẽ đọc gói tin này và báo cho người nhận biết
-                string data = $"REQUEST_CALL|{receiverName}|{channelID}";
-                byte[] buffer = Encoding.UTF8.GetBytes(data);
-                stream.Write(buffer, 0, buffer.Length);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi gửi tín hiệu: " + ex.Message);
-            }
+            // Gửi yêu cầu
+            string data = $"REQUEST_CALL|{receiverName}|{channelID}\n";
+            byte[] buffer = Encoding.UTF8.GetBytes(data);
+            stream.Write(buffer, 0, buffer.Length);
         }
     }
 }

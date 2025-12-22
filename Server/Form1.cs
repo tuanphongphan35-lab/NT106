@@ -347,35 +347,26 @@ namespace Server
         }
         private async void HandleEndCall(string[] parts, NetworkStream senderStream)
         {
+            // Cấu trúc nhận: END_CALL | TênNgườiNhận | IDPhòng
             string receiverName = parts[1];
-            string channelID = parts[2];
 
-            // Lấy tên người gọi (Sender) từ dictionary
-            string senderName = "";
-            lock (connectedUsers)
-            {
-                if (connectedUsers.ContainsKey(senderStream))
-                    senderName = connectedUsers[senderStream];
-            }
-
-            if (string.IsNullOrEmpty(senderName)) return; // Không xác định được người gọi
-
-            // Tìm stream của người nhận
+            // Tìm người nhận (người cần bị ngắt kết nối)
             NetworkStream receiverStream = GetStreamByUsername(receiverName);
 
             if (receiverStream != null)
             {
-                // Gửi tín hiệu đến người nhận: "Có cuộc gọi đến từ A"
-                // Gói tin gửi đi: INCOMING_CALL | SenderName | ChannelID
-                string msg = $"INCOMING_CALL|{senderName}|{channelID}";
+                // --- SỬA LẠI: Gửi lệnh END_CALL (chứ không phải INCOMING_CALL) ---
+                string msg = "END_CALL\n";
                 SendResponse(receiverStream, msg);
 
-                UpdateUILabel($"[Call] {senderName} đang gọi {receiverName}...");
+                // Cập nhật Log Server cho đúng
+                string senderName = "";
+                if (connectedUsers.ContainsKey(senderStream)) senderName = connectedUsers[senderStream];
+                UpdateUILabel($"[Call] Cuộc gọi giữa {senderName} và {receiverName} đã kết thúc.");
             }
             else
             {
-                // Người nhận không online, báo lại cho người gọi
-                SendResponse(senderStream, "CALL_ERROR|User Offline");
+                Console.WriteLine("Người nhận không online.");
             }
         }
 
@@ -403,16 +394,36 @@ namespace Server
 
         private async Task HandleRequestCall(string[] parts, NetworkStream senderStream)
         {
+            // Cấu trúc nhận: REQUEST_CALL | Người Nhận | ID Phòng
             string targetName = parts[1];
+            string channelID = parts[2];
 
-            // Tìm stream của đối phương để báo tin ngắt kết nối
+            // Lấy tên người gọi (Sender)
+            string senderName = "";
+            if (connectedUsers.ContainsKey(senderStream))
+            {
+                senderName = connectedUsers[senderStream];
+            }
+
+            // Tìm Stream của người nhận
             NetworkStream targetStream = GetStreamByUsername(targetName);
 
             if (targetStream != null)
             {
-                SendResponse(targetStream, "CALL_ENDED");
+                // --- SỬA LẠI ĐOẠN NÀY QUAN TRỌNG NHẤT ---
+
+                // 1. Gửi lệnh INCOMING_CALL (báo có cuộc gọi đến)
+                // Thay vì gửi lệnh CALL_ENDED (ngắt cuộc gọi) như code cũ
+                string msg = $"INCOMING_CALL|{senderName}|{channelID}\n";
+                SendResponse(targetStream, msg);
+
+                // 2. Cập nhật Log Server cho đúng
+                UpdateUILabel($"[Call] {senderName} đang gọi cho {targetName}...");
             }
-            UpdateUILabel($"[Call] Cuộc gọi với {targetName} đã kết thúc.");
+            else
+            {
+                SendResponse(senderStream, "CALL_ERROR|User Offline\n");
+            }
         }
 
         private async Task HandleRegistration(string[] requestParts, NetworkStream clientStream)
