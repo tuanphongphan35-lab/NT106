@@ -4,55 +4,54 @@ using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
+using System.Linq; // Cần thiết cho hàm .Any()
 
 namespace Login
 {
     public partial class TimKiemNguoiDung : Form
     {
-        private NetworkStream _serverStream; // Biến giữ kết nối
-        private string _myUserName;          // Tên của chính mình
+        private NetworkStream _serverStream;
+        private string _myUserName;
 
-        // --- MỚI: Biến để lưu người dùng đang được chọn trong danh sách ---
+        // 1. Biến lưu danh sách bạn bè hiện tại (Đã thêm mới)
+        private List<string> _danhSachBanBeHienTai;
+
         private string _selectedUserId = "";
         private string _selectedUserName = "";
-        private Button _currentSelectedButton = null; // Để xử lý hiệu ứng đổi màu nút đang chọn
+        private Button _currentSelectedButton = null;
 
-        public TimKiemNguoiDung(NetworkStream stream, string myName)
+        // 2. CONSTRUCTOR ĐÃ SỬA: Nhận thêm List<string> currentFriends
+        public TimKiemNguoiDung(NetworkStream stream, string myName, List<string> currentFriends)
         {
             InitializeComponent();
             _serverStream = stream;
             _myUserName = myName;
 
-            // Cấu hình thanh cuộn cho danh sách
+            // Lưu danh sách bạn bè vào biến. Nếu null thì tạo list rỗng.
+            _danhSachBanBeHienTai = currentFriends ?? new List<string>();
+
+            // Cấu hình panel danh sách (nếu chưa chỉnh trong Design)
             flpDanhSach.AutoScroll = true;
-            flpDanhSach.WrapContents = false; // Xếp theo cột dọc
+            flpDanhSach.WrapContents = false;
             flpDanhSach.FlowDirection = FlowDirection.TopDown;
         }
 
-        // --- 1. Nút TÌM KIẾM ---
+        // --- NÚT TÌM KIẾM (Giữ nguyên) ---
         private void roundButton1_Click(object sender, EventArgs e)
         {
             string keyword = txtTimKiem.Texts.Trim();
-
-            if (string.IsNullOrEmpty(keyword))
-            {
-                MessageBox.Show("Vui lòng nhập tên cần tìm!");
-                return;
-            }
-
-            if (_serverStream == null || !_serverStream.CanWrite)
-            {
-                MessageBox.Show("Lỗi kết nối Server!");
-                return;
-            }
+            if (string.IsNullOrEmpty(keyword)) return;
 
             try
             {
-                // Reset lại lựa chọn cũ
+                // Reset lựa chọn cũ
                 _selectedUserId = "";
+                _selectedUserName = "";
                 _currentSelectedButton = null;
 
-                byte[] buffer = Encoding.UTF8.GetBytes($"TIM_KIEM|{keyword}");
+                // Gửi lệnh tìm kiếm
+                string cmd = $"TIM_KIEM|{keyword}\n";
+                byte[] buffer = Encoding.UTF8.GetBytes(cmd);
                 _serverStream.Write(buffer, 0, buffer.Length);
                 _serverStream.Flush();
             }
@@ -62,157 +61,139 @@ namespace Login
             }
         }
 
-        // --- 2. Nút THÊM BẠN BÈ (Lấy từ người đang chọn trong flpDanhSach) ---
-        // Nút thêm bạn bè 
+        // --- NÚT THÊM BẠN BÈ (Đã cập nhật logic chặn trùng) ---
+        // Lưu ý: Hãy đảm bảo bên Design bạn đã gán sự kiện Click của nút "Thêm bạn bè" vào hàm này
         private void btnSua_Click(object sender, EventArgs e)
         {
-            // Kiểm tra xem người dùng đã chọn ai chưa
-            if (string.IsNullOrEmpty(_selectedUserId))
+            // 1. Kiểm tra đã chọn người chưa
+            if (string.IsNullOrEmpty(_selectedUserName))
             {
-                MessageBox.Show("Vui lòng bấm chọn một người trong danh sách bên dưới trước!", "Chưa chọn người dùng");
+                MessageBox.Show("Vui lòng chọn người cần kết bạn!", "Thông báo");
                 return;
             }
 
+            // 2. Kiểm tra có phải chính mình không
             if (_selectedUserName == _myUserName)
             {
-                MessageBox.Show("Không thể kết bạn với chính mình!");
+                MessageBox.Show("Không thể kết bạn với chính mình!", "Lỗi");
                 return;
             }
+
+            // 3. [QUAN TRỌNG] Kiểm tra xem đã là bạn bè chưa
+            bool daLaBanBe = _danhSachBanBeHienTai.Any(ban =>
+                ban.Equals(_selectedUserName, StringComparison.OrdinalIgnoreCase));
+
+            if (daLaBanBe)
+            {
+                MessageBox.Show($"Bạn và {_selectedUserName} đã là bạn bè rồi!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return; // Dừng lại tại đây
+            }
+
+            // 4. Gửi lời mời nếu hợp lệ
             try
             {
-                // Gửi lệnh kết bạn kèm theo Tên người đó (hoặc ID tùy server bạn xử lý)
-                // Ở đây mình gửi cả ID để chắc chắn: KET_BAN|ID_Nguoi_Muon_Ket
-                byte[] buffer = Encoding.UTF8.GetBytes($"KET_BAN|{_selectedUserName}");
+                string cmd = $"KET_BAN|{_selectedUserName}\n";
+                byte[] buffer = Encoding.UTF8.GetBytes(cmd);
                 _serverStream.Write(buffer, 0, buffer.Length);
                 _serverStream.Flush();
-
-                MessageBox.Show($"Đã gửi lời mời kết bạn tới {_selectedUserName}!");
-                // làm sao phải thông báo cho người nhận biết được có lời mời kết bạn
-                // phần này để server xử lý gửi tin nhắn thông báo
+                MessageBox.Show($"Đã gửi lời mời tới {_selectedUserName}!", "Thành công");
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Lỗi khi gửi lời mời: " + ex.Message);
+                MessageBox.Show("Lỗi kết nối: " + ex.Message);
             }
         }
 
-        // --- 3. HÀM XỬ LÝ KẾT QUẢ TỪ SERVER (Public để Form chính gọi vào) ---
+        // --- XỬ LÝ KẾT QUẢ TỪ SERVER (Giữ nguyên để hiển thị danh sách) ---
         public void XuLyKetQuaTuServer(string messageFromServer)
         {
-            // Format tin nhắn nhận được: "TIM_THAY|Tuan:001;Lan:002;Hung:003"
-
             string[] parts = messageFromServer.Split('|');
             if (parts.Length < 2) return;
 
-            string dataPart = parts[1]; // Lấy phần dữ liệu phía sau
+            string dataPart = parts[1];
             string[] listUsers = dataPart.Split(';');
 
-            // Dùng Invoke để vẽ giao diện an toàn từ luồng khác
+            // Dùng Invoke để cập nhật giao diện từ luồng khác
             flpDanhSach.Invoke(new Action(() =>
             {
-                flpDanhSach.Controls.Clear(); // Xóa danh sách cũ
+                flpDanhSach.Controls.Clear();
 
                 foreach (string item in listUsers)
                 {
                     if (string.IsNullOrWhiteSpace(item)) continue;
 
-                    // Tách Tên và ID (Format: Tên:ID)
+                    // Server có thể trả về "TenUser" hoặc "TenUser:ID"
                     string[] info = item.Split(':');
                     string tenUser = info[0];
-                    string userId = (info.Length > 1) ? info[1] : ""; // Nếu không có ID thì để rỗng
+                    string userId = (info.Length > 1) ? info[1] : "";
 
                     TaoNutNguoiDung(tenUser, userId);
                 }
 
-                // Thông báo nếu danh sách rỗng
                 if (flpDanhSach.Controls.Count == 0)
                 {
-                    Label lbl = new Label
-                    {
-                        Text = "Không tìm thấy người dùng nào!",
-                        ForeColor = Color.White,
-                        AutoSize = true,
-                        Padding = new Padding(10)
-                    };
+                    Label lbl = new Label { Text = "Không tìm thấy!", ForeColor = Color.White, AutoSize = true };
                     flpDanhSach.Controls.Add(lbl);
                 }
             }));
         }
 
-        // --- 4. HÀM VẼ NÚT (Custom Giao Diện & Logic Chọn) ---
+        // --- HÀM TẠO NÚT HIỂN THỊ NGƯỜI DÙNG ---
         private void TaoNutNguoiDung(string ten, string id)
         {
             Button btn = new Button();
 
-            // Thiết kế giao diện nút
-            btn.Text = "  " + ten;
-            btn.Width = flpDanhSach.Width - 25; // Trừ hao thanh cuộn
+            // Nếu đã là bạn bè thì đổi màu chữ cho dễ nhận biết (Tùy chọn)
+            bool isFriend = _danhSachBanBeHienTai.Contains(ten);
+            if (isFriend)
+            {
+                btn.Text = "✓ " + ten + " (Bạn bè)";
+                btn.ForeColor = Color.LimeGreen;
+            }
+            else
+            {
+                btn.Text = "  " + ten;
+                btn.ForeColor = Color.FromArgb(220, 221, 222);
+            }
+
+            btn.Width = flpDanhSach.Width - 25;
             btn.Height = 60;
             btn.TextAlign = ContentAlignment.MiddleLeft;
             btn.FlatStyle = FlatStyle.Flat;
             btn.FlatAppearance.BorderSize = 0;
             btn.Cursor = Cursors.Hand;
-            btn.Tag = id; // Lưu ID ẩn trong nút
-
-            // Màu mặc định (Xám tối)
+            btn.Tag = id;
             btn.BackColor = Color.FromArgb(54, 57, 63);
-            btn.ForeColor = Color.FromArgb(220, 221, 222);
 
-            // --- SỰ KIỆN CLICK (LOGIC CHỌN NGƯỜI DÙNG) ---
+            // Sự kiện khi bấm vào tên người dùng
             btn.Click += (s, e) =>
             {
-                // 1. Trả màu nút cũ về bình thường (nếu có)
-                if (_currentSelectedButton != null)
-                {
-                    _currentSelectedButton.BackColor = Color.FromArgb(54, 57, 63);
-                }
+                // Reset màu nút cũ
+                if (_currentSelectedButton != null) _currentSelectedButton.BackColor = Color.FromArgb(54, 57, 63);
 
-                // 2. Đổi màu nút vừa bấm (Xám sáng hơn để biết đang chọn)
-                btn.BackColor = Color.FromArgb(88, 101, 242); // Màu xanh tím kiểu Discord Brand
+                // Highlight nút mới
+                btn.BackColor = Color.FromArgb(88, 101, 242);
                 _currentSelectedButton = btn;
 
-                // 3. Lưu thông tin vào biến toàn cục để nút "Thêm bạn bè" sử dụng
+                // Lưu lại người đang chọn để dùng cho nút "Thêm bạn bè"
                 _selectedUserId = id;
                 _selectedUserName = ten;
-
-                // (Tùy chọn) Hiện thông báo nhỏ hoặc Log
-                // MessageBox.Show($"Đã chọn: {ten}");
             };
 
             flpDanhSach.Controls.Add(btn);
         }
 
-        private void btnXem_Click(object sender, EventArgs e)
-        {
-            // Nút Xem Thông Tin của người dùng đang chọn
-            if (string.IsNullOrEmpty(_selectedUserId))
-            {
-                MessageBox.Show("Vui lòng bấm chọn một người trong danh sách bên dưới trước!", "Chưa chọn người dùng");
-                return;
-            }
-            try
-            {
-                // Gửi lệnh xem thông tin kèm theo Tên người đó (hoặc ID tùy server bạn xử lý)
-                byte[] buffer = Encoding.UTF8.GetBytes($"XEM_THONG_TIN|{_selectedUserName}");
-                _serverStream.Write(buffer, 0, buffer.Length);
-                _serverStream.Flush();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Lỗi khi gửi yêu cầu xem thông tin: " + ex.Message);
-            }
-            // hiện vào trang thông tin người dùng
-
-        }
-
+        // Nút Đóng
         private void btnXoa_Click(object sender, EventArgs e)
         {
             this.Close();
         }
 
-        private void flpDanhSach_Paint(object sender, PaintEventArgs e)
+        // Nút Xem thông tin (Tùy chọn)
+        private void btnXem_Click(object sender, EventArgs e)
         {
-
+            if (string.IsNullOrEmpty(_selectedUserName)) return;
+            // Code xem thông tin của bạn ở đây...
         }
     }
 }

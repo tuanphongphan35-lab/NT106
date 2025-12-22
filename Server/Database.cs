@@ -556,5 +556,37 @@ namespace Server
             Console.WriteLine($"[DEBUG] Kết thúc tìm kiếm. Trả về {ketQua.Count} kết quả.");
             return ketQua;
         }
+
+        // Hàm xóa bạn bè khỏi danh sách
+        public static async Task<bool> XoaBanBe(string nguoiYeuCau, string nguoiCanXoa)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                // 1. Lấy ID thật (Document ID) của cả 2 người từ username
+                string idA = await LayIDNguoiDung(nguoiYeuCau);
+                string idB = await LayIDNguoiDung(nguoiCanXoa);
+
+                // Nếu không tìm thấy ID của 1 trong 2 thì báo lỗi
+                if (string.IsNullOrEmpty(idA) || string.IsNullOrEmpty(idB)) return false;
+
+                // 2. Xóa người B trong danh sách bạn của người A
+                // Đường dẫn: Users -> [ID_A] -> Friends -> [ID_B]
+                DocumentReference docRefA = db.Collection("Users").Document(idA).Collection("Friends").Document(idB);
+                await docRefA.DeleteAsync();
+
+                // 3. Xóa người A trong danh sách bạn của người B
+                // Đường dẫn: Users -> [ID_B] -> Friends -> [ID_A]
+                DocumentReference docRefB = db.Collection("Users").Document(idB).Collection("Friends").Document(idA);
+                await docRefB.DeleteAsync();
+
+                return true; // Xóa thành công
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi XoaBanBe: " + ex.Message);
+                return false;
+            }
+        }
     }
 }

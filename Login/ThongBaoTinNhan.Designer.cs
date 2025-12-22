@@ -51,7 +51,6 @@
             flowLayoutPanel1.Size = new Size(923, 572);
             flowLayoutPanel1.TabIndex = 0;
             flowLayoutPanel1.WrapContents = false;
-            flowLayoutPanel1.Paint += flowLayoutPanel1_Paint;
             // 
             // ThongBaoTinNhan
             // 
@@ -64,7 +63,6 @@
             Margin = new Padding(4);
             Name = "ThongBaoTinNhan";
             Text = "ThongBaoTinNhan";
-            Load += ThongBaoTinNhan_Load;
             pnlThongBaoContainer.ResumeLayout(false);
             ResumeLayout(false);
         }

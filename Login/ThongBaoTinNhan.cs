@@ -1,11 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Login
@@ -17,30 +11,19 @@ namespace Login
             InitializeComponent();
         }
 
-        private void ThongBaoTinNhan_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            // Nếu người dùng bấm nút X (UserClosing)
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                e.Cancel = true; // Hủy lệnh hủy diệt Form
-                this.Hide();     // Chỉ ẩn nó đi thôi
-            }
-        }
-
-        // 2. Hàm public để bên ngoài (ChatForm) nhét thông báo vào
+        // Hàm này để ChatForm gọi khi có thông báo mới
         public void ThemThongBaoMoi(UserControl item)
         {
+            // Thêm item mới lên ĐẦU danh sách (SetChildIndex = 0)
             flowLayoutPanel1.Controls.Add(item);
-            flowLayoutPanel1.Controls.SetChildIndex(item, 0); // Đưa cái mới nhất lên đầu
-        }
-        private void ThongBaoTinNhan_Load(object sender, EventArgs e)
-        {
-
+            flowLayoutPanel1.Controls.SetChildIndex(item, 0);
         }
 
-        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        // Sự kiện khi form mất tiêu điểm (bấm ra ngoài) thì tự ẩn đi (Giống Messenger)
+        protected override void OnDeactivate(EventArgs e)
         {
-
+            base.OnDeactivate(e);
+            this.Hide();
         }
     }
 }

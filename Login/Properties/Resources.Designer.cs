@@ -83,6 +83,16 @@ namespace Login.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap AcceptCall {
+            get {
+                object obj = ResourceManager.GetObject("AcceptCall", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap BackGroundChat1 {
             get {
                 object obj = ResourceManager.GetObject("BackGroundChat1", resourceCulture);
@@ -286,6 +296,16 @@ namespace Login.Properties {
         internal static System.Drawing.Bitmap notification_bell {
             get {
                 object obj = ResourceManager.GetObject("notification-bell", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap RejectCall {
+            get {
+                object obj = ResourceManager.GetObject("RejectCall", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }
