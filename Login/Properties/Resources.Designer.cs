@@ -213,6 +213,16 @@ namespace Login.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap logo_group {
+            get {
+                object obj = ResourceManager.GetObject("logo group", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap Logo_xám_cyan {
             get {
                 object obj = ResourceManager.GetObject("Logo xám cyan", resourceCulture);
