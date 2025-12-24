@@ -192,6 +192,52 @@ namespace Server
                                         else Console.WriteLine("=> [FAIL] Không xóa được (Có thể do sai tên bảng/cột).");
                                     }
                                     break;
+                                case "TAO_NHOM":
+                                    await HandleCreateGroup(requestParts, clientStream);
+                                    break;
+                                case "LAY_DS_MOI_MEM":
+                                    {
+                                        // Cấu trúc: LAY_DS_MOI_MEM | GroupID
+                                        string groupID = requestParts[1];
+                                        string nguoiYeuCau2 = connectedUsers[clientStream];
+
+                                        // A. Lấy tất cả bạn bè của người yêu cầu
+                                        List<string> tatCaBanBe = await Database.LayDanhSachBanBe(nguoiYeuCau2);
+
+                                        // B. Lấy danh sách thành viên đang có trong nhóm
+                                        List<string> thanhVienTrongNhom = await Database.LayThanhVienNhom(groupID);
+
+                                        // C. Lọc: Chỉ lấy những người TRONG danh sách bạn bè NHƯNG KHÔNG CÓ trong nhóm
+                                        // (Đây là logic "người chưa tham gia")
+                                        List<string> ungVien = tatCaBanBe.Except(thanhVienTrongNhom).ToList();
+
+                                        // Gửi kết quả về
+                                        string data = string.Join(";", ungVien);
+                                        SendResponse(clientStream, $"DS_MOI_MEM|{groupID}|{data}");
+                                    }
+                                    break;
+
+                                // Case 2: Client xác nhận thêm người
+                                case "THEM_THANH_VIEN":
+                                    {
+                                        // Cấu trúc: THEM_THANH_VIEN | GroupID | User1;User2
+                                        string groupID = requestParts[1];
+                                        string usersStr = requestParts[2];
+                                        List<string> newMembers = usersStr.Split(';').Where(x => !string.IsNullOrEmpty(x)).ToList();
+
+                                        // Lưu vào DB
+                                        bool ok = await Database.ThemThanhVienVaoNhom(groupID, newMembers);
+
+                                        if (ok)
+                                        {
+                                            // Báo thành công cho người mời
+                                            SendResponse(clientStream, "THEM_MEM_OK");
+
+                                            // (Nâng cao) Gửi thông báo cho cả nhóm biết có người mới (Tùy chọn)
+                                            // Code gửi thông báo Broadcast nhóm viết ở đây nếu cần
+                                        }
+                                    }
+                                    break;
                             }
                         }
                         catch (Exception exLogic)
@@ -491,7 +537,25 @@ namespace Server
                     string friendString = string.Join(";", danhSachBanBe);
                     SendResponse(clientStream, "LIST_BAN_BE|" + friendString);
                 }
-                string userID = await Database.LayIDNguoiDung(taiKhoan);
+
+                Dictionary<string, string> danhSachNhom = await Database.LayDanhSachNhom(taiKhoan);
+
+                if (danhSachNhom.Count > 0)
+                {
+                    // 2. Gom thành chuỗi định dạng: ID1:Ten1;ID2:Ten2;...
+                    List<string> groupParts = new List<string>();
+                    foreach (var g in danhSachNhom)
+                    {
+                        // Dùng dấu hai chấm (:) để ngăn cách ID và Tên
+                        groupParts.Add($"{g.Key}:{g.Value}");
+                    }
+
+                    string groupString = string.Join(";", groupParts);
+
+                    // 3. Gửi về Client lệnh LIST_NHOM
+                    SendResponse(clientStream, "LIST_NHOM|" + groupString);
+                    string userID = await Database.LayIDNguoiDung(taiKhoan);
+                }
                 SendResponse(clientStream, "DANGNHAP_SUCCESS|" + taiKhoan);
                 // 1. Báo cho MỌI NGƯỜI biết TÔI vừa Online
                 foreach (var user in connectedUsers)
@@ -529,6 +593,80 @@ namespace Server
             string matKhauDaLuu = await Database.LayMatKhauQuenMatKhau(email);
             if (!string.IsNullOrEmpty(matKhauDaLuu)) SendResponse(clientStream, "QUENMK_SUCCESS");
             else SendResponse(clientStream, "QUENMK_FAILED");
+        }
+
+        // --- [THÊM MỚI] XỬ LÝ TẠO NHÓM ---
+        private async Task HandleCreateGroup(string[] parts, NetworkStream clientStream)
+        {
+            // Cấu trúc: TAO_NHOM | Tên Nhóm | User1;User2;User3
+            if (parts.Length < 3) return;
+
+            string tenNhom = parts[1];
+            string rawMembers = parts[2]; // Chuỗi "User1;User2"
+
+            // 1. Lấy tên người tạo (Người đang gửi lệnh)
+            string nguoiTao = "";
+            lock (connectedUsers)
+            {
+                if (connectedUsers.ContainsKey(clientStream))
+                    nguoiTao = connectedUsers[clientStream];
+            }
+
+            if (string.IsNullOrEmpty(nguoiTao)) return;
+
+            // 2. Tách danh sách thành viên mời
+            List<string> membersToInvite = rawMembers.Split(';')
+                                                     .Where(x => !string.IsNullOrEmpty(x))
+                                                     .ToList();
+
+            // --- KIỂM TRA ĐIỀU KIỆN 1: NHÓM >= 3 NGƯỜI ---
+            // (Người tạo + Số người mời) phải >= 3
+            if (membersToInvite.Count + 1 < 3)
+            {
+                SendResponse(clientStream, "TAO_NHOM_THAT_BAI|Nhóm phải có ít nhất 3 người (bao gồm bạn).");
+                return;
+            }
+
+            // --- KIỂM TRA ĐIỀU KIỆN 2: PHẢI LÀ BẠN BÈ ---
+            foreach (string member in membersToInvite)
+            {
+                // Bỏ qua nếu tự mời chính mình (dù Client đã chặn nhưng Server nên check lại)
+                if (member == nguoiTao) continue;
+
+                bool laBanBe = await Database.KiemTraLaBanBe(nguoiTao, member);
+                if (!laBanBe)
+                {
+                    SendResponse(clientStream, $"TAO_NHOM_THAT_BAI|Bạn và {member} chưa là bạn bè.");
+                    return;
+                }
+            }
+
+            // --- TẠO NHÓM TRONG DB ---
+            string groupID = await Database.TaoNhomChat(tenNhom, nguoiTao, membersToInvite);
+
+            if (!string.IsNullOrEmpty(groupID))
+            {
+                // 1. Báo cho người tạo thành công: TAO_NHOM_THANH_CONG | ID_Nhom | Ten_Nhom
+                SendResponse(clientStream, $"TAO_NHOM_THANH_CONG|{groupID}|{tenNhom}");
+
+                UpdateUILabel($"[Group] {nguoiTao} đã tạo nhóm '{tenNhom}' với {membersToInvite.Count} thành viên.");
+
+                // 2. (Nâng cao) Gửi thông báo cho các thành viên được mời nếu họ đang Online
+                // Để họ biết mình vừa được thêm vào nhóm mới
+                foreach (string mem in membersToInvite)
+                {
+                    NetworkStream memStream = GetStreamByUsername(mem);
+                    if (memStream != null)
+                    {
+                        // Gói tin: NEW_GROUP | ID_Nhom | Ten_Nhom | Nguoi_Tao
+                        SendResponse(memStream, $"NEW_GROUP|{groupID}|{tenNhom}|{nguoiTao}");
+                    }
+                }
+            }
+            else
+            {
+                SendResponse(clientStream, "TAO_NHOM_THAT_BAI|Lỗi cơ sở dữ liệu.");
+            }
         }
 
         private void UpdateUILabel(string message)

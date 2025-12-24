@@ -24,8 +24,8 @@ namespace Login
         private TimKiemNguoiDung frmTimKiem = null;
         private readonly string _loggedInUserID;
         private DanhSachBanBe _frmDanhSachBanBe = null;
-        // --- BIẾN CHO CHỨC NĂNG THÔNG BÁO ---
-        private int _soLuongThongBao = 0; // Biến đếm số lượng thông báo chưa đọc
+        private bool _dangChatNhom = false;
+        private int _soLuongThongBao = 0; 
 
         public ChatForm(string userID, string user, string pass)
         {
@@ -79,6 +79,7 @@ namespace Login
             };
 
             SetDoubleBuffered(txtChatBox);
+            ChuyenCheDoChat("");
         }
 
         // --- HÀM VẼ SỐ THÔNG BÁO TRÊN NÚT CHUÔNG ---
@@ -200,7 +201,7 @@ namespace Login
                             string hSender = parts[1];
                             string hContent = parts[2];
                             bool isMeHist = (hSender == currentUserName);
-                            this.Invoke(new Action(() => AddMessage(hContent, isMeHist)));
+                            this.Invoke(new Action(() => AddMessage("", hContent, isMeHist)));
                             break;
 
                         case "HISTORY_END":
@@ -246,6 +247,96 @@ namespace Login
                                 }
                                 else MessageBox.Show($"{tenNguoiTraLoi} đã từ chối.");
                             }));
+                            break;
+                        case "TAO_NHOM_THANH_CONG":
+                            // Server trả về: TAO_NHOM_THANH_CONG | ID_Nhom | Ten_Nhom
+                            string groupID = parts[1];
+                            string groupName = parts[2];
+
+                            this.Invoke(new Action(() =>
+                            {
+                                MessageBox.Show($"Tạo nhóm '{groupName}' thành công!");
+                                // Thêm nút nhóm vào giao diện (Hàm này viết ở Bước 5)
+                                ThemNhomVaoList(groupID, groupName);
+                            }));
+                            break;
+
+                        case "TAO_NHOM_THAT_BAI":
+                            string reason = parts[1];
+                            this.Invoke(new Action(() => MessageBox.Show("Tạo nhóm thất bại: " + reason)));
+                            break;
+
+                        case "NEW_GROUP":
+                            // Khi người khác mời mình vào nhóm: NEW_GROUP | ID | Ten | NguoiTao
+                            string newGroupID = parts[1];
+                            string newGroupName = parts[2];
+                            string creator = parts[3];
+
+                            this.Invoke(new Action(() =>
+                            {
+                                // Hiển thị thông báo nhỏ hoặc Toast notification nếu muốn
+                                // MessageBox.Show($"{creator} đã thêm bạn vào nhóm {newGroupName}");
+                                ThemNhomVaoList(newGroupID, newGroupName);
+                            }));
+                            break;
+                        case "LIST_NHOM":
+                            // Server gửi: LIST_NHOM | ID1:Ten1;ID2:Ten2...
+                            if (parts.Length > 1)
+                            {
+                                string[] rawGroups = parts[1].Split(';'); // Tách từng nhóm
+
+                                this.Invoke(new Action(() =>
+                                {
+                                    foreach (string g in rawGroups)
+                                    {
+                                        // Tách ID và Tên (ID:Name)
+                                        string[] info = g.Split(':');
+                                        if (info.Length == 2)
+                                        {
+                                            string gID = info[0];
+                                            string gName = info[1];
+
+                                            // Gọi hàm vẽ nút nhóm (đã viết ở câu trả lời trước)
+                                            ThemNhomVaoList(gID, gName);
+                                        }
+                                    }
+                                }));
+                            }
+                            break;
+                        case "DS_MOI_MEM":
+                            // Server trả về: DS_MOI_MEM | GroupID | User1;User2;User3
+                            string currentGroupID = parts[1];
+                            string rawList = (parts.Length > 2) ? parts[2] : "";
+
+                            this.Invoke(new Action(() =>
+                            {
+                                // 1. Chuyển chuỗi thành List
+                                List<string> candidates = new List<string>();
+                                if (!string.IsNullOrEmpty(rawList))
+                                {
+                                    candidates.AddRange(rawList.Split(';'));
+                                }
+
+                                // 2. Mở Form chọn (FormChonThanhVien)
+                                FormChonThanhVien frm = new FormChonThanhVien(candidates);
+                                frm.StartPosition = FormStartPosition.CenterParent;
+
+                                if (frm.ShowDialog() == DialogResult.OK)
+                                {
+                                    // 3. Nếu người dùng chọn xong và bấm OK -> Gửi lệnh thêm
+                                    List<string> selected = frm.SelectedUsers;
+                                    string userStr = string.Join(";", selected);
+
+                                    // Gửi: THEM_THANH_VIEN | GroupID | User1;User2
+                                    string cmd = $"THEM_THANH_VIEN|{currentGroupID}|{userStr}\n";
+                                    byte[] buff = System.Text.Encoding.UTF8.GetBytes(cmd);
+                                    stream.Write(buff, 0, buff.Length);
+                                }
+                            }));
+                            break;
+
+                        case "THEM_MEM_OK":
+                            this.Invoke(new Action(() => MessageBox.Show("Đã thêm thành viên thành công!")));
                             break;
                     }
                 }
@@ -317,7 +408,7 @@ namespace Login
                     catch { MessageBox.Show("Lỗi kết nối server!"); }
                 }
 
-                AddMessage(message, true);
+                AddMessage("", message, true);
                 txtInput.Texts = "";
             }
         }
@@ -356,14 +447,36 @@ namespace Login
             }
         }
 
-        private void AddMessage(string message, bool isMe)
+        // Thay đổi tham số đầu vào: thêm string name
+        private void AddMessage(string name, string message, bool isMe)
         {
+            // Kiểm tra thread (giữ nguyên)
             if (txtChatBox.InvokeRequired)
             {
-                txtChatBox.Invoke(new Action(() => AddMessage(message, isMe)));
+                txtChatBox.Invoke(new Action(() => AddMessage(name, message, isMe)));
                 return;
             }
 
+            // --- PHẦN 1: TÊN NGƯỜI GỬI (Chỉ hiện khi không phải là mình) ---
+            if (!isMe)
+            {
+                Label lblName = new Label();
+                lblName.Text = name;
+
+                // [QUAN TRỌNG 1] Đặt nền trong suốt để xóa khung trắng
+                lblName.BackColor = Color.Transparent;
+
+                // [QUAN TRỌNG 2] Đặt màu chữ sáng (Trắng) để nổi bật trên nền tối
+                lblName.ForeColor = Color.White;
+
+                lblName.Font = new Font("Segoe UI", 8, FontStyle.Bold);
+                lblName.AutoSize = true;
+                lblName.Margin = new Padding(12, 10, 0, 2); // Căn lề một chút cho đẹp
+
+                txtChatBox.Controls.Add(lblName);
+            }
+
+            // --- PHẦN 2: BONG BÓNG CHAT (Giữ nguyên logic vẽ bong bóng) ---
             Label lblBubble = new Label();
             lblBubble.Text = message;
             lblBubble.Font = new Font("Arial", 11, FontStyle.Regular);
@@ -378,10 +491,11 @@ namespace Login
             }
             else
             {
-                lblBubble.BackColor = Color.LightGray;
+                lblBubble.BackColor = Color.White; // Hoặc LightGray tùy bạn
                 lblBubble.ForeColor = Color.Black;
             }
 
+            // Vẽ bo tròn góc bong bóng chat
             lblBubble.Paint += (s, e) =>
             {
                 e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
@@ -406,12 +520,13 @@ namespace Login
             }
             else
             {
-                lblBubble.Margin = new Padding(5, 5, 0, 5);
+                // Margin top = 0 để bong bóng dính sát vào tên ở trên
+                lblBubble.Margin = new Padding(5, 0, 0, 5);
             }
 
             txtChatBox.Controls.Add(lblBubble);
-            txtChatBox.Invalidate();
-            txtChatBox.Update();
+
+            // Cuộn xuống tin nhắn mới nhất
             try { txtChatBox.ScrollControlIntoView(lblBubble); } catch { }
         }
 
@@ -469,7 +584,7 @@ namespace Login
         {
             string senderID = parts[1];
             string content = parts[2];
-            if (senderID != _loggedInUserID) AddMessage(content, false);
+            if (senderID != _loggedInUserID) AddMessage(senderID, content, false);
         }
 
         private void HandleSearchResult(string data)
@@ -690,43 +805,58 @@ namespace Login
         private void lblTenPhong__TextChanged(object sender, EventArgs e) { }
 
 
-        private void ChuyenCheDoChat(string tenNguoiNhan)
+        // Sửa hàm cũ: thêm tham số isGroup (mặc định false)
+        private void ChuyenCheDoChat(string receiverID, bool isGroup = false)
         {
             txtInput.Enabled = true;
-            // Cập nhật biến theo dõi người đang chat
-            _nguoiDangChat = tenNguoiNhan;
+            _nguoiDangChat = receiverID;
+            this._dangChatNhom = isGroup;
+            this._nguoiDangChat = receiverID;
 
             this.Invoke(new Action(() =>
             {
-                // 1. Xóa khung chat cũ để chuẩn bị hiện tin nhắn mới
                 txtChatBox.Controls.Clear();
-                txtChatBox.Invalidate();
 
-                // 2. Đổi tên phòng chat trên giao diện
-                if (string.IsNullOrEmpty(tenNguoiNhan))
+                // Hiển thị tên
+                if (isGroup)
                 {
-                    lblTenPhong.Texts = "Phòng Chat Một Mình";
+                    // Nếu muốn hiển thị tên Nhóm đẹp thì phải lưu mapping ID->Name
+                    // Ở đây tạm thời hiện ID hoặc bạn cần lấy text từ nút vừa bấm
+                    lblTenPhong.Texts = "Nhóm: " + GetGroupNameByID(receiverID);
                 }
                 else
                 {
-                    lblTenPhong.Texts =  tenNguoiNhan;
+                    if (string.IsNullOrEmpty(receiverID)) lblTenPhong.Texts = "Phòng Chat Chung";
+                    else lblTenPhong.Texts = receiverID;
+                }
 
-                    // 3. Gửi lệnh xin lịch sử chat (QUAN TRỌNG: Phải có \n)
-                    try
+                // Gửi lệnh lấy lịch sử
+                try
+                {
+                    if (stream != null && client.Connected && !string.IsNullOrEmpty(receiverID))
                     {
-                        if (stream != null && client.Connected)
-                        {
-                            string cmd = $"LAY_LICH_SU|{tenNguoiNhan}\n"; // Thêm \n ở đây
-                            byte[] buffer = Encoding.UTF8.GetBytes(cmd);
-                            stream.Write(buffer, 0, buffer.Length);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("Lỗi tải lịch sử: " + ex.Message);
+                        // Server cần phân biệt lấy lịch sử user hay nhóm
+                        // Bạn có thể quy ước: Nếu ID bắt đầu bằng "G_" là nhóm
+                        // Hoặc sửa lệnh Server: LAY_LICH_SU_NHOM
+
+                        string cmd = "";
+                        if (isGroup) cmd = $"LAY_LICH_SU_NHOM|{receiverID}\n";
+                        else cmd = $"LAY_LICH_SU|{receiverID}\n";
+
+                        byte[] buffer = Encoding.UTF8.GetBytes(cmd);
+                        stream.Write(buffer, 0, buffer.Length);
                     }
                 }
+                catch { }
             }));
+        }
+
+        // Hàm phụ để lấy tên nhóm từ nút bấm (vì receiverID chỉ là mã G_...)
+        private string GetGroupNameByID(string groupID)
+        {
+            Control[] founds = roundFlowLayoutPanel2.Controls.Find("group_" + groupID, true);
+            if (founds.Length > 0) return founds[0].Text.Replace("👥 ", "");
+            return groupID;
         }
 
         private void roundButton4_Click_1(object sender, EventArgs e)
@@ -842,17 +972,7 @@ namespace Login
         // --- HÀM 1: QUYẾT ĐỊNH XEM NÊN LÀM GÌ ---
         private void XuLySauKhiLoadDanhSach()
         {
-            // Kiểm tra xem có nút bạn bè nào trong danh sách không
-            if (roundFlowLayoutPanel2.Controls.Count > 0)
-            {
-                // TRƯỜNG HỢP CÓ BẠN BÈ:
-                // Lấy nút đầu tiên (người trên cùng) và kích hoạt sự kiện Click
-                // Điều này tương đương với việc người dùng tự bấm vào người đó
-                if (roundFlowLayoutPanel2.Controls[0] is Button btnDauTien)
-                {
-                    btnDauTien.PerformClick();
-                }
-            }
+            ChuyenCheDoChat("");
         }
         
         private void roundButton3_Click(object sender, EventArgs e)
@@ -882,6 +1002,92 @@ namespace Login
             string data = $"REQUEST_CALL|{receiverName}|{channelID}\n";
             byte[] buffer = Encoding.UTF8.GetBytes(data);
             stream.Write(buffer, 0, buffer.Length);
+        }
+
+        private void btnTaoNhom_Click(object sender, EventArgs e)
+        {
+            // --- TRƯỜNG HỢP 1: ĐANG Ở TRONG NHÓM -> THÊM THÀNH VIÊN ---
+            if (_dangChatNhom)
+            {
+                // Kiểm tra an toàn
+                if (string.IsNullOrEmpty(_nguoiDangChat)) return;
+
+                // Gửi lệnh lấy danh sách bạn bè chưa vào nhóm để mời
+                try
+                {
+                    // _nguoiDangChat lúc này chính là GroupID
+                    string cmd = $"LAY_DS_MOI_MEM|{_nguoiDangChat}\n";
+                    byte[] buffer = System.Text.Encoding.UTF8.GetBytes(cmd);
+                    stream.Write(buffer, 0, buffer.Length);
+                }
+                catch
+                {
+                    MessageBox.Show("Mất kết nối Server!");
+                }
+            }
+            // --- TRƯỜNG HỢP 2: ĐANG CHAT RIÊNG/CHUNG -> TẠO NHÓM MỚI ---
+            else
+            {
+                // (Logic cũ của bạn copy vào đây)
+                // 1. Thu thập danh sách bạn bè đang có trên giao diện
+                List<string> listBanBe = new List<string>();
+
+                foreach (Control c in roundFlowLayoutPanel2.Controls)
+                {
+                    string tenLayDuoc = "";
+
+                    // Chỉ lấy những nút là User (có prefix btn_), bỏ qua nút Group (group_)
+                    if (!string.IsNullOrEmpty(c.Name) && c.Name.StartsWith("btn_"))
+                    {
+                        tenLayDuoc = c.Name.Replace("btn_", "");
+                    }
+                    else if (c.Text.Contains("●")) // Fallback cho các nút cũ
+                    {
+                        tenLayDuoc = c.Text.Replace("●", "").Trim();
+                    }
+
+                    if (!string.IsNullOrEmpty(tenLayDuoc))
+                    {
+                        listBanBe.Add(tenLayDuoc);
+                    }
+                }
+
+                // 2. Mở Form Tạo Nhóm
+                FormTaoNhom frm = new FormTaoNhom(this.stream, listBanBe);
+                frm.StartPosition = FormStartPosition.CenterParent;
+                frm.ShowDialog();
+            }
+        }
+
+        private void ThemNhomVaoList(string groupID, string groupName)
+        {
+            Button btnNhom = new Button();
+
+            // [QUAN TRỌNG]: Đặt Name bắt đầu bằng tiền tố khác để phân biệt với user thường
+            // Ví dụ: user thì là "btn_", nhóm thì là "group_"
+            btnNhom.Name = "group_" + groupID;
+
+            // Thêm icon biểu thị nhóm (nếu muốn)
+            btnNhom.Text = "👥 " + groupName;
+
+            // Style cho nút nhóm (Có thể cho màu khác để dễ nhìn)
+            btnNhom.Size = new Size(250, 50);
+            btnNhom.BackColor = Color.FromArgb(70, 70, 80); // Màu hơi khác user chút
+            btnNhom.ForeColor = Color.White;
+            btnNhom.FlatStyle = FlatStyle.Flat;
+            btnNhom.FlatAppearance.BorderSize = 0;
+            btnNhom.TextAlign = ContentAlignment.MiddleLeft;
+            btnNhom.Padding = new Padding(10, 0, 0, 0);
+            btnNhom.Cursor = Cursors.Hand;
+
+            // Sự kiện Click: Chuyển chế độ chat sang Nhóm
+            // Lưu ý: Cần sửa hàm ChuyenCheDoChat để hỗ trợ ID Nhóm (xem Bước 6)
+            btnNhom.Click += (s, e) => { ChuyenCheDoChat(groupID, true); };
+
+            if (roundFlowLayoutPanel2.InvokeRequired)
+                roundFlowLayoutPanel2.Invoke(new Action(() => roundFlowLayoutPanel2.Controls.Add(btnNhom)));
+            else
+                roundFlowLayoutPanel2.Controls.Add(btnNhom);
         }
     }
 }

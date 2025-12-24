@@ -588,5 +588,136 @@ namespace Server
                 return false;
             }
         }
+
+        // --- [THÊM MỚI] CÁC HÀM HỖ TRỢ GROUP CHAT ---
+
+        // 1. Kiểm tra quan hệ bạn bè (Dùng để validate khi tạo nhóm)
+        public static async Task<bool> KiemTraLaBanBe(string nguoiYeuCau, string nguoiDuocMoi)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                string idA = await LayIDNguoiDung(nguoiYeuCau);
+                string idB = await LayIDNguoiDung(nguoiDuocMoi);
+
+                if (string.IsNullOrEmpty(idA) || string.IsNullOrEmpty(idB)) return false;
+
+                // Kiểm tra trong sub-collection Friends của A có chứa B không
+                DocumentSnapshot docSnap = await db.Collection("Users").Document(idA)
+                                                   .Collection("Friends").Document(idB).GetSnapshotAsync();
+                return docSnap.Exists;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        // 2. Tạo nhóm chat mới
+        public static async Task<string> TaoNhomChat(string tenNhom, string nguoiTao, List<string> thanhVien)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                // Tạo danh sách thành viên đầy đủ (bao gồm cả người tạo)
+                List<string> fullMembers = new List<string>(thanhVien);
+                if (!fullMembers.Contains(nguoiTao)) fullMembers.Add(nguoiTao);
+
+                // Data để lưu vào Firestore
+                Dictionary<string, object> groupData = new Dictionary<string, object>
+        {
+            { "groupName", tenNhom },
+            { "creator", nguoiTao },
+            { "members", fullMembers }, // Lưu mảng danh sách tên các thành viên
+            { "createdAt", Timestamp.GetCurrentTimestamp() }
+        };
+
+                // Thêm vào Collection "Groups" (Firestore tự sinh ID)
+                DocumentReference docRef = await db.Collection("Groups").AddAsync(groupData);
+
+                // Trả về ID của nhóm vừa tạo
+                return docRef.Id;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi TaoNhomChat: " + ex.Message);
+                return null;
+            }
+        }
+
+        // --- [THÊM VÀO DATABASE.CS] ---
+        // Hàm lấy danh sách các nhóm mà 'userName' là thành viên
+        public static async Task<Dictionary<string, string>> LayDanhSachNhom(string userName)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            Dictionary<string, string> groups = new Dictionary<string, string>();
+            try
+            {
+                // Query: Tìm trong Collection 'Groups' những document nào mà
+                // mảng 'members' có chứa 'userName'
+                Query query = db.Collection("Groups").WhereArrayContains("members", userName);
+
+                QuerySnapshot snap = await query.GetSnapshotAsync();
+                foreach (DocumentSnapshot doc in snap.Documents)
+                {
+                    if (doc.Exists)
+                    {
+                        string groupID = doc.Id;
+                        string groupName = doc.GetValue<string>("groupName");
+
+                        // Lưu vào Dictionary dạng: ID -> Tên Nhóm
+                        groups.Add(groupID, groupName);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi lấy danh sách nhóm: " + ex.Message);
+            }
+            return groups;
+        }
+
+
+        // 1. Lấy danh sách thành viên trong nhóm (để lọc trùng)
+        public static async Task<List<string>> LayThanhVienNhom(string groupID)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            List<string> members = new List<string>();
+            try
+            {
+                DocumentSnapshot doc = await db.Collection("Groups").Document(groupID).GetSnapshotAsync();
+                if (doc.Exists)
+                {
+                    // Lấy mảng 'members' từ Firestore
+                    if (doc.ContainsField("members"))
+                    {
+                        // Chuyển đổi từ object[] sang List<string>
+                        var listObj = doc.GetValue<List<object>>("members");
+                        foreach (var obj in listObj) members.Add(obj.ToString());
+                    }
+                }
+            }
+            catch { }
+            return members;
+        }
+
+        // 2. Thêm thành viên mới vào mảng 'members'
+        public static async Task<bool> ThemThanhVienVaoNhom(string groupID, List<string> newMembers)
+        {
+            FirestoreDb db = FirestoreHelper.GetDatabase();
+            try
+            {
+                DocumentReference docRef = db.Collection("Groups").Document(groupID);
+
+                // Dùng FieldValue.ArrayUnion để thêm vào mảng mà không mất dữ liệu cũ
+                await docRef.UpdateAsync("members", FieldValue.ArrayUnion(newMembers.ToArray()));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi thêm thành viên: " + ex.Message);
+                return false;
+            }
+        }
     }
 }

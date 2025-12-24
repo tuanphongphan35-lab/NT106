@@ -44,11 +44,11 @@
             roundFlowLayoutPanel1 = new RoundFlowLayoutPanel();
             lblTenPhong = new RoundTextBox();
             btnCall = new RoundButton();
+            btnTaoNhom = new RoundButton();
             roundButton7 = new RoundButton();
             btnSend = new RoundButton();
             txtInput = new RoundTextBox();
             txtChatBox = new RoundFlowLayoutPanel();
-            btnGroup = new RoundButton();
             panel1.SuspendLayout();
             panel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
@@ -258,7 +258,7 @@
             roundFlowLayoutPanel1.BorderThickness = 0F;
             roundFlowLayoutPanel1.Controls.Add(lblTenPhong);
             roundFlowLayoutPanel1.Controls.Add(btnCall);
-            roundFlowLayoutPanel1.Controls.Add(btnGroup);
+            roundFlowLayoutPanel1.Controls.Add(btnTaoNhom);
             roundFlowLayoutPanel1.Location = new Point(34, 2);
             roundFlowLayoutPanel1.Margin = new Padding(2);
             roundFlowLayoutPanel1.Name = "roundFlowLayoutPanel1";
@@ -302,6 +302,24 @@
             btnCall.TabIndex = 15;
             btnCall.UseVisualStyleBackColor = false;
             btnCall.Click += btnCall_Click;
+            // 
+            // btnTaoNhom
+            // 
+            btnTaoNhom.BackColor = Color.MediumSlateBlue;
+            btnTaoNhom.BackgroundImage = Properties.Resources.logo_group;
+            btnTaoNhom.BackgroundImageLayout = ImageLayout.Stretch;
+            btnTaoNhom.BorderColor = Color.Transparent;
+            btnTaoNhom.BorderRadius = 20;
+            btnTaoNhom.BorderThickness = 0F;
+            btnTaoNhom.FlatAppearance.BorderSize = 0;
+            btnTaoNhom.FlatStyle = FlatStyle.Flat;
+            btnTaoNhom.ForeColor = Color.White;
+            btnTaoNhom.Location = new Point(217, 3);
+            btnTaoNhom.Name = "btnTaoNhom";
+            btnTaoNhom.Size = new Size(71, 40);
+            btnTaoNhom.TabIndex = 16;
+            btnTaoNhom.UseVisualStyleBackColor = false;
+            btnTaoNhom.Click += btnTaoNhom_Click;
             // 
             // roundButton7
             // 
@@ -348,6 +366,7 @@
             txtInput.BorderFocusColor = Color.HotPink;
             txtInput.BorderRadius = 15;
             txtInput.BorderSize = 0;
+            txtInput.ForeColor = Color.White;
             txtInput.Location = new Point(88, 591);
             txtInput.Multiline = false;
             txtInput.Name = "txtInput";
@@ -369,23 +388,6 @@
             txtChatBox.Name = "txtChatBox";
             txtChatBox.Size = new Size(601, 522);
             txtChatBox.TabIndex = 0;
-            // 
-            // btnGroup
-            // 
-            btnGroup.BackColor = Color.MediumSlateBlue;
-            btnGroup.BackgroundImage = Properties.Resources.logo_group;
-            btnGroup.BackgroundImageLayout = ImageLayout.Stretch;
-            btnGroup.BorderColor = Color.Transparent;
-            btnGroup.BorderRadius = 20;
-            btnGroup.BorderThickness = 0F;
-            btnGroup.FlatAppearance.BorderSize = 0;
-            btnGroup.FlatStyle = FlatStyle.Flat;
-            btnGroup.ForeColor = Color.White;
-            btnGroup.Location = new Point(217, 3);
-            btnGroup.Name = "btnGroup";
-            btnGroup.Size = new Size(71, 40);
-            btnGroup.TabIndex = 16;
-            btnGroup.UseVisualStyleBackColor = false;
             // 
             // ChatForm
             // 
@@ -426,6 +428,6 @@
         private RoundFlowLayoutPanel roundFlowLayoutPanel1;
         private RoundTextBox lblTenPhong;
         private RoundButton btnCall;
-        private RoundButton btnGroup;
+        private RoundButton btnTaoNhom;
     }
 }
