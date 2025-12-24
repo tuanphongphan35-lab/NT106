@@ -28,72 +28,102 @@
         /// </summary>
         private void InitializeComponent()
         {
-            button1 = new Button();
-            button2 = new Button();
-            circularPictureBox1 = new CircularPictureBox();
-            circularPictureBox2 = new CircularPictureBox();
+            circularPictureBox1 = new PictureBox();
+            circularPictureBox2 = new PictureBox();
+            panel1 = new Panel();
+            button2 = new RoundButton();
+            button1 = new RoundButton();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).BeginInit();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox2).BeginInit();
+            panel1.SuspendLayout();
             SuspendLayout();
-            // 
-            // button1
-            // 
-            button1.Location = new Point(90, 558);
-            button1.Name = "button1";
-            button1.Size = new Size(112, 34);
-            button1.TabIndex = 0;
-            button1.Text = "mic ";
-            button1.UseVisualStyleBackColor = true;
-            button1.Click += button1_Click;
-            // 
-            // button2
-            // 
-            button2.Location = new Point(267, 558);
-            button2.Name = "button2";
-            button2.Size = new Size(112, 34);
-            button2.TabIndex = 1;
-            button2.Text = "tắt";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
             // 
             // circularPictureBox1
             // 
-            circularPictureBox1.Location = new Point(30, 12);
+            circularPictureBox1.Dock = DockStyle.Top;
+            circularPictureBox1.Location = new Point(0, 0);
             circularPictureBox1.Name = "circularPictureBox1";
-            circularPictureBox1.Size = new Size(287, 259);
-            circularPictureBox1.TabIndex = 2;
+            circularPictureBox1.Size = new Size(913, 565);
+            circularPictureBox1.TabIndex = 0;
             circularPictureBox1.TabStop = false;
             // 
             // circularPictureBox2
             // 
-            circularPictureBox2.Location = new Point(245, 277);
+            circularPictureBox2.Location = new Point(730, 368);
             circularPictureBox2.Name = "circularPictureBox2";
-            circularPictureBox2.Size = new Size(253, 239);
-            circularPictureBox2.TabIndex = 3;
+            circularPictureBox2.Size = new Size(161, 172);
+            circularPictureBox2.TabIndex = 1;
             circularPictureBox2.TabStop = false;
+            // 
+            // panel1
+            // 
+            panel1.BackColor = Color.FromArgb(40, 43, 51);
+            panel1.Controls.Add(button2);
+            panel1.Controls.Add(button1);
+            panel1.Location = new Point(44, 588);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(832, 59);
+            panel1.TabIndex = 2;
+            // 
+            // button2
+            // 
+            button2.BackColor = Color.Red;
+            button2.BorderColor = Color.Transparent;
+            button2.BorderRadius = 20;
+            button2.BorderThickness = 0F;
+            button2.FlatAppearance.BorderSize = 0;
+            button2.FlatStyle = FlatStyle.Flat;
+            button2.ForeColor = Color.White;
+            button2.Location = new Point(540, 6);
+            button2.Name = "button2";
+            button2.Size = new Size(188, 50);
+            button2.TabIndex = 1;
+            button2.Text = "Thoát";
+            button2.UseVisualStyleBackColor = false;
+            button2.Click += button2_Click;
+            // 
+            // button1
+            // 
+            button1.BackColor = Color.CornflowerBlue;
+            button1.BorderColor = Color.Transparent;
+            button1.BorderRadius = 20;
+            button1.BorderThickness = 0F;
+            button1.FlatAppearance.BorderSize = 0;
+            button1.FlatStyle = FlatStyle.Flat;
+            button1.ForeColor = Color.White;
+            button1.Location = new Point(109, 6);
+            button1.Name = "button1";
+            button1.Size = new Size(188, 50);
+            button1.TabIndex = 0;
+            button1.Text = "Mic";
+            button1.UseVisualStyleBackColor = false;
+            button1.Click += button1_Click;
             // 
             // Call
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(510, 674);
+            BackColor = Color.FromArgb(62, 66, 75);
+            ClientSize = new Size(913, 681);
+            Controls.Add(panel1);
             Controls.Add(circularPictureBox2);
             Controls.Add(circularPictureBox1);
-            Controls.Add(button2);
-            Controls.Add(button1);
+            Margin = new Padding(2);
             Name = "Call";
             Text = "Call";
             Load += Call_Load;
             ((System.ComponentModel.ISupportInitialize)circularPictureBox1).EndInit();
             ((System.ComponentModel.ISupportInitialize)circularPictureBox2).EndInit();
+            panel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
         #endregion
 
-        private Button button1;
-        private Button button2;
-        private CircularPictureBox circularPictureBox1;
-        private CircularPictureBox circularPictureBox2;
+        private PictureBox circularPictureBox1;
+        private PictureBox circularPictureBox2;
+        private Panel panel1;
+        private RoundButton button2;
+        private RoundButton button1;
     }
 }

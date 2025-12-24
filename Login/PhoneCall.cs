@@ -22,6 +22,16 @@ namespace Login
             // labelTenNguoiGoi.Text = callerName + " đang gọi..."; 
         }
 
+        private void SendSignal(string msg)
+        {
+            try
+            {
+                byte[] buffer = Encoding.UTF8.GetBytes(msg + "\n");
+                _stream.Write(buffer, 0, buffer.Length);
+            }
+            catch { }
+        }
+
         private void btnAccept_Click(object sender, EventArgs e)
         {
             // 1. Gửi tín hiệu CHẤP NHẬN về Server
@@ -40,16 +50,6 @@ namespace Login
             // 1. Gửi tín hiệu TỪ CHỐI
             SendSignal($"RESPONSE_CALL|{_callerName}|REJECT");
             this.Close();
-        }
-
-        private void SendSignal(string msg)
-        {
-            try
-            {
-                byte[] buffer = Encoding.UTF8.GetBytes(msg + "\n");
-                _stream.Write(buffer, 0, buffer.Length);
-            }
-            catch { }
         }
     }
 }

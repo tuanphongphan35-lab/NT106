@@ -117,7 +117,30 @@ namespace Login
             }));
         }
 
-        // --- NÚT BẤM ---
+
+        private void Call_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (rtcEngine != null)
+            {
+                rtcEngine.LeaveChannel();
+                rtcEngine.Dispose();
+                rtcEngine = null;
+            }
+        }
+
+        //NÚT BẤM
+        private void button1_Click(object sender, EventArgs e)
+        {
+            if (rtcEngine == null)
+            {
+                MessageBox.Show("Agora Engine chưa khởi động được! Kiểm tra lại file DLL hoặc AppID.");
+                return;
+            }
+            _isMicOn = !_isMicOn;
+            rtcEngine.EnableLocalAudio(_isMicOn);
+            button1.Text = _isMicOn ? "Mic: ON" : "Mic: OFF";
+        }
+
         private void button2_Click(object sender, EventArgs e)
         {
             try
@@ -139,28 +162,6 @@ namespace Login
             }
             this.Close();
         }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-            if (rtcEngine == null)
-            {
-                MessageBox.Show("Agora Engine chưa khởi động được! Kiểm tra lại file DLL hoặc AppID.");
-                return;
-            }
-            _isMicOn = !_isMicOn;
-            rtcEngine.EnableLocalAudio(_isMicOn);
-            button1.Text = _isMicOn ? "Mic: ON" : "Mic: OFF";
-        }
-
-        private void Call_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (rtcEngine != null)
-            {
-                rtcEngine.LeaveChannel();
-                rtcEngine.Dispose();
-                rtcEngine = null;
-            }
-        }
     }
 
     // Class lắng nghe sự kiện
@@ -179,4 +180,5 @@ namespace Login
             _parent.OnUserOffline(remoteUid);
         }
     }
+
 }
