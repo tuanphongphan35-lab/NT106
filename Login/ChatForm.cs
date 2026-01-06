@@ -732,11 +732,6 @@ namespace Login
                 frmTimKiem = new TimKiemNguoiDung(this.stream, this.currentUserName, listBanBe);
                 frmTimKiem.Show();
             }
-            else
-            {
-                frmTimKiem.BringToFront();
-            }
-        }
 
         private void ThemBanVaoList(string tenBanBe)
         {
@@ -781,8 +776,6 @@ namespace Login
             }));
         }
 
-        private void roundButton3_Click_1(object sender, EventArgs e) { ChuyenCheDoChat(""); }
-
         private void btnCall_Click_1(object sender, EventArgs e)
         {
             string myName = PhienDangNhap.TaiKhoanHienTai;
@@ -805,7 +798,6 @@ namespace Login
         private void lblTenPhong__TextChanged(object sender, EventArgs e) { }
 
 
-        // Sửa hàm cũ: thêm tham số isGroup (mặc định false)
         private void ChuyenCheDoChat(string receiverID, bool isGroup = false)
         {
             txtInput.Enabled = true;
@@ -857,40 +849,6 @@ namespace Login
             Control[] founds = roundFlowLayoutPanel2.Controls.Find("group_" + groupID, true);
             if (founds.Length > 0) return founds[0].Text.Replace("👥 ", "");
             return groupID;
-        }
-
-        private void roundButton4_Click_1(object sender, EventArgs e)
-        {
-            // Nếu form đang hiện thì ẩn đi
-            if (_frmThongBao.Visible)
-            {
-                _frmThongBao.Hide();
-            }
-            else
-            {
-                // 1. Tắt đèn báo đỏ (Reset số lượng)
-                if (_soLuongThongBao > 0)
-                {
-                    _soLuongThongBao = 0;
-                    roundButton4.Invalidate(); // Vẽ lại nút (xóa chấm đỏ)
-                }
-
-                // 2. Tính toán vị trí để hiện Form ngay bên dưới nút chuông
-                // Lấy vị trí của nút chuông so với màn hình máy tính
-                Point screenPos = roundButton4.PointToScreen(Point.Empty);
-
-                // Tính tọa độ: 
-                // X = Vị trí nút chuông + Chiều rộng nút chuông - Chiều rộng form thông báo (để căn lề phải)
-                // Y = Vị trí nút chuông + Chiều cao nút chuông + 5px hở ra
-                int x = screenPos.X + roundButton4.Width - _frmThongBao.Width;
-                int y = screenPos.Y + roundButton4.Height + 5;
-
-                _frmThongBao.Location = new Point(x, y);
-
-                // 3. Hiện form
-                _frmThongBao.Show();
-                _frmThongBao.BringToFront();
-            }
         }
 
 
@@ -949,7 +907,6 @@ namespace Login
         }
 
         // Trong ChatForm.cs
-
         // Hàm này để Form DanhSachBanBe gọi khi xóa thành công
         public void XoaNutBanBeTrenGiaoDien(string tenBan)
         {
