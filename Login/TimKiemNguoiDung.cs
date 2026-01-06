@@ -4,7 +4,8 @@ using System.Drawing;
 using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
-using System.Linq; // Cần thiết cho hàm .Any()
+using System.Linq;
+using Agora.Rtc;
 
 namespace Login
 {
@@ -15,7 +16,7 @@ namespace Login
 
         // 1. Biến lưu danh sách bạn bè hiện tại (Đã thêm mới)
         private List<string> _danhSachBanBeHienTai;
-
+        private ThongTinNguoiDung _frmInfo;
         private string _selectedUserId = "";
         private string _selectedUserName = "";
         private Button _currentSelectedButton = null;
@@ -26,6 +27,7 @@ namespace Login
             InitializeComponent();
             _serverStream = stream;
             _myUserName = myName;
+
 
             // Lưu danh sách bạn bè vào biến. Nếu null thì tạo list rỗng.
             _danhSachBanBeHienTai = currentFriends ?? new List<string>();
@@ -143,8 +145,10 @@ namespace Login
         {
             Button btn = new Button();
 
-            // Nếu đã là bạn bè thì đổi màu chữ cho dễ nhận biết (Tùy chọn)
-            bool isFriend = _danhSachBanBeHienTai.Contains(ten);
+            bool isFriend = _danhSachBanBeHienTai.Any(ban =>
+            ban.Trim().Equals(ten.Trim(), StringComparison.OrdinalIgnoreCase) 
+            || ban.Contains(ten) 
+            );
             if (isFriend)
             {
                 btn.Text = "✓ " + ten + " (Bạn bè)";
@@ -192,8 +196,23 @@ namespace Login
         // Nút Xem thông tin (Tùy chọn)
         private void btnXem_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(_selectedUserName)) return;
-            // Code xem thông tin của bạn ở đây...
+            if (string.IsNullOrEmpty(_selectedUserId))
+            {
+                MessageBox.Show("Vui lòng chọn người cần xem!", "Thông báo");
+                return;
+            }
+
+            if (_frmInfo != null && !_frmInfo.IsDisposed)
+            {
+                _frmInfo.Close();
+                return; 
+            }
+
+            _frmInfo = new ThongTinNguoiDung(_selectedUserId);
+
+            _frmInfo.StartPosition = FormStartPosition.CenterScreen;
+            _frmInfo.Show();
         }
+
     }
 }

@@ -15,6 +15,7 @@ namespace Login
 {
     public partial class ChatForm : Form
     {
+
         private ThongBaoTinNhan _frmThongBao = new ThongBaoTinNhan();
         private TcpClient client;
         private NetworkStream stream;
@@ -22,6 +23,7 @@ namespace Login
         private string currentPassword;
         private string _nguoiDangChat = "";
         private TimKiemNguoiDung frmTimKiem = null;
+        private ThongTinNguoiDung _frmProfile = null;
         private readonly string _loggedInUserID;
         private DanhSachBanBe _frmDanhSachBanBe = null;
         private bool _dangChatNhom = false;
@@ -378,9 +380,9 @@ namespace Login
                 // --- KHI BẤM VÀO THÌ RESET SỐ LƯỢNG ---
                 _soLuongThongBao = 0;
                 roundButton4.Invalidate(); // Vẽ lại nút (xóa chấm đỏ)
-
+                _frmThongBao.StartPosition = FormStartPosition.Manual;
                 // Hiện form
-                int x = this.Location.X + 60;
+                int x = this.Location.X + 80;
                 int y = this.Location.Y + 100;
                 _frmThongBao.Location = new Point(x, y);
                 _frmThongBao.Show();
@@ -666,8 +668,21 @@ namespace Login
         private void circularPictureBox1_Click(object sender, EventArgs e)
         {
             if (_loggedInUserID == null) return;
-            ThongTinNguoiDung profileForm = new ThongTinNguoiDung(_loggedInUserID);
-            profileForm.ShowDialog();
+
+            if (_frmProfile != null && !_frmProfile.IsDisposed)
+            {
+                _frmProfile.Close();
+                return; 
+            }
+            _frmProfile = new ThongTinNguoiDung(_loggedInUserID);
+
+            _frmProfile.StartPosition = FormStartPosition.Manual;
+
+            int x = this.Location.X + 80;
+            int y = this.Location.Y + 80;
+            _frmProfile.Location = new Point(x, y);
+
+            _frmProfile.Show();
         }
 
         private void roundButton5_Click(object sender, EventArgs e) { roundButton5.Enabled = false; }
@@ -705,33 +720,43 @@ namespace Login
                 catch (Exception ex) { MessageBox.Show("Lỗi nén thư mục: " + ex.Message); }
             }
         }
-
+        // Button tìm kiếm bạn bè
         private void roundButton6_Click(object sender, EventArgs e)
-        {
-            // 1. Tạo danh sách chứa tên bạn bè đang có
+        {// --- BƯỚC 1: KIỂM TRA TRẠNG THÁI (Logic Bật/Tắt) ---
+            if (frmTimKiem != null && !frmTimKiem.IsDisposed)
+            {
+                frmTimKiem.Close();
+                return; 
+            }
+
+            // --- BƯỚC 2: NẾU FORM CHƯA MỞ THÌ MỚI LẤY DỮ LIỆU VÀ MỞ ---
+
+            // 1. Tạo danh sách chứa tên bạn bè (Chỉ làm khi cần mở form)
             List<string> listBanBe = new List<string>();
 
-            // 2. Duyệt qua tất cả các nút trong panel danh sách bạn bè
-            // (Giả sử panel chứa bạn bè tên là roundFlowLayoutPanel2)
+            // 2. Duyệt danh sách bạn bè hiện tại để chặn kết bạn trùng
             foreach (Control c in roundFlowLayoutPanel2.Controls)
             {
                 if (c is Button btn)
                 {
-                    // [QUAN TRỌNG]: Vì nút bạn bè của bạn có dấu chấm tròn (●) nên phải xóa đi mới lấy được tên đúng
-                    // Ví dụ text là: "● ElicBug" -> Phải xóa "● " đi
+                    // Xử lý chuỗi tên (xóa dấu chấm tròn)
                     string tenBanBe = btn.Text.Replace("●", "").Trim();
-
                     listBanBe.Add(tenBanBe);
                 }
             }
 
-            // 3. Mở form tìm kiếm và TRUYỀN DANH SÁCH SANG
-            if (frmTimKiem == null || frmTimKiem.IsDisposed)
-            {
-                // Truyền thêm listBanBe vào constructor mới sửa
-                frmTimKiem = new TimKiemNguoiDung(this.stream, this.currentUserName, listBanBe);
-                frmTimKiem.Show();
-            }
+            // 3. Khởi tạo form mới (truyền danh sách mới nhất vào)
+            frmTimKiem = new TimKiemNguoiDung(this.stream, this.currentUserName, listBanBe);
+            frmTimKiem.StartPosition = FormStartPosition.Manual; 
+
+            int x = this.Location.X + 80;
+            int y = this.Location.Y + 80; 
+
+            frmTimKiem.Location = new Point(x, y);
+
+
+            frmTimKiem.Show();
+        }
 
         private void ThemBanVaoList(string tenBanBe)
         {

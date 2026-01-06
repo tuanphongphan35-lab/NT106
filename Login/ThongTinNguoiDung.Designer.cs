@@ -90,6 +90,7 @@
             // label5
             // 
             label5.AutoSize = true;
+            label5.BackColor = Color.FromArgb(62, 66, 75);
             label5.Font = new Font("Segoe UI", 11F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label5.ForeColor = Color.White;
             label5.Location = new Point(118, 62);
@@ -102,6 +103,7 @@
             // label4
             // 
             label4.AutoSize = true;
+            label4.BackColor = Color.FromArgb(62, 66, 75);
             label4.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label4.ForeColor = Color.White;
             label4.Location = new Point(42, 355);
@@ -114,6 +116,7 @@
             // label3
             // 
             label3.AutoSize = true;
+            label3.BackColor = Color.FromArgb(62, 66, 75);
             label3.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label3.ForeColor = Color.White;
             label3.Location = new Point(42, 218);
@@ -126,6 +129,7 @@
             // label2
             // 
             label2.AutoSize = true;
+            label2.BackColor = Color.FromArgb(62, 66, 75);
             label2.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label2.ForeColor = Color.White;
             label2.Location = new Point(42, 286);
@@ -138,6 +142,7 @@
             // label1
             // 
             label1.AutoSize = true;
+            label1.BackColor = Color.FromArgb(62, 66, 75);
             label1.Font = new Font("Segoe UI", 9F, FontStyle.Bold, GraphicsUnit.Point, 0);
             label1.ForeColor = Color.White;
             label1.Location = new Point(24, 144);
@@ -248,15 +253,16 @@
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.FromArgb(40, 43, 51);
-            ClientSize = new Size(509, 724);
+            ClientSize = new Size(509, 719);
             Controls.Add(button1);
             Controls.Add(circularPictureBox1);
             Controls.Add(panel1);
             Controls.Add(pictureBox1);
+            DoubleBuffered = true;
+            FormBorderStyle = FormBorderStyle.None;
             Margin = new Padding(2);
             Name = "ThongTinNguoiDung";
             Text = "ThongTinNguoiDung";
-            TransparencyKey = SystemColors.ButtonHighlight;
             Load += ThongTinNguoiDung_Load;
             MouseDown += ThongTinNguoiDungForm_MouseDown;
             MouseMove += ThongTinNguoiDungForm_MouseMove;

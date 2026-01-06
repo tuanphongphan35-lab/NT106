@@ -9,7 +9,7 @@ namespace Login
     public partial class Call : Form
     {
         // --- CẤU HÌNH AGORA ---
-        private string _appID = "c505b6fe6e6549509d0c735b2335fe85"; // <--- ĐIỀN APP ID
+        private string _appID = "c505b6fe6e6549509d0c735b2335fe85";
         private IRtcEngine rtcEngine;
 
         private NetworkStream _serverStream;
@@ -145,25 +145,37 @@ namespace Login
         {
             try
             {
-                // QUAN TRỌNG: Thêm + "\n" vào cuối cùng
                 string msg = $"END_CALL|{_otherPersonName}|{_channelName}\n";
 
                 byte[] buffer = Encoding.UTF8.GetBytes(msg);
                 _serverStream.Write(buffer, 0, buffer.Length);
             }
-            catch { } // Kệ lỗi mạng, cứ tắt form
-
-            // Hủy Agora
-            if (rtcEngine != null)
-            {
-                rtcEngine.LeaveChannel();
-                rtcEngine.Dispose();
-                rtcEngine = null;
-            }
+            catch { } 
             this.Close();
         }
-    }
+        private void CallClosing (object sender, FormClosingEventArgs e)
+        {
+            CleanUpResources();
+        }
+        private void CleanUpResources()
+        {
+            if (rtcEngine != null)
+            {
+                var engineToDispose = rtcEngine;
+                rtcEngine = null; 
 
+                Task.Run(() =>
+                {
+                    try
+                    {
+                        engineToDispose.LeaveChannel();
+                        engineToDispose.Dispose();
+                    }
+                    catch { }
+                });
+            }
+        }
+    } 
     // Class lắng nghe sự kiện
     internal class UserEventHandler : IRtcEngineEventHandler
     {

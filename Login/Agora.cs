@@ -11,8 +11,7 @@ namespace Login
     {
         private IRtcEngine rtcEngine;
         // App ID này bạn nên bảo mật, nhưng để test thì cứ để đây
-        private string appId = "020845b04dfa45619f8ffaac218cf8fa";
-
+        private string appId = "c505b6fe6e6549509d0c735b2335fe85";
         // Khởi tạo Engine
         // Handler được truyền từ Form PhoneCall vào để Form đó xử lý giao diện
         public void InitEngine(IRtcEngineEventHandler handler)
