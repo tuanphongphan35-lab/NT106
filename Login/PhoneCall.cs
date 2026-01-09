@@ -19,7 +19,7 @@ namespace Login
             _channelID = channelID;
 
             // Hiển thị tên người gọi
-            // labelTenNguoiGoi.Text = callerName + " đang gọi..."; 
+            label1.Text = string.IsNullOrEmpty(_callerName) ? "Unknown" : _callerName; 
         }
 
         private void SendSignal(string msg)
